@@ -57,6 +57,7 @@ export const xenditWebhookSchema = z.object({
   id: z.string().min(1).max(160),
   external_id: z.string().regex(/^FUTURA-\d{10,}-[a-zA-Z0-9-]+$/),
   status: z.string().min(1).max(40),
+  amount: z.number().positive().optional(),
   invoice_url: z.string().url().max(2048).nullable().optional(),
   paid_at: z.string().max(80).nullable().optional(),
 });

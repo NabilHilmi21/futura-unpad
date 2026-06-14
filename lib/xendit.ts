@@ -2,6 +2,7 @@ export type XenditInvoice = {
   id: string;
   external_id: string;
   status: string;
+  amount: number;
   invoice_url?: string;
   paid_at?: string;
 };
@@ -28,7 +29,8 @@ export const getXenditInvoice = async (
     !res.ok ||
     typeof invoice?.id !== "string" ||
     typeof invoice?.external_id !== "string" ||
-    typeof invoice?.status !== "string"
+    typeof invoice?.status !== "string" ||
+    typeof invoice?.amount !== "number"
   ) {
     return null;
   }
@@ -37,6 +39,7 @@ export const getXenditInvoice = async (
     id: invoice.id,
     external_id: invoice.external_id,
     status: invoice.status,
+    amount: invoice.amount,
     invoice_url:
       typeof invoice.invoice_url === "string" ? invoice.invoice_url : undefined,
     paid_at: typeof invoice.paid_at === "string" ? invoice.paid_at : undefined,

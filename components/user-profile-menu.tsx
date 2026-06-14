@@ -9,7 +9,6 @@ import {
   LayoutDashboard,
   LogOutIcon,
   ReceiptText,
-  Settings,
   ShieldCheck,
   User,
 } from "lucide-react"
@@ -39,7 +38,6 @@ export default function UserProfileMenu() {
   const router = useRouter()
   const pathname = usePathname()
   const { user, isAdmin, signOut } = useAuth()
-  const [open, setOpen] = useState(false)
   const [logoutOpen, setLogoutOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const initials = useMemo(() => (user ? getInitials(user) : "U"), [user])
@@ -59,7 +57,6 @@ export default function UserProfileMenu() {
     }
 
     setIsLoggingOut(false)
-    setOpen(false)
 
     if (
       pathname.startsWith("/admin") ||
@@ -76,22 +73,11 @@ export default function UserProfileMenu() {
 
   return (
     <>
-      <div
-        className="relative"
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
-        onFocus={() => setOpen(true)}
-        onKeyDown={(event) => {
-          if (event.key === "Escape") {
-            setOpen(false)
-          }
-        }}
-      >
+      <div className="group relative">
         <Button
           asChild
           variant="ghost"
           className="h-10 rounded-full px-2 py-1.5"
-          aria-expanded={open}
           aria-haspopup="menu"
           aria-label="Open profile dashboard"
         >
@@ -105,12 +91,11 @@ export default function UserProfileMenu() {
           </Link>
         </Button>
 
-        {open ? (
-          <div className="absolute right-0 top-full z-50 w-80 pt-2">
-            <div
-              role="menu"
-              className="overflow-hidden rounded-xl bg-popover p-2 text-popover-foreground shadow-lg ring-1 ring-foreground/10"
-            >
+        <div className="pointer-events-none absolute right-0 top-full z-50 w-80 translate-y-1 pt-2 opacity-0 transition duration-150 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
+          <div
+            role="menu"
+            className="overflow-hidden rounded-xl bg-popover p-2 text-popover-foreground shadow-lg ring-1 ring-foreground/10"
+          >
               <div className="px-3 py-2">
                 <div className="flex items-center gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted text-sm font-semibold text-foreground">
@@ -130,15 +115,15 @@ export default function UserProfileMenu() {
               <div className="-mx-1 my-1 h-px bg-border" />
 
               <div className="space-y-1">
-                <ProfileMenuLink href="/profile" onSelect={() => setOpen(false)}>
+                <ProfileMenuLink href="/profile">
                   <User className="h-4 w-4" />
                   View profile
                 </ProfileMenuLink>
-                <ProfileMenuLink href="/transactions" onSelect={() => setOpen(false)}>
+                <ProfileMenuLink href="/transactions">
                   <ReceiptText className="h-4 w-4" />
                   Seminar transactions
                 </ProfileMenuLink>
-                <ProfileMenuLink href="/registration" onSelect={() => setOpen(false)}>
+                <ProfileMenuLink href="/registration">
                   <CreditCard className="h-4 w-4" />
                   Register another seminar
                 </ProfileMenuLink>
@@ -148,20 +133,16 @@ export default function UserProfileMenu() {
 
               <div className="space-y-1">
                 {isAdmin ? (
-                  <ProfileMenuLink href="/admin" onSelect={() => setOpen(false)}>
+                  <ProfileMenuLink href="/admin">
                     <LayoutDashboard className="h-4 w-4" />
                     Admin dashboard
                   </ProfileMenuLink>
                 ) : null}
-                <ProfileMenuLink href="/reset-password" onSelect={() => setOpen(false)}>
+                <ProfileMenuLink href="/forgot-password">
                   <ShieldCheck className="h-4 w-4" />
-                  Password & security
-                </ProfileMenuLink>
-                <ProfileMenuLink href="/forgot-password" onSelect={() => setOpen(false)}>
-                  <Settings className="h-4 w-4" />
                   Account recovery
                 </ProfileMenuLink>
-                <ProfileMenuLink href="/#details" onSelect={() => setOpen(false)}>
+                <ProfileMenuLink href="/#details">
                   <HelpCircle className="h-4 w-4" />
                   Seminar details
                 </ProfileMenuLink>
@@ -174,16 +155,14 @@ export default function UserProfileMenu() {
                 role="menuitem"
                 className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm text-destructive outline-none transition-colors hover:bg-destructive/10 focus:bg-destructive/10"
                 onClick={() => {
-                  setOpen(false)
                   setLogoutOpen(true)
                 }}
               >
                 <LogOutIcon className="h-4 w-4" />
                 Log out
               </button>
-            </div>
           </div>
-        ) : null}
+        </div>
       </div>
 
       <ConfirmDialog
@@ -208,18 +187,15 @@ export default function UserProfileMenu() {
 function ProfileMenuLink({
   href,
   children,
-  onSelect,
 }: {
   href: string
   children: React.ReactNode
-  onSelect: () => void
 }) {
   return (
     <Link
       href={href}
       role="menuitem"
       className="flex cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-      onClick={onSelect}
     >
       {children}
     </Link>

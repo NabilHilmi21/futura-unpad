@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { invalidRequest, rateLimited } from "@/lib/http";
+import {
+  PASSWORD_RECOVERY_COOKIE,
+  passwordRecoveryCookieOptions,
+} from "@/lib/password-recovery";
 import { rateLimit } from "@/lib/rate-limit";
 import { resetPasswordSchema } from "@/lib/validation";
 import { createClient } from "@/utils/supabase/server";
@@ -23,13 +28,31 @@ export async function POST(request: Request) {
     return invalidRequest();
   }
 
+  const cookieStore = await cookies();
+  const hasRecoveryContext = cookieStore.has(PASSWORD_RECOVERY_COOKIE);
+
+  if (!hasRecoveryContext) {
+    return NextResponse.json(
+      { error: "Reset link is invalid or expired" },
+      { status: 403 }
+    );
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: "Reset link is invalid or expired" }, { status: 401 });
+    const response = NextResponse.json(
+      { error: "Reset link is invalid or expired" },
+      { status: 401 }
+    );
+    response.cookies.set(PASSWORD_RECOVERY_COOKIE, "", {
+      ...passwordRecoveryCookieOptions,
+      maxAge: 0,
+    });
+    return response;
   }
 
   const { error } = await supabase.auth.updateUser({
@@ -43,5 +66,11 @@ export async function POST(request: Request) {
 
   await supabase.auth.signOut();
 
-  return NextResponse.json({ ok: true });
+  const response = NextResponse.json({ ok: true });
+  response.cookies.set(PASSWORD_RECOVERY_COOKIE, "", {
+    ...passwordRecoveryCookieOptions,
+    maxAge: 0,
+  });
+
+  return response;
 }

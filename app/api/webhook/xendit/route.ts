@@ -6,6 +6,10 @@ import { rateLimit } from "@/lib/rate-limit";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { xenditWebhookSchema } from "@/lib/validation";
 
+type WebhookRegistrationRow = {
+    payment_amount: number | null;
+};
+
 const isValidCallbackToken = (token: string | null) => {
     const expected = process.env.XENDIT_CALLBACK_TOKEN;
 
@@ -53,6 +57,36 @@ export async function POST(req: Request) {
 
         const body = parsed.data;
         const paymentStatus = normalizeXenditInvoiceStatus(body.status);
+        const supabase = createAdminClient();
+        const { data: registration, error: lookupError } = await supabase
+            .from("seminar_registrations")
+            .select("payment_amount")
+            .eq("xendit_external_id", body.external_id)
+            .maybeSingle<WebhookRegistrationRow>();
+
+        if (lookupError) {
+            console.error("Webhook lookup failed", lookupError.message);
+            return serverError();
+        }
+
+        if (!registration) {
+            return NextResponse.json(
+                { error: "Registration order was not found" },
+                { status: 404 }
+            );
+        }
+
+        if (
+            typeof body.amount === "number" &&
+            registration.payment_amount !== null &&
+            body.amount !== registration.payment_amount
+        ) {
+            console.error("Webhook amount mismatch", {
+                external_id: body.external_id,
+            });
+            return invalidRequest();
+        }
+
         const paymentUpdate: Record<string, string | null> = {
             payment_status: paymentStatus,
             xendit_invoice_id: body.id,
@@ -66,7 +100,6 @@ export async function POST(req: Request) {
             paymentUpdate.paid_at = getXenditPaidAt(body);
         }
 
-        const supabase = createAdminClient();
         const { error } = await supabase
             .from("seminar_registrations")
             .update(paymentUpdate)

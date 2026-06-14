@@ -105,6 +105,22 @@ async function verifyPayment(orderId: string) {
     return { status: "pending" as const };
   }
 
+  const expectedAmount =
+    data.payment_amount ??
+    (isAcademicStatus(data.status_akademika) &&
+    isAttendanceMethod(data.presentasi_riset)
+      ? getPaymentAmount(data.status_akademika, data.presentasi_riset)
+      : null);
+  const invoiceAmount =
+    typeof invoice.amount === "number" ? invoice.amount : null;
+
+  if (expectedAmount === null || invoiceAmount !== expectedAmount) {
+    console.error("Payment amount verification failed", {
+      external_id: data.xendit_external_id,
+    });
+    return { status: "pending" as const };
+  }
+
   const paymentStatus = normalizeXenditInvoiceStatus(invoice.status);
   const paidAt =
     paymentStatus === "paid" || paymentStatus === "settled"
