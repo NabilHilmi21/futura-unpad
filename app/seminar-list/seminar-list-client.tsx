@@ -10,12 +10,13 @@ export default function SeminarListClient({
     initialData: Participants[]
 }) {
     const participants = initialData
-    const luringCount = participants.filter((participant) => participant.presentasi_riset === "luring").length
-    const daringCount = participants.filter((participant) => participant.presentasi_riset === "daring").length
-    const paidCount = participants.filter(
+    const studentCount = participants.filter(
         (participant) =>
-            participant.payment_status === "paid" ||
-            participant.payment_status === "settled"
+            participant.status_akademika === "mahasiswa" ||
+            participant.status_akademika === "siswa"
+    ).length
+    const educatorCount = participants.filter(
+        (participant) => participant.status_akademika === "dosen"
     ).length
 
     return (
@@ -29,7 +30,7 @@ export default function SeminarListClient({
                         Seminar Participant List
                     </h1>
                     <p className="text-sm leading-6 text-muted-foreground">
-                        Review registrations and payment statuses for Futura.
+                        Review free seminar registrations for Futura.
                     </p>
                 </div>
                 <p className="text-sm text-muted-foreground">
@@ -43,12 +44,12 @@ export default function SeminarListClient({
                     <p className="mt-3 text-3xl font-semibold tracking-tight">{participants.length}</p>
                 </div>
                 <div className="rounded-lg border border-border p-5">
-                    <p className="text-sm text-muted-foreground">Paid registrations</p>
-                    <p className="mt-3 text-3xl font-semibold tracking-tight">{paidCount}</p>
+                    <p className="text-sm text-muted-foreground">Students</p>
+                    <p className="mt-3 text-3xl font-semibold tracking-tight">{studentCount}</p>
                 </div>
                 <div className="rounded-lg border border-border p-5">
-                    <p className="text-sm text-muted-foreground">Luring / Daring</p>
-                    <p className="mt-3 text-3xl font-semibold tracking-tight">{luringCount} / {daringCount}</p>
+                    <p className="text-sm text-muted-foreground">Educators</p>
+                    <p className="mt-3 text-3xl font-semibold tracking-tight">{educatorCount}</p>
                 </div>
             </div>
 

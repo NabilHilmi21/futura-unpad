@@ -4,11 +4,11 @@ import { CalendarDays, Mail, ShieldCheck, Ticket, UserRound } from "lucide-react
 
 import { Button } from "@/components/ui/button"
 import {
-  attendanceLabels,
   formatCurrency,
   isAcademicStatus,
-  isAttendanceMethod,
+  isMechaturaCompetitionType,
   isPaymentStatus,
+  mechaturaCompetitionLabels,
   paymentStatusLabels,
   statusLabels,
 } from "@/lib/payment"
@@ -21,11 +21,25 @@ type ProfileRegistration = {
   no_telepon: string
   asal_institusi: string
   status_akademika: unknown
-  presentasi_riset: unknown
+  created_at: string | null
+}
+
+type ProfileMechaturaRegistration = {
+  id: string
+  team_name: string
+  competition_type: unknown
+  robot_name: string
+  registration_status: string | null
   payment_status: string | null
   payment_amount: number | null
   xendit_external_id: string
   created_at: string | null
+}
+
+type ProfileMechaturaLeader = {
+  full_name: string
+  email: string | null
+  phone: string | null
 }
 
 const formatDate = (value?: string | null) => {
@@ -50,7 +64,11 @@ export default async function ProfilePage() {
   }
 
   const adminSupabase = createAdminClient()
-  const [{ data: adminUser }, { data: latestRegistration, error }] =
+  const [
+    { data: adminUser },
+    { data: latestRegistration, error },
+    { data: latestMechaturaRegistration, error: mechaturaError },
+  ] =
     await Promise.all([
       supabase
         .from("admin_users")
@@ -60,26 +78,48 @@ export default async function ProfilePage() {
       adminSupabase
         .from("seminar_registrations")
         .select(
-          "nama_lengkap,email,no_telepon,asal_institusi,status_akademika,presentasi_riset,payment_status,payment_amount,xendit_external_id,created_at"
+          "nama_lengkap,email,no_telepon,asal_institusi,status_akademika,created_at"
         )
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle<ProfileRegistration>(),
+      adminSupabase
+        .from("mechatura_registrations")
+        .select(
+          "id,team_name,competition_type,robot_name,registration_status,payment_status,payment_amount,xendit_external_id,created_at"
+        )
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle<ProfileMechaturaRegistration>(),
     ])
 
-  if (error) {
-    throw new Error(error.message)
+  if (error || mechaturaError) {
+    throw new Error(error?.message ?? mechaturaError?.message)
   }
 
-  const paymentStatus = isPaymentStatus(latestRegistration?.payment_status)
-    ? latestRegistration.payment_status
-    : "unpaid"
+  const { data: mechaturaLeader } = latestMechaturaRegistration
+    ? await adminSupabase
+        .from("mechatura_members")
+        .select("full_name,email,phone")
+        .eq("registration_id", latestMechaturaRegistration.id)
+        .eq("is_leader", true)
+        .maybeSingle<ProfileMechaturaLeader>()
+    : { data: null }
+
   const academicStatus = isAcademicStatus(latestRegistration?.status_akademika)
     ? latestRegistration.status_akademika
     : null
-  const attendanceMethod = isAttendanceMethod(latestRegistration?.presentasi_riset)
-    ? latestRegistration.presentasi_riset
+  const mechaturaPaymentStatus = isPaymentStatus(
+    latestMechaturaRegistration?.payment_status
+  )
+    ? latestMechaturaRegistration.payment_status
+    : "unpaid"
+  const mechaturaCompetition = isMechaturaCompetitionType(
+    latestMechaturaRegistration?.competition_type
+  )
+    ? latestMechaturaRegistration.competition_type
     : null
 
   return (
@@ -91,7 +131,7 @@ export default async function ProfilePage() {
             Your Futura account
           </h1>
           <p className="max-w-xl text-sm leading-6 text-muted-foreground">
-            Review your account details and your latest seminar registration.
+            Review your account details and your latest registrations.
           </p>
         </div>
         <Button asChild className="h-10 rounded-xl">
@@ -166,32 +206,14 @@ export default async function ProfilePage() {
                 <p className="font-medium">{latestRegistration.asal_institusi}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Payment</p>
-                <p className="font-medium">{paymentStatusLabels[paymentStatus]}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Ticket</p>
+                <p className="text-muted-foreground">Status</p>
                 <p className="font-medium">
-                  {academicStatus ? statusLabels[academicStatus] : "-"} /{" "}
-                  {attendanceMethod ? attendanceLabels[attendanceMethod] : "-"}
+                  {academicStatus ? statusLabels[academicStatus] : "-"}
                 </p>
               </div>
               <div>
-                <p className="text-muted-foreground">Amount</p>
-                <p className="font-medium">
-                  {formatCurrency(latestRegistration.payment_amount ?? 0)}
-                </p>
-              </div>
-              <div className="sm:col-span-2">
-                <Button asChild variant="outline" className="h-10 rounded-xl">
-                  <Link
-                    href={`/payment?order_id=${encodeURIComponent(
-                      latestRegistration.xendit_external_id
-                    )}`}
-                  >
-                    Open payment details
-                  </Link>
-                </Button>
+                <p className="text-muted-foreground">Fee</p>
+                <p className="font-medium">Free</p>
               </div>
             </div>
           ) : (
@@ -203,6 +225,83 @@ export default async function ProfilePage() {
             </div>
           )}
         </div>
+      </section>
+
+      <section className="rounded-xl border border-border bg-card p-5">
+        <div className="flex items-center gap-3">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+            <Ticket className="h-5 w-5 text-muted-foreground" />
+          </span>
+          <div>
+            <h2 className="font-semibold">Latest Mechatura registration</h2>
+            <p className="text-sm text-muted-foreground">
+              {latestMechaturaRegistration
+                ? `Created ${formatDate(latestMechaturaRegistration.created_at)}`
+                : "No linked Mechatura team yet."}
+            </p>
+          </div>
+        </div>
+
+        {latestMechaturaRegistration ? (
+          <div className="mt-6 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <p className="text-muted-foreground">Team</p>
+              <p className="font-medium">{latestMechaturaRegistration.team_name}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Category</p>
+              <p className="font-medium">
+                {mechaturaCompetition
+                  ? mechaturaCompetitionLabels[mechaturaCompetition]
+                  : "-"}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Robot</p>
+              <p className="font-medium">{latestMechaturaRegistration.robot_name}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Leader</p>
+              <p className="font-medium">{mechaturaLeader?.full_name ?? "-"}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Registration</p>
+              <p className="font-medium">
+                {latestMechaturaRegistration.registration_status ?? "-"}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Payment</p>
+              <p className="font-medium">
+                {paymentStatusLabels[mechaturaPaymentStatus]}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Amount</p>
+              <p className="font-medium">
+                {formatCurrency(latestMechaturaRegistration.payment_amount ?? 0)}
+              </p>
+            </div>
+            <div className="sm:col-span-2">
+              <Button asChild variant="outline" className="h-10 rounded-xl">
+                <Link
+                  href={`/payment?order_id=${encodeURIComponent(
+                    latestMechaturaRegistration.xendit_external_id
+                  )}`}
+                >
+                  Open payment details
+                </Link>
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-6 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+            You have not registered a Mechatura team while signed in yet.
+            <Button asChild className="mt-4 h-10 rounded-xl">
+              <Link href="/registration/mechatura">Register Mechatura</Link>
+            </Button>
+          </div>
+        )}
       </section>
     </main>
   )

@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 const steps = ["Registration", "Payment"];
 
-export default function RegistrationProgress({
+export default function SeminarRegistrationProgress({
   currentStep,
 }: {
   currentStep: 1 | 2;

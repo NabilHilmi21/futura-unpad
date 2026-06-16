@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { EB_Garamond, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/layout/navbar";
@@ -8,11 +8,16 @@ import NavigationLoading from "@/components/navigation-loading";
 import { AuthProvider, type AuthUser } from "@/components/auth-provider";
 import { createClient } from "@/utils/supabase/server";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const ebGaramond = EB_Garamond({
+  subsets: ["latin"],
+  variable: "--font-heading",
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -52,7 +57,14 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
+      className={cn(
+        "h-full",
+        "antialiased",
+        inter.variable,
+        ebGaramond.variable,
+        geistMono.variable,
+        "font-sans"
+      )}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <AuthProvider initialUser={initialUser} initialIsAdmin={initialIsAdmin}>

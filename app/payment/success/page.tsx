@@ -1,17 +1,17 @@
 import Link from "next/link";
 import { CheckCircle2, Clock } from "lucide-react";
-import RegistrationProgress from "@/components/registration-progress";
+import SeminarRegistrationProgress from "@/components/seminar-registration-progress";
 import { Button } from "@/components/ui/button";
 import {
-  attendanceLabels,
   formatCurrency,
-  getPaymentAmount,
   getXenditPaidAt,
-  isAcademicStatus,
-  isAttendanceMethod,
+  isMechaturaCompetitionType,
   isRegistrationToken,
+  mechaturaCompetitionLabels,
+  mechaturaPaymentAmount,
   normalizeXenditInvoiceStatus,
-  statusLabels,
+  registrationProgramLabels,
+  type RegistrationProgram,
 } from "@/lib/payment";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { createClient } from "@/utils/supabase/server";
@@ -22,101 +22,145 @@ type SuccessSearchParams = Promise<
   Record<string, string | string[] | undefined>
 >;
 
-type PaymentVerificationRow = {
-  nama_lengkap: string;
-  email: string;
-  no_telepon: string;
-  asal_institusi: string;
-  status_akademika: unknown;
-  presentasi_riset: unknown;
+type MechaturaPaymentVerificationRow = {
+  id: string;
+  team_name: string;
+  institution: string;
+  competition_type: unknown;
+  robot_name: string;
   payment_amount: number | null;
   paid_at: string | null;
   payment_status: string | null;
   xendit_external_id: string;
   xendit_invoice_id: string | null;
   xendit_invoice_url: string | null;
-  user_id: string | null;
+  user_id: string;
 };
 
-function createReceipt(data: PaymentVerificationRow): ReceiptData | null {
-  if (
-    !isAcademicStatus(data.status_akademika) ||
-    !isAttendanceMethod(data.presentasi_riset)
-  ) {
+type VerificationOrder = {
+  program: RegistrationProgram;
+  table: "mechatura_registrations";
+  name: string;
+  email: string;
+  phone: string;
+  institution: string;
+  ticket: string;
+  amount: number;
+  paidAt: string | null;
+  paymentStatus: string | null;
+  externalId: string;
+  invoiceId: string | null;
+  invoiceUrl: string | null;
+  userId: string | null;
+};
+
+const createReceipt = (order: VerificationOrder): ReceiptData => ({
+  title: `${registrationProgramLabels[order.program]} Payment Receipt`,
+  name: order.name,
+  email: order.email,
+  phone: order.phone,
+  institution: order.institution,
+  program: registrationProgramLabels[order.program],
+  ticket: order.ticket,
+  amount: formatCurrency(order.amount),
+  paidAt: order.paidAt ? new Date(order.paidAt).toLocaleString("id-ID") : "-",
+  invoiceId: order.invoiceId ?? "-",
+  referenceId: order.externalId,
+});
+
+const findMechaturaOrder = async (
+  supabase: ReturnType<typeof createAdminClient>,
+  orderId: string
+): Promise<VerificationOrder | null> => {
+  const { data, error } = await supabase
+    .from("mechatura_registrations")
+    .select(
+      "id,team_name,institution,competition_type,robot_name,payment_amount,paid_at,payment_status,xendit_external_id,xendit_invoice_id,xendit_invoice_url,user_id"
+    )
+    .eq("xendit_external_id", orderId)
+    .maybeSingle<MechaturaPaymentVerificationRow>();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data || !isMechaturaCompetitionType(data.competition_type)) {
     return null;
   }
 
-  const amount =
-    data.payment_amount ??
-    getPaymentAmount(data.status_akademika, data.presentasi_riset);
+  const { data: leader, error: leaderError } = await supabase
+    .from("mechatura_members")
+    .select("full_name,email,phone")
+    .eq("registration_id", data.id)
+    .eq("is_leader", true)
+    .maybeSingle<{ full_name: string; email: string | null; phone: string | null }>();
+
+  if (leaderError) {
+    throw leaderError;
+  }
+
+  if (!leader?.email || !leader.phone) {
+    return null;
+  }
 
   return {
-    name: data.nama_lengkap,
-    email: data.email,
-    phone: data.no_telepon,
-    institution: data.asal_institusi,
-    academicStatus: statusLabels[data.status_akademika],
-    attendance: attendanceLabels[data.presentasi_riset],
-    amount: formatCurrency(amount),
-    paidAt: data.paid_at
-      ? new Date(data.paid_at).toLocaleString("id-ID")
-      : "-",
-    invoiceId: data.xendit_invoice_id ?? "-",
-    referenceId: data.xendit_external_id,
+    program: "mechatura",
+    table: "mechatura_registrations",
+    name: `${data.team_name} / ${leader.full_name}`,
+    email: leader.email,
+    phone: leader.phone,
+    institution: data.institution,
+    ticket: `${mechaturaCompetitionLabels[data.competition_type]} - ${data.robot_name}`,
+    amount: data.payment_amount ?? mechaturaPaymentAmount,
+    paidAt: data.paid_at,
+    paymentStatus: data.payment_status,
+    externalId: data.xendit_external_id,
+    invoiceId: data.xendit_invoice_id,
+    invoiceUrl: data.xendit_invoice_url,
+    userId: data.user_id,
   };
-}
+};
+
+const findOrder = findMechaturaOrder;
 
 async function verifyPayment(orderId: string) {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
-    .from("seminar_registrations")
-    .select(
-      "nama_lengkap,email,no_telepon,asal_institusi,status_akademika,presentasi_riset,payment_amount,paid_at,payment_status,xendit_external_id,xendit_invoice_id,xendit_invoice_url,user_id"
-    )
-    .eq("xendit_external_id", orderId)
-    .maybeSingle<PaymentVerificationRow>();
+  const order = await findOrder(supabase, orderId);
 
-  if (error || !data) {
+  if (!order) {
     return { status: "invalid" as const };
   }
 
-  if (data.user_id) {
+  if (order.userId) {
     const authSupabase = await createClient();
     const {
       data: { user },
     } = await authSupabase.auth.getUser();
 
-    if (data.user_id !== user?.id) {
+    if (order.userId !== user?.id) {
       return { status: "invalid" as const };
     }
   }
 
-  if (data.payment_status === "paid" || data.payment_status === "settled") {
-    return { status: "paid" as const, receipt: createReceipt(data) };
+  if (order.paymentStatus === "paid" || order.paymentStatus === "settled") {
+    return { status: "paid" as const, receipt: createReceipt(order) };
   }
 
-  if (!data.xendit_invoice_id) {
+  if (!order.invoiceId) {
     return { status: "pending" as const };
   }
 
-  const invoice = await getXenditInvoice(data.xendit_invoice_id);
+  const invoice = await getXenditInvoice(order.invoiceId);
 
-  if (!invoice || invoice.external_id !== data.xendit_external_id) {
+  if (!invoice || invoice.external_id !== order.externalId) {
     return { status: "pending" as const };
   }
 
-  const expectedAmount =
-    data.payment_amount ??
-    (isAcademicStatus(data.status_akademika) &&
-    isAttendanceMethod(data.presentasi_riset)
-      ? getPaymentAmount(data.status_akademika, data.presentasi_riset)
-      : null);
-  const invoiceAmount =
-    typeof invoice.amount === "number" ? invoice.amount : null;
+  const invoiceAmount = typeof invoice.amount === "number" ? invoice.amount : null;
 
-  if (expectedAmount === null || invoiceAmount !== expectedAmount) {
+  if (invoiceAmount !== order.amount) {
     console.error("Payment amount verification failed", {
-      external_id: data.xendit_external_id,
+      external_id: order.externalId,
     });
     return { status: "pending" as const };
   }
@@ -125,16 +169,25 @@ async function verifyPayment(orderId: string) {
   const paidAt =
     paymentStatus === "paid" || paymentStatus === "settled"
       ? getXenditPaidAt(invoice)
-      : data.paid_at;
+      : order.paidAt;
+  const updatePayload: Record<string, string | null> = {
+    payment_status: paymentStatus,
+    paid_at: paidAt,
+    xendit_invoice_id: invoice.id,
+    xendit_invoice_url: invoice.invoice_url ?? order.invoiceUrl,
+  };
+
+  if (
+    order.program === "mechatura" &&
+    (paymentStatus === "paid" || paymentStatus === "settled")
+  ) {
+    updatePayload.registration_status = "confirmed";
+  }
+
   const { error: updateError } = await supabase
-    .from("seminar_registrations")
-    .update({
-      payment_status: paymentStatus,
-      paid_at: paidAt,
-      xendit_invoice_id: invoice.id,
-      xendit_invoice_url: invoice.invoice_url ?? data.xendit_invoice_url,
-    })
-    .eq("xendit_external_id", data.xendit_external_id);
+    .from(order.table)
+    .update(updatePayload)
+    .eq("xendit_external_id", order.externalId);
 
   if (updateError) {
     console.error("Payment sync failed", updateError.message);
@@ -148,11 +201,11 @@ async function verifyPayment(orderId: string) {
   return {
     status: "paid" as const,
     receipt: createReceipt({
-      ...data,
-      payment_status: paymentStatus,
-      paid_at: paidAt,
-      xendit_invoice_id: invoice.id,
-      xendit_invoice_url: invoice.invoice_url ?? data.xendit_invoice_url,
+      ...order,
+      paymentStatus,
+      paidAt,
+      invoiceId: invoice.id,
+      invoiceUrl: invoice.invoice_url ?? order.invoiceUrl,
     }),
   };
 }
@@ -175,7 +228,7 @@ export default async function PaymentSuccessPage({
 
   return (
     <main className="mx-auto w-full max-w-3xl space-y-12 px-6 py-16 sm:px-8">
-      <RegistrationProgress currentStep={2} />
+      <SeminarRegistrationProgress currentStep={2} />
 
       <section className="rounded-xl p-8 text-center">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-muted">
@@ -187,7 +240,7 @@ export default async function PaymentSuccessPage({
         </h1>
         <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">
           {isPaid
-            ? "Thank you. Your Futura seminar registration payment has been completed and verified."
+            ? "Thank you. Your Futura registration payment has been completed and verified."
             : "We received the payment redirect, but the payment has not been verified yet. Please wait a moment or refresh this page."}
         </p>
 

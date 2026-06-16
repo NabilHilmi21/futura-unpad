@@ -1,21 +1,25 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import type { Metadata } from "next"
+
+import { FAQSection } from "@/components/landing/faq-section"
+import { EventOverviewSection } from "@/components/landing/event-overview-section"
+import { Footer } from "@/components/landing/footer"
+import { HeroSection } from "@/components/landing/hero-section"
+import { RegistrationCards } from "@/components/landing/registration-cards"
+
+export const metadata: Metadata = {
+  title: "FUTURA 2026 | Technology, Robotics, and Research Event",
+  description:
+    "Register for Futura 2026, a university technology event featuring seminars, robotic competition, and research dissemination.",
+}
 
 export default function Home() {
   return (
-    <main>
-      <section className="max-w-7xl mx-auto flex flex-col justify-center gap-6 h-screen">
-        <p className="border text-muted-foreground text-sm rounded-full w-fit py-1 px-4">Futura 2026 registration is open!</p>
-        <h1 className="text-7xl font-bold tracking-tighter text-balance w-1/2">A little insight into the future</h1>
-      
-        <div className="flex gap-1">
-          <Link href="/registration">
-            <Button className="rounded-xl py-5 px-4 cursor-pointer">Register Now</Button>
-          </Link>
-          <Button className="rounded-xl py-5 px-4 cursor-pointer" variant="outline">About us</Button>
-        </div>
-      </section>
-        
+    <main className="bg-[#fbfbf8]">
+      <HeroSection />
+      <RegistrationCards />
+      <EventOverviewSection />
+      <FAQSection />
+      <Footer />
     </main>
-  );
+  )
 }

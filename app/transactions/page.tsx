@@ -4,13 +4,11 @@ import { ArrowUpRight, ReceiptText } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
-  attendanceLabels,
   formatCurrency,
-  isAcademicStatus,
-  isAttendanceMethod,
+  isMechaturaCompetitionType,
   isPaymentStatus,
+  mechaturaCompetitionLabels,
   paymentStatusLabels,
-  statusLabels,
   type PaymentStatus,
 } from "@/lib/payment"
 import { createAdminClient } from "@/lib/supabase-admin"
@@ -18,9 +16,9 @@ import { createClient } from "@/utils/supabase/server"
 
 type Transaction = {
   id: string
-  nama_lengkap: string
-  status_akademika: unknown
-  presentasi_riset: unknown
+  team_name: string
+  competition_type: unknown
+  robot_name: string
   payment_status: string | null
   payment_amount: number | null
   paid_at: string | null
@@ -61,9 +59,9 @@ export default async function TransactionsPage() {
 
   const adminSupabase = createAdminClient()
   const { data, error } = await adminSupabase
-    .from("seminar_registrations")
+    .from("mechatura_registrations")
     .select(
-      "id,nama_lengkap,status_akademika,presentasi_riset,payment_status,payment_amount,paid_at,xendit_external_id,created_at"
+      "id,team_name,competition_type,robot_name,payment_status,payment_amount,paid_at,xendit_external_id,created_at"
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
@@ -83,15 +81,15 @@ export default async function TransactionsPage() {
             Transactions
           </p>
           <h1 className="text-4xl font-semibold tracking-tight text-balance">
-            Your seminar transactions
+            Your Mechatura transactions
           </h1>
           <p className="max-w-xl text-sm leading-6 text-muted-foreground">
-            Track registrations, payment status, receipts, and pending seminar
-            payments for your account.
+            Track robotics competition payment status, receipts, and pending
+            invoices for your account.
           </p>
         </div>
         <Button asChild className="h-10 rounded-xl">
-          <Link href="/registration">Register another seminar</Link>
+          <Link href="/registration/mechatura">Register Mechatura</Link>
         </Button>
       </section>
 
@@ -110,8 +108,8 @@ export default async function TransactionsPage() {
       ) : (
         <section className="overflow-hidden rounded-xl border border-border bg-card">
           <div className="hidden grid-cols-[1.1fr_1fr_120px_160px_120px] gap-4 border-b border-border px-5 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground lg:grid">
-            <span>Seminar</span>
-            <span>Ticket</span>
+            <span>Team</span>
+            <span>Category</span>
             <span>Amount</span>
             <span>Status</span>
             <span className="text-right">Action</span>
@@ -122,13 +120,10 @@ export default async function TransactionsPage() {
               const status = isPaymentStatus(transaction.payment_status)
                 ? transaction.payment_status
                 : "unpaid"
-              const academicStatus = isAcademicStatus(transaction.status_akademika)
-                ? transaction.status_akademika
-                : null
-              const attendanceMethod = isAttendanceMethod(
-                transaction.presentasi_riset
+              const competitionType = isMechaturaCompetitionType(
+                transaction.competition_type
               )
-                ? transaction.presentasi_riset
+                ? transaction.competition_type
                 : null
               const isPaid = status === "paid" || status === "settled"
               const actionHref = isPaid
@@ -145,9 +140,9 @@ export default async function TransactionsPage() {
                   className="grid gap-4 px-5 py-5 lg:grid-cols-[1.1fr_1fr_120px_160px_120px] lg:items-center"
                 >
                   <div>
-                    <h2 className="font-medium">Futura Seminar Registration</h2>
+                    <h2 className="font-medium">Mechatura Registration</h2>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {transaction.nama_lengkap} - Created{" "}
+                      {transaction.team_name} - Created{" "}
                       {formatDate(transaction.created_at)}
                     </p>
                     {transaction.paid_at ? (
@@ -159,11 +154,11 @@ export default async function TransactionsPage() {
 
                   <div className="text-sm">
                     <p className="font-medium">
-                      {academicStatus ? statusLabels[academicStatus] : "-"}
+                      {competitionType
+                        ? mechaturaCompetitionLabels[competitionType]
+                        : "-"}
                     </p>
-                    <p className="text-muted-foreground">
-                      {attendanceMethod ? attendanceLabels[attendanceMethod] : "-"}
-                    </p>
+                    <p className="text-muted-foreground">{transaction.robot_name}</p>
                   </div>
 
                   <p className="text-sm font-medium">

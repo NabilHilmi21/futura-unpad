@@ -1,4 +1,4 @@
-export type AcademicStatus = "mahasiswa" | "dosen";
+export type AcademicStatus = "mahasiswa" | "siswa" | "dosen" | "umum";
 export type AttendanceMethod = "daring" | "luring";
 export type PaymentStatus =
   | "unpaid"
@@ -8,24 +8,36 @@ export type PaymentStatus =
   | "expired"
   | "cancelled"
   | "settled";
+export type RegistrationProgram = "seminar" | "mechatura";
+export type MechaturaCompetitionType = "sumo" | "transporter";
 
 export const paymentPrices: Record<
   AcademicStatus,
   Record<AttendanceMethod, number>
 > = {
   mahasiswa: {
-    daring: 75000,
-    luring: 100000,
+    daring: 0,
+    luring: 0,
+  },
+  siswa: {
+    daring: 0,
+    luring: 0,
   },
   dosen: {
-    daring: 100000,
-    luring: 150000,
+    daring: 0,
+    luring: 0,
+  },
+  umum: {
+    daring: 0,
+    luring: 0,
   },
 };
 
 export const statusLabels: Record<AcademicStatus, string> = {
   mahasiswa: "Mahasiswa",
+  siswa: "Siswa",
   dosen: "Dosen",
+  umum: "Umum",
 };
 
 export const attendanceLabels: Record<AttendanceMethod, string> = {
@@ -33,15 +45,39 @@ export const attendanceLabels: Record<AttendanceMethod, string> = {
   luring: "Luring",
 };
 
+export const registrationProgramLabels: Record<RegistrationProgram, string> = {
+  seminar: "Futura Seminar",
+  mechatura: "Mechatura",
+};
+
+export const mechaturaCompetitionLabels: Record<MechaturaCompetitionType, string> = {
+  sumo: "Robot Sumo",
+  transporter: "Robot Transporter",
+};
+
+export const mechaturaPaymentAmount = 250000;
+
 export const formatCurrency = (value: number) =>
   `Rp. ${value.toLocaleString("id-ID")}`;
 
 export const isAcademicStatus = (value: unknown): value is AcademicStatus =>
-  value === "mahasiswa" || value === "dosen";
+  value === "mahasiswa" ||
+  value === "siswa" ||
+  value === "dosen" ||
+  value === "umum";
 
 export const isAttendanceMethod = (
   value: unknown
 ): value is AttendanceMethod => value === "daring" || value === "luring";
+
+export const isRegistrationProgram = (
+  value: unknown
+): value is RegistrationProgram => value === "seminar" || value === "mechatura";
+
+export const isMechaturaCompetitionType = (
+  value: unknown
+): value is MechaturaCompetitionType =>
+  value === "sumo" || value === "transporter";
 
 export const getPaymentAmount = (
   status: AcademicStatus,

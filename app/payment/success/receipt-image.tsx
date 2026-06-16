@@ -4,12 +4,13 @@ import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export type ReceiptData = {
+  title: string;
   name: string;
   email: string;
   phone: string;
   institution: string;
-  academicStatus: string;
-  attendance: string;
+  program: string;
+  ticket: string;
   amount: string;
   paidAt: string;
   invoiceId: string;
@@ -21,8 +22,8 @@ const rows = (receipt: ReceiptData) => [
   ["Email", receipt.email],
   ["Phone", receipt.phone],
   ["Institution", receipt.institution],
-  ["Academic Status", receipt.academicStatus],
-  ["Attendance", receipt.attendance],
+  ["Program", receipt.program],
+  ["Ticket", receipt.ticket],
   ["Payment Date", receipt.paidAt],
   ["Invoice ID", receipt.invoiceId],
   ["Reference ID", receipt.referenceId],
@@ -78,7 +79,7 @@ export default function ReceiptImage({ receipt }: { receipt: ReceiptData }) {
 
     ctx.font = "400 30px Arial";
     ctx.fillStyle = "#666666";
-    ctx.fillText("Seminar Payment Receipt", 96, 200);
+    ctx.fillText(receipt.title, 96, 200);
 
     ctx.fillStyle = "#111111";
     ctx.font = "700 88px Arial";
@@ -141,7 +142,7 @@ export default function ReceiptImage({ receipt }: { receipt: ReceiptData }) {
             <div>
               <p className="text-2xl font-semibold tracking-tight">Futura</p>
               <p className="text-sm text-muted-foreground">
-                Seminar Payment Receipt
+                {receipt.title}
               </p>
             </div>
             <p className="rounded-full bg-muted px-3 py-1 text-xs font-medium">

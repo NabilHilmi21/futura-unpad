@@ -11,9 +11,11 @@ export default function PaymentActions({
   orderId: string;
 }) {
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handlePay = async () => {
     setIsLoading(true);
+    setErrorMessage("");
 
     try {
       const res = await fetch("/api/payment/xendit", {
@@ -33,22 +35,33 @@ export default function PaymentActions({
       window.location.href = data.invoice_url;
     } catch (error) {
       console.error(error);
-      alert("Payment failed to start. Please try again.");
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Payment failed to start. Please try again."
+      );
       setIsLoading(false);
     }
   };
 
   return (
-    <section className="grid gap-3 sm:grid-cols-2">
-      <Button asChild variant="outline" className="h-11 rounded-xl">
-        <Link href="/registration">
-          <ArrowLeft className="h-4 w-4" />
-          Back to registration
-        </Link>
-      </Button>
-      <Button onClick={handlePay} disabled={isLoading} className="h-11 rounded-xl">
-        {isLoading ? "Creating invoice..." : "Continue Payment"}
-      </Button>
+    <section className="space-y-3">
+      {errorMessage ? (
+        <p role="alert" className="text-sm text-destructive">
+          {errorMessage}
+        </p>
+      ) : null}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Button asChild variant="outline" className="h-11 rounded-xl">
+          <Link href="/registration">
+            <ArrowLeft className="h-4 w-4" />
+            Back to registration
+          </Link>
+        </Button>
+        <Button onClick={handlePay} disabled={isLoading} className="h-11 rounded-xl">
+          {isLoading ? "Creating invoice..." : "Continue Payment"}
+        </Button>
+      </div>
     </section>
   );
 }

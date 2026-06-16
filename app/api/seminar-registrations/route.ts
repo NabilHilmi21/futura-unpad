@@ -2,14 +2,12 @@ import { NextResponse } from "next/server";
 import { isUniqueViolation } from "@/lib/database-errors";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { invalidRequest, rateLimited, serverError } from "@/lib/http";
-import { createRegistrationToken, getPaymentAmount } from "@/lib/payment";
 import { rateLimit } from "@/lib/rate-limit";
 import { seminarRegistrationSchema } from "@/lib/validation";
 import { createClient } from "@/utils/supabase/server";
 
 type ExistingRegistration = {
-  xendit_external_id: string;
-  payment_status: string | null;
+  id: string;
   user_id: string | null;
   email: string;
 };
@@ -17,9 +15,8 @@ type ExistingRegistration = {
 const duplicateRegistrationResponse = (registration: ExistingRegistration) =>
   NextResponse.json(
     {
-      error: "You already have a registration. Continue to your profile to view payment status.",
-      order_id: registration.xendit_external_id,
-      payment_status: registration.payment_status,
+      error: "You already have a seminar registration.",
+      registration_id: registration.id,
     },
     { status: 409 }
   );
@@ -50,7 +47,7 @@ export async function POST(request: Request) {
   const adminSupabase = createAdminClient();
   const existingBaseQuery = adminSupabase
     .from("seminar_registrations")
-    .select("xendit_external_id,payment_status,user_id,email");
+    .select("id,user_id,email");
   const existingQuery = user
     ? existingBaseQuery.or(`user_id.eq.${user.id},email.eq.${parsed.data.email}`)
     : existingBaseQuery.eq("email", parsed.data.email);
@@ -67,30 +64,24 @@ export async function POST(request: Request) {
     return duplicateRegistrationResponse(existingRegistration[0] as ExistingRegistration);
   }
 
-  const orderId = createRegistrationToken();
-  const amount = getPaymentAmount(
-    parsed.data.status_akademika,
-    parsed.data.presentasi_riset
-  );
-
-  const { error } = await adminSupabase.from("seminar_registrations").insert({
-    user_id: user?.id ?? null,
-    nama_lengkap: parsed.data.nama_lengkap,
-    email: parsed.data.email,
-    no_telepon: parsed.data.no_telepon,
-    asal_institusi: parsed.data.asal_institusi,
-    status_akademika: parsed.data.status_akademika,
-    presentasi_riset: parsed.data.presentasi_riset,
-    payment_status: "unpaid",
-    payment_amount: amount,
-    xendit_external_id: orderId,
-  });
+  const { data: insertedRegistration, error } = await adminSupabase
+    .from("seminar_registrations")
+    .insert({
+      user_id: user?.id ?? null,
+      nama_lengkap: parsed.data.nama_lengkap,
+      email: parsed.data.email,
+      no_telepon: parsed.data.no_telepon,
+      asal_institusi: parsed.data.asal_institusi,
+      status_akademika: parsed.data.status_akademika,
+    })
+    .select("id")
+    .single<{ id: string }>();
 
   if (error) {
     if (isUniqueViolation(error)) {
       const duplicateBaseQuery = adminSupabase
         .from("seminar_registrations")
-        .select("xendit_external_id,payment_status,user_id,email");
+        .select("id,user_id,email");
       const duplicateQuery = user
         ? duplicateBaseQuery.or(`user_id.eq.${user.id},email.eq.${parsed.data.email}`)
         : duplicateBaseQuery.eq("email", parsed.data.email);
@@ -109,7 +100,7 @@ export async function POST(request: Request) {
       }
 
       return NextResponse.json(
-        { error: "You already have a registration. Continue to your profile to view payment status." },
+        { error: "You already have a seminar registration." },
         { status: 409 }
       );
     }
@@ -118,5 +109,8 @@ export async function POST(request: Request) {
     return serverError();
   }
 
-  return NextResponse.json({ order_id: orderId });
+  return NextResponse.json({
+    success: true,
+    registration_id: insertedRegistration.id,
+  });
 }

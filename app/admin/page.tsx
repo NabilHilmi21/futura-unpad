@@ -2,7 +2,6 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import {
     ArrowUpRight,
-    Banknote,
     CheckCircle2,
     Clock3,
     Monitor,
@@ -11,8 +10,9 @@ import {
 import { Button } from "@/components/ui/button"
 import { createAdminClient } from "@/lib/supabase-admin"
 import {
-    formatCurrency,
+    isMechaturaCompetitionType,
     isPaymentStatus,
+    mechaturaCompetitionLabels,
     paymentStatusLabels,
     type PaymentStatus,
 } from "@/lib/payment"
@@ -20,10 +20,26 @@ import { createClient } from "@/utils/supabase/server"
 
 type AdminRegistration = {
     status_akademika: string | null
-    presentasi_riset: string | null
+    created_at: string | null
+}
+
+type AdminMechaturaRegistration = {
+    id: string
+    team_id: string
+    team_name: string
+    institution: string
+    competition_type: unknown
+    robot_name: string
+    registration_status: string | null
     payment_status: string | null
     payment_amount: number | null
     created_at: string | null
+}
+
+type AdminMechaturaLeader = {
+    registration_id: string
+    full_name: string
+    email: string | null
 }
 
 const completedStatuses = new Set(["paid", "settled"])
@@ -41,7 +57,27 @@ const statusClassName: Record<PaymentStatus, string> = {
 const getStatus = (status: string | null) =>
     isPaymentStatus(status) ? status : "unpaid"
 
-export default async function AdminPage() {
+type AdminSearchParams = Promise<Record<string, string | string[] | undefined>>
+
+export default async function AdminPage({
+    searchParams,
+}: {
+    searchParams: AdminSearchParams
+}) {
+    const params = await searchParams
+    const categoryParam = Array.isArray(params.category)
+        ? params.category[0]
+        : params.category
+    const paymentParam = Array.isArray(params.payment)
+        ? params.payment[0]
+        : params.payment
+    const searchParam = Array.isArray(params.search)
+        ? params.search[0]
+        : params.search
+    const categoryFilter = isMechaturaCompetitionType(categoryParam)
+        ? categoryParam
+        : "all"
+    const searchFilter = (searchParam ?? "").trim().toLowerCase()
     const supabase = await createClient()
 
     const {
@@ -63,41 +99,38 @@ export default async function AdminPage() {
     }
 
     const adminSupabase = createAdminClient()
-    const { data, error } = await adminSupabase
-        .from("seminar_registrations")
-        .select("status_akademika,presentasi_riset,payment_status,payment_amount,created_at")
-        .order("created_at", { ascending: false })
+    const [{ data, error }, { data: mechaturaData, error: mechaturaError }] =
+        await Promise.all([
+            adminSupabase
+                .from("seminar_registrations")
+                .select("status_akademika,created_at")
+                .order("created_at", { ascending: false }),
+            adminSupabase
+                .from("mechatura_registrations")
+                .select(
+                    "id,team_id,team_name,institution,competition_type,robot_name,registration_status,payment_status,payment_amount,created_at"
+                )
+                .order("created_at", { ascending: false })
+                .returns<AdminMechaturaRegistration[]>(),
+        ])
 
-    if (error) {
-        throw new Error(error.message)
+    if (error || mechaturaError) {
+        throw new Error(error?.message ?? mechaturaError?.message)
     }
 
     const registrations = (data ?? []) as AdminRegistration[]
     const totalRegistrations = registrations.length
-    const paidRegistrations = registrations.filter((registration) =>
-        completedStatuses.has(getStatus(registration.payment_status))
-    )
-    const pendingRegistrations = registrations.filter(
-        (registration) => getStatus(registration.payment_status) === "pending"
-    ).length
-    const unpaidRegistrations = registrations.filter(
-        (registration) => getStatus(registration.payment_status) === "unpaid"
-    ).length
-    const totalRevenue = paidRegistrations.reduce(
-        (sum, registration) => sum + (registration.payment_amount ?? 0),
-        0
-    )
-    const luringCount = registrations.filter(
-        (registration) => registration.presentasi_riset === "luring"
-    ).length
-    const daringCount = registrations.filter(
-        (registration) => registration.presentasi_riset === "daring"
-    ).length
     const mahasiswaCount = registrations.filter(
         (registration) => registration.status_akademika === "mahasiswa"
     ).length
+    const siswaCount = registrations.filter(
+        (registration) => registration.status_akademika === "siswa"
+    ).length
     const dosenCount = registrations.filter(
         (registration) => registration.status_akademika === "dosen"
+    ).length
+    const umumCount = registrations.filter(
+        (registration) => registration.status_akademika === "umum"
     ).length
     const paymentStatuses: PaymentStatus[] = [
         "unpaid",
@@ -108,6 +141,50 @@ export default async function AdminPage() {
         "expired",
         "cancelled",
     ]
+    const paymentFilter = isPaymentStatus(paymentParam) ? paymentParam : "all"
+    const mechaturaRegistrations = mechaturaData ?? []
+    const { data: leaders } = mechaturaRegistrations.length
+        ? await adminSupabase
+            .from("mechatura_members")
+            .select("registration_id,full_name,email")
+            .in(
+                "registration_id",
+                mechaturaRegistrations.map((registration) => registration.id)
+            )
+            .eq("is_leader", true)
+            .returns<AdminMechaturaLeader[]>()
+        : { data: [] }
+    const leaderByRegistrationId = new Map(
+        (leaders ?? []).map((leader) => [leader.registration_id, leader])
+    )
+    const filteredMechaturaRegistrations = mechaturaRegistrations.filter(
+        (registration) => {
+            const leader = leaderByRegistrationId.get(registration.id)
+            const categoryMatches =
+                categoryFilter === "all" ||
+                registration.competition_type === categoryFilter
+            const paymentMatches =
+                paymentFilter === "all" ||
+                getStatus(registration.payment_status) === paymentFilter
+            const searchMatches =
+                !searchFilter ||
+                [
+                    registration.team_id,
+                    registration.team_name,
+                    registration.institution,
+                    registration.robot_name,
+                    leader?.full_name,
+                    leader?.email,
+                ]
+                    .filter(Boolean)
+                    .some((value) => value!.toLowerCase().includes(searchFilter))
+
+            return categoryMatches && paymentMatches && searchMatches
+        }
+    )
+    const mechaturaPaidCount = mechaturaRegistrations.filter((registration) =>
+        completedStatuses.has(getStatus(registration.payment_status))
+    ).length
 
     return (
         <main className="mx-auto w-full max-w-6xl space-y-10 px-6 py-10 sm:px-8">
@@ -153,81 +230,72 @@ export default async function AdminPage() {
 
                 <div className="rounded-xl border border-border p-5">
                     <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm text-muted-foreground">Paid</p>
+                        <p className="text-sm text-muted-foreground">Mahasiswa</p>
                         <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                     </div>
                     <p className="mt-4 text-3xl font-semibold tracking-tight">
-                        {paidRegistrations.length}
+                        {mahasiswaCount}
                     </p>
                 </div>
 
                 <div className="rounded-xl border border-border p-5">
                     <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm text-muted-foreground">Pending / Unpaid</p>
+                        <p className="text-sm text-muted-foreground">Siswa</p>
                         <Clock3 className="h-4 w-4 text-amber-600" />
                     </div>
                     <p className="mt-4 text-3xl font-semibold tracking-tight">
-                        {pendingRegistrations} / {unpaidRegistrations}
+                        {siswaCount}
                     </p>
                 </div>
 
                 <div className="rounded-xl border border-border p-5">
                     <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm text-muted-foreground">Confirmed revenue</p>
-                        <Banknote className="h-4 w-4 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">Dosen / Umum</p>
+                        <Users className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <p className="mt-4 text-3xl font-semibold tracking-tight">
-                        {formatCurrency(totalRevenue)}
+                        {dosenCount} / {umumCount}
                     </p>
                 </div>
             </section>
 
-            <section className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+            <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="rounded-xl border border-border p-5">
-                    <div className="flex items-center justify-between gap-4">
-                        <div>
-                            <h2 className="font-semibold">Payment Status</h2>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                Current payment distribution from all registrations.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="mt-5 divide-y divide-border">
-                        {paymentStatuses.map((status) => {
-                            const count = registrations.filter(
-                                (registration) => getStatus(registration.payment_status) === status
-                            ).length
-                            const percentage =
-                                totalRegistrations > 0
-                                    ? Math.round((count / totalRegistrations) * 100)
-                                    : 0
-
-                            return (
-                                <div
-                                    key={status}
-                                    className="grid gap-3 py-4 sm:grid-cols-[140px_1fr_64px] sm:items-center"
-                                >
-                                    <span
-                                        className={`w-fit rounded-full px-2.5 py-1 text-xs font-medium ${statusClassName[status]}`}
-                                    >
-                                        {paymentStatusLabels[status]}
-                                    </span>
-                                    <div className="h-2 overflow-hidden rounded-full bg-muted">
-                                        <div
-                                            className="h-full rounded-full bg-foreground"
-                                            style={{ width: `${percentage}%` }}
-                                        />
-                                    </div>
-                                    <p className="text-sm text-muted-foreground sm:text-right">
-                                        {count}
-                                    </p>
-                                </div>
-                            )
-                        })}
-                    </div>
+                    <p className="text-sm text-muted-foreground">Mechatura teams</p>
+                    <p className="mt-4 text-3xl font-semibold tracking-tight">
+                        {mechaturaRegistrations.length}
+                    </p>
                 </div>
+                <div className="rounded-xl border border-border p-5">
+                    <p className="text-sm text-muted-foreground">Mechatura paid</p>
+                    <p className="mt-4 text-3xl font-semibold tracking-tight">
+                        {mechaturaPaidCount}
+                    </p>
+                </div>
+                <div className="rounded-xl border border-border p-5">
+                    <p className="text-sm text-muted-foreground">Robot Sumo</p>
+                    <p className="mt-4 text-3xl font-semibold tracking-tight">
+                        {
+                            mechaturaRegistrations.filter(
+                                (registration) => registration.competition_type === "sumo"
+                            ).length
+                        }
+                    </p>
+                </div>
+                <div className="rounded-xl border border-border p-5">
+                    <p className="text-sm text-muted-foreground">Robot Transporter</p>
+                    <p className="mt-4 text-3xl font-semibold tracking-tight">
+                        {
+                            mechaturaRegistrations.filter(
+                                (registration) =>
+                                    registration.competition_type === "transporter"
+                            ).length
+                        }
+                    </p>
+                </div>
+            </section>
 
+            <section className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
                 <div className="rounded-xl border border-border p-5">
                     <div className="flex items-center gap-3">
                         <span className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
@@ -236,64 +304,163 @@ export default async function AdminPage() {
                         <div>
                             <h2 className="font-semibold">Audience Mix</h2>
                             <p className="text-sm text-muted-foreground">
-                                Attendance and academic status.
+                                Academic status from free seminar registrations.
                             </p>
                         </div>
                     </div>
 
                     <div className="mt-6 space-y-5">
-                        <div>
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">Luring</span>
-                                <span className="font-medium">{luringCount}</span>
-                            </div>
-                            <div className="mt-2 h-2 rounded-full bg-muted">
-                                <div
-                                    className="h-2 rounded-full bg-blue-600"
-                                    style={{
-                                        width: `${
-                                            totalRegistrations > 0
-                                                ? (luringCount / totalRegistrations) * 100
-                                                : 0
-                                        }%`,
-                                    }}
-                                />
-                            </div>
-                        </div>
+                        {[
+                            ["Mahasiswa", mahasiswaCount, "bg-blue-600"],
+                            ["Siswa", siswaCount, "bg-emerald-600"],
+                            ["Dosen", dosenCount, "bg-violet-600"],
+                            ["Umum", umumCount, "bg-zinc-600"],
+                        ].map(([label, count, color]) => {
+                            const numericCount = Number(count)
+                            const percentage =
+                                totalRegistrations > 0
+                                    ? (numericCount / totalRegistrations) * 100
+                                    : 0
 
-                        <div>
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">Daring</span>
-                                <span className="font-medium">{daringCount}</span>
-                            </div>
-                            <div className="mt-2 h-2 rounded-full bg-muted">
-                                <div
-                                    className="h-2 rounded-full bg-emerald-600"
-                                    style={{
-                                        width: `${
-                                            totalRegistrations > 0
-                                                ? (daringCount / totalRegistrations) * 100
-                                                : 0
-                                        }%`,
-                                    }}
-                                />
-                            </div>
-                        </div>
+                            return (
+                                <div key={label}>
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-muted-foreground">{label}</span>
+                                        <span className="font-medium">{numericCount}</span>
+                                    </div>
+                                    <div className="mt-2 h-2 rounded-full bg-muted">
+                                        <div
+                                            className={`h-2 rounded-full ${color}`}
+                                            style={{ width: `${percentage}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </div>
 
-                        <div className="grid grid-cols-2 gap-3 pt-2">
-                            <div className="rounded-lg border border-border p-4">
-                                <p className="text-sm text-muted-foreground">Mahasiswa</p>
-                                <p className="mt-2 text-2xl font-semibold tracking-tight">
-                                    {mahasiswaCount}
-                                </p>
-                            </div>
-                            <div className="rounded-lg border border-border p-4">
-                                <p className="text-sm text-muted-foreground">Dosen</p>
-                                <p className="mt-2 text-2xl font-semibold tracking-tight">
-                                    {dosenCount}
-                                </p>
-                            </div>
+                <div className="rounded-xl border border-border p-5">
+                    <h2 className="font-semibold">Seminar Registration</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        The seminar is free. Participant data is collected for
+                        attendance and committee communication only.
+                    </p>
+                    <div className="mt-6 grid grid-cols-2 gap-3">
+                        <div className="rounded-lg border border-border p-4">
+                            <p className="text-sm text-muted-foreground">Total</p>
+                            <p className="mt-2 text-2xl font-semibold tracking-tight">
+                                {totalRegistrations}
+                            </p>
                         </div>
+                        <div className="rounded-lg border border-border p-4">
+                            <p className="text-sm text-muted-foreground">Fee</p>
+                            <p className="mt-2 text-2xl font-semibold tracking-tight">
+                                Free
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className="rounded-xl border border-border p-5">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                        <h2 className="font-semibold">Mechatura Teams</h2>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            Search and filter robotics competition registrations.
+                        </p>
+                    </div>
+                    <form className="grid gap-3 sm:grid-cols-3 lg:min-w-[560px]" action="/admin">
+                        <input
+                            name="search"
+                            defaultValue={searchParam ?? ""}
+                            placeholder="Search team, robot, leader"
+                            className="h-10 rounded-xl border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                        />
+                        <select
+                            name="category"
+                            defaultValue={categoryFilter}
+                            className="h-10 rounded-xl border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                        >
+                            <option value="all">All categories</option>
+                            <option value="sumo">Robot Sumo</option>
+                            <option value="transporter">Robot Transporter</option>
+                        </select>
+                        <select
+                            name="payment"
+                            defaultValue={paymentFilter}
+                            className="h-10 rounded-xl border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                        >
+                            <option value="all">All payments</option>
+                            {paymentStatuses.map((status) => (
+                                <option key={status} value={status}>
+                                    {paymentStatusLabels[status]}
+                                </option>
+                            ))}
+                        </select>
+                        <Button className="h-10 rounded-xl sm:col-span-3 lg:col-span-1">
+                            Apply filters
+                        </Button>
+                    </form>
+                </div>
+
+                <div className="mt-5 overflow-hidden rounded-xl border border-border">
+                    <div className="hidden grid-cols-[1.2fr_1fr_1fr_120px_120px] gap-4 border-b border-border px-4 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground lg:grid">
+                        <span>Team</span>
+                        <span>Category</span>
+                        <span>Leader</span>
+                        <span>Payment</span>
+                        <span>Registration</span>
+                    </div>
+                    <div className="divide-y divide-border">
+                        {filteredMechaturaRegistrations.length ? (
+                            filteredMechaturaRegistrations.map((registration) => {
+                                const leader = leaderByRegistrationId.get(registration.id)
+                                const status = getStatus(registration.payment_status)
+                                const category = isMechaturaCompetitionType(
+                                    registration.competition_type
+                                )
+                                    ? mechaturaCompetitionLabels[registration.competition_type]
+                                    : "-"
+
+                                return (
+                                    <article
+                                        key={registration.id}
+                                        className="grid gap-4 px-4 py-4 text-sm lg:grid-cols-[1.2fr_1fr_1fr_120px_120px] lg:items-center"
+                                    >
+                                        <div>
+                                            <p className="font-medium">{registration.team_name}</p>
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                {registration.team_id} / {registration.robot_name}
+                                            </p>
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                {registration.institution}
+                                            </p>
+                                        </div>
+                                        <p>{category}</p>
+                                        <div>
+                                            <p className="font-medium">{leader?.full_name ?? "-"}</p>
+                                            <p className="mt-1 break-all text-xs text-muted-foreground">
+                                                {leader?.email ?? "-"}
+                                            </p>
+                                        </div>
+                                        <span
+                                            className={`w-fit rounded-full px-2.5 py-1 text-xs font-medium ${statusClassName[status]}`}
+                                        >
+                                            {paymentStatusLabels[status]}
+                                        </span>
+                                        <p className="text-muted-foreground">
+                                            {registration.registration_status ?? "-"}
+                                        </p>
+                                    </article>
+                                )
+                            })
+                        ) : (
+                            <div className="p-6 text-sm text-muted-foreground">
+                                No Mechatura teams match the current filters.
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>
