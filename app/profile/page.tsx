@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import { CalendarDays, Mail, ShieldCheck, Ticket, UserRound } from "lucide-react"
+import { CalendarDays, Mail, ShieldCheck, Ticket, UserRound, Bot, BookOpen, CheckCircle2, Clock, ChevronRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -101,11 +101,11 @@ export default async function ProfilePage() {
 
   const { data: mechaturaLeader } = latestMechaturaRegistration
     ? await adminSupabase
-        .from("mechatura_members")
-        .select("full_name,email,phone")
-        .eq("registration_id", latestMechaturaRegistration.id)
-        .eq("is_leader", true)
-        .maybeSingle<ProfileMechaturaLeader>()
+      .from("mechatura_members")
+      .select("full_name,email,phone")
+      .eq("registration_id", latestMechaturaRegistration.id)
+      .eq("is_leader", true)
+      .maybeSingle<ProfileMechaturaLeader>()
     : { data: null }
 
   const academicStatus = isAcademicStatus(latestRegistration?.status_akademika)
@@ -123,186 +123,218 @@ export default async function ProfilePage() {
     : null
 
   return (
-    <main className="mx-auto w-full max-w-5xl space-y-8 px-6 py-12 sm:px-8">
-      <section className="flex flex-col gap-4 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between">
+    <main className="mx-auto w-full max-w-6xl px-6 py-12 sm:px-8">
+      <section className="flex flex-col gap-4 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between mb-8">
         <div className="space-y-2">
-          <p className="text-sm font-medium text-muted-foreground">Profile</p>
-          <h1 className="text-4xl font-semibold tracking-tight text-balance">
-            Your Futura account
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">
+            Your Dashboard
           </h1>
           <p className="max-w-xl text-sm leading-6 text-muted-foreground">
-            Review your account details and your latest registrations.
+            Manage your profile and track your Futura event registrations.
           </p>
         </div>
-        <Button asChild className="h-10 rounded-xl">
-          <Link href="/transactions">View transactions</Link>
+        <Button asChild variant="outline" className="h-10 rounded-xl">
+          <Link href="/transactions">View all transactions</Link>
         </Button>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="rounded-xl border border-border bg-card p-5">
-          <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <UserRound className="h-5 w-5 text-muted-foreground" />
-            </span>
-            <div className="min-w-0">
-              <h2 className="font-semibold">Account details</h2>
-              <p className="truncate text-sm text-muted-foreground">{user.email}</p>
-            </div>
-          </div>
+      <div className="grid gap-8 lg:grid-cols-[1fr_2fr] items-start">
 
-          <div className="mt-6 space-y-4 text-sm">
-            <div className="flex items-start gap-3">
-              <Mail className="mt-0.5 h-4 w-4 text-muted-foreground" />
+        {/* LEFT COLUMN: Profile Info */}
+        <div className="space-y-6 lg:sticky lg:top-8">
+          <div className="rounded-xl border border-border bg-card p-6">
+            <div className="flex flex-col items-center text-center space-y-4 mb-8">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted border border-border">
+                <UserRound className="h-8 w-8 text-muted-foreground" />
+              </div>
               <div>
-                <p className="text-muted-foreground">Email</p>
-                <p className="break-all font-medium">{user.email ?? "-"}</p>
+                <h2 className="font-semibold text-lg text-foreground">Account Details</h2>
+                <p className="text-sm text-muted-foreground mt-1 truncate max-w-[200px]">{user.email}</p>
               </div>
             </div>
-            <div className="flex items-start gap-3">
-              <ShieldCheck className="mt-0.5 h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-muted-foreground">Role</p>
-                <p className="font-medium">{adminUser ? "Admin" : "Participant"}</p>
+
+            <div className="space-y-4 text-sm">
+              <div className="flex items-center gap-3">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <div className="overflow-hidden">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Email</p>
+                  <p className="font-medium truncate mt-0.5">{user.email ?? "-"}</p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <CalendarDays className="mt-0.5 h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-muted-foreground">Account created</p>
-                <p className="font-medium">{formatDate(user.created_at)}</p>
+              <div className="flex items-center gap-3">
+                <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Role</p>
+                  <p className="font-medium mt-0.5">{adminUser ? "Administrator" : "Participant"}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Joined</p>
+                  <p className="font-medium mt-0.5">{formatDate(user.created_at)}</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-5">
-          <div className="flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-              <Ticket className="h-5 w-5 text-muted-foreground" />
-            </span>
-            <div>
-              <h2 className="font-semibold">Latest seminar registration</h2>
-              <p className="text-sm text-muted-foreground">
-                {latestRegistration
-                  ? `Created ${formatDate(latestRegistration.created_at)}`
-                  : "No linked registration yet."}
-              </p>
+        {/* RIGHT COLUMN: Registrations */}
+        <div className="space-y-6">
+
+          {/* SEMINAR CARD */}
+          <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="border-b border-border bg-muted/30 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-background border border-border p-2 rounded-lg">
+                  <Ticket className="h-4 w-4 text-foreground" />
+                </div>
+                <div>
+                  <h2 className="font-semibold">National Seminar</h2>
+                  <p className="text-xs text-muted-foreground">
+                    {latestRegistration ? `Registered on ${formatDate(latestRegistration.created_at)}` : "No active registration"}
+                  </p>
+                </div>
+              </div>
+              {latestRegistration && (
+                <span className="inline-flex items-center rounded-md border border-border bg-background px-2.5 py-1 text-xs font-semibold text-foreground">
+                  <CheckCircle2 className="w-3 h-3 mr-1.5 text-muted-foreground" /> Active
+                </span>
+              )}
+            </div>
+
+            <div className="p-6">
+              {latestRegistration ? (
+                <div className="grid gap-5 text-sm sm:grid-cols-2">
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Participant Name</p>
+                    <p className="font-medium">{latestRegistration.nama_lengkap}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Institution</p>
+                    <p className="font-medium">{latestRegistration.asal_institusi}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Phone Number</p>
+                    <p className="font-medium">{latestRegistration.no_telepon}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Status / Fee</p>
+                    <p className="font-medium">
+                      {academicStatus ? statusLabels[academicStatus] : "-"} <span className="text-muted-foreground font-normal ml-1">(Free)</span>
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-6 text-center">
+                  <p className="text-sm text-muted-foreground mb-4">You haven't registered for the National Seminar yet.</p>
+                  <Button asChild className="h-10 rounded-xl">
+                    <Link href="/registration/seminar">Register for Seminar</Link>
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
-          {latestRegistration ? (
-            <div className="mt-6 grid gap-4 text-sm sm:grid-cols-2">
-              <div>
-                <p className="text-muted-foreground">Name</p>
-                <p className="font-medium">{latestRegistration.nama_lengkap}</p>
+          {/* MECHATURA CARD */}
+          <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="border-b border-border bg-muted/30 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-background border border-border p-2 rounded-lg">
+                  <Bot className="h-4 w-4 text-foreground" />
+                </div>
+                <div>
+                  <h2 className="font-semibold">Mechatura Competition</h2>
+                  <p className="text-xs text-muted-foreground">
+                    {latestMechaturaRegistration ? `Registered on ${formatDate(latestMechaturaRegistration.created_at)}` : "No active registration"}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-muted-foreground">Phone</p>
-                <p className="font-medium">{latestRegistration.no_telepon}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Institution</p>
-                <p className="font-medium">{latestRegistration.asal_institusi}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Status</p>
-                <p className="font-medium">
-                  {academicStatus ? statusLabels[academicStatus] : "-"}
-                </p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Fee</p>
-                <p className="font-medium">Free</p>
+              {latestMechaturaRegistration && (
+                <span className={`inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-semibold ${mechaturaPaymentStatus === 'paid' ? 'border-border bg-background text-foreground' : 'border-border bg-muted text-muted-foreground'}`}>
+                  {mechaturaPaymentStatus === 'paid' ? <CheckCircle2 className="w-3 h-3 mr-1.5 text-muted-foreground" /> : <Clock className="w-3 h-3 mr-1.5 text-muted-foreground" />}
+                  {paymentStatusLabels[mechaturaPaymentStatus]}
+                </span>
+              )}
+            </div>
+
+            <div className="p-6">
+              {latestMechaturaRegistration ? (
+                <div className="grid gap-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Team Name</p>
+                    <p className="font-medium">{latestMechaturaRegistration.team_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Category</p>
+                    <p className="font-medium">
+                      {mechaturaCompetition ? mechaturaCompetitionLabels[mechaturaCompetition] : "-"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Robot Name</p>
+                    <p className="font-medium">{latestMechaturaRegistration.robot_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Team Leader</p>
+                    <p className="font-medium">{mechaturaLeader?.full_name ?? "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Registration Status</p>
+                    <p className="font-medium capitalize">{latestMechaturaRegistration.registration_status?.replace('_', ' ') ?? "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Amount Due</p>
+                    <p className="font-medium">{formatCurrency(latestMechaturaRegistration.payment_amount ?? 0)}</p>
+                  </div>
+
+                  <div className="sm:col-span-2 lg:col-span-3 mt-4">
+                    <Button asChild variant="secondary" className="h-10 rounded-xl w-full sm:w-auto">
+                      <Link href={`/payment?order_id=${encodeURIComponent(latestMechaturaRegistration.xendit_external_id)}`}>
+                        Open Payment Details <ChevronRight className="w-4 h-4 ml-1" />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-6 text-center">
+                  <p className="text-sm text-muted-foreground mb-4">You haven't formed a team for the Mechatura Robotics Competition yet.</p>
+                  <Button asChild className="h-10 rounded-xl">
+                    <Link href="/registration/mechatura">Register Team</Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* LOMBA KTI CARD (UI ONLY) */}
+          <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="border-b border-border bg-muted/30 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="bg-background border border-border p-2 rounded-lg">
+                  <BookOpen className="h-4 w-4 text-foreground" />
+                </div>
+                <div>
+                  <h2 className="font-semibold">Lomba KTI</h2>
+                  <p className="text-xs text-muted-foreground">
+                    Scientific Paper Competition
+                  </p>
+                </div>
               </div>
             </div>
-          ) : (
-            <div className="mt-6 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-              You have not registered for a seminar while signed in yet.
-              <Button asChild className="mt-4 h-10 rounded-xl">
-                <Link href="/registration">Register now</Link>
-              </Button>
+
+            <div className="p-6">
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <p className="text-sm text-muted-foreground mb-4">No active Lomba KTI registration found for this account.</p>
+                <Button asChild className="h-10 rounded-xl">
+                  <Link href="/registration/lomba-kti">Register for Lomba KTI</Link>
+                </Button>
+              </div>
             </div>
-          )}
+          </div>
+
         </div>
-      </section>
-
-      <section className="rounded-xl border border-border bg-card p-5">
-        <div className="flex items-center gap-3">
-          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-            <Ticket className="h-5 w-5 text-muted-foreground" />
-          </span>
-          <div>
-            <h2 className="font-semibold">Latest Mechatura registration</h2>
-            <p className="text-sm text-muted-foreground">
-              {latestMechaturaRegistration
-                ? `Created ${formatDate(latestMechaturaRegistration.created_at)}`
-                : "No linked Mechatura team yet."}
-            </p>
-          </div>
-        </div>
-
-        {latestMechaturaRegistration ? (
-          <div className="mt-6 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
-            <div>
-              <p className="text-muted-foreground">Team</p>
-              <p className="font-medium">{latestMechaturaRegistration.team_name}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Category</p>
-              <p className="font-medium">
-                {mechaturaCompetition
-                  ? mechaturaCompetitionLabels[mechaturaCompetition]
-                  : "-"}
-              </p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Robot</p>
-              <p className="font-medium">{latestMechaturaRegistration.robot_name}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Leader</p>
-              <p className="font-medium">{mechaturaLeader?.full_name ?? "-"}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Registration</p>
-              <p className="font-medium">
-                {latestMechaturaRegistration.registration_status ?? "-"}
-              </p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Payment</p>
-              <p className="font-medium">
-                {paymentStatusLabels[mechaturaPaymentStatus]}
-              </p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Amount</p>
-              <p className="font-medium">
-                {formatCurrency(latestMechaturaRegistration.payment_amount ?? 0)}
-              </p>
-            </div>
-            <div className="sm:col-span-2">
-              <Button asChild variant="outline" className="h-10 rounded-xl">
-                <Link
-                  href={`/payment?order_id=${encodeURIComponent(
-                    latestMechaturaRegistration.xendit_external_id
-                  )}`}
-                >
-                  Open payment details
-                </Link>
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="mt-6 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-            You have not registered a Mechatura team while signed in yet.
-            <Button asChild className="mt-4 h-10 rounded-xl">
-              <Link href="/registration/mechatura">Register Mechatura</Link>
-            </Button>
-          </div>
-        )}
-      </section>
+      </div>
     </main>
   )
 }
