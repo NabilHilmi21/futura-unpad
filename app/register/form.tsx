@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import GoogleLoginButton from "../login/google-login";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -193,6 +194,19 @@ export default function RegisterForm() {
                     >
                         {isSubmitting ? "Creating account..." : "Create Account"}
                     </Button>
+
+                    <div className="relative my-0.5">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t border-border" />
+                        </div>
+                        <div className="relative flex justify-center text-sm lowercase">
+                            <span className="bg-background px-2 text-muted-foreground">
+                                Or continue with
+                            </span>
+                        </div>
+                    </div>
+
+                    <GoogleLoginButton />
                 </Field>
                 <p className="text-center text-sm text-muted-foreground">
                     Already have an account?{" "}

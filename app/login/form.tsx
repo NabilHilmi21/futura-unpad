@@ -53,11 +53,11 @@ export default function LoginForm() {
         const next = currentUrl.searchParams.get("next");
         const safeNext =
             next &&
-            next.startsWith("/") &&
-            !next.startsWith("//") &&
-            !next.startsWith("/login") &&
-            !next.startsWith("/register") &&
-            !next.startsWith("/auth/callback")
+                next.startsWith("/") &&
+                !next.startsWith("//") &&
+                !next.startsWith("/login") &&
+                !next.startsWith("/register") &&
+                !next.startsWith("/auth/callback")
                 ? next
                 : "/admin";
 
@@ -114,6 +114,18 @@ export default function LoginForm() {
                     >
                         {isSubmitting ? "Signing in..." : "Log in"}
                     </Button>
+
+                    <div className="relative my-0.5">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t border-border" />
+                        </div>
+                        <div className="relative flex justify-center text-sm lowercase">
+                            <span className="bg-background px-2 text-muted-foreground">
+                                Or continue with
+                            </span>
+                        </div>
+                    </div>
+
                     <GoogleLoginButton />
                 </Field>
                 <p className="text-center text-sm text-muted-foreground">
@@ -121,7 +133,7 @@ export default function LoginForm() {
                     <Link
                         href={
                             typeof window !== "undefined" &&
-                            new URL(window.location.href).searchParams.get("next")
+                                new URL(window.location.href).searchParams.get("next")
                                 ? `/register?next=${new URL(window.location.href).searchParams.get("next")}`
                                 : "/register"
                         }
