@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input"
 import { forgotPasswordSchema, type ForgotPasswordFormValues } from "@/lib/validation"
 
 export default function ForgotPasswordPage() {
-    const [message, setMessage] = useState("")
+    const [successMessage, setSuccessMessage] = useState("")
+    const [errorMessage, setErrorMessage] = useState("")
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     const {
@@ -26,7 +27,8 @@ export default function ForgotPasswordPage() {
 
     const onSubmit = async (values: ForgotPasswordFormValues) => {
         setIsSubmitting(true)
-        setMessage("")
+        setSuccessMessage("")
+        setErrorMessage("")
 
         const res = await fetch("/api/auth/forgot-password", {
             method: "POST",
@@ -38,12 +40,12 @@ export default function ForgotPasswordPage() {
 
         if (!res.ok) {
             const data = await res.json().catch(() => null)
-            setMessage(data?.error ?? "Please try again later.")
+            setErrorMessage(data?.error ?? "Please try again later.")
             setIsSubmitting(false)
             return
         }
 
-        setMessage("If an account exists for that email, a reset link has been sent.")
+        setSuccessMessage(`Email has been successfully sent to ${values.email}`)
         setIsSubmitting(false)
     }
 
@@ -77,9 +79,17 @@ export default function ForgotPasswordPage() {
                         ) : null}
                     </Field>
 
-                    {message ? (
-                        <p className="rounded-[8px] border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-                            {message}
+                    {errorMessage ? (
+                        <p className="rounded-[8px] border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+                            {errorMessage === "User with this email not found" 
+                                ? "Email doesn't exist." 
+                                : errorMessage}
+                        </p>
+                    ) : null}
+
+                    {successMessage ? (
+                        <p className="rounded-[8px] border border-emerald-500/50 bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                            {successMessage}
                         </p>
                     ) : null}
 

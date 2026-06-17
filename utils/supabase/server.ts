@@ -25,3 +25,14 @@ export const createClient = async () => {
     },
   });
 };
+
+export const createAdminClient = () => {
+  return createServerClient(supabaseUrl!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+    cookies: {
+      getAll() {
+        return [];
+      },
+      setAll() {},
+    },
+  });
+};
