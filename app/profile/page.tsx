@@ -14,6 +14,7 @@ import {
 } from "@/lib/payment"
 import { createAdminClient } from "@/lib/supabase-admin"
 import { createClient } from "@/utils/supabase/server"
+import { EditProfileDialog } from "@/components/edit-profile-dialog"
 
 type ProfileRegistration = {
   nama_lengkap: string
@@ -41,6 +42,20 @@ type ProfileMechaturaLeader = {
   email: string | null
   phone: string | null
 }
+const getInitials = (displayName: string | null | undefined, email: string | null | undefined) => {
+  const nameToUse = displayName || email?.split("@")[0] || "U"
+  const parts = nameToUse
+    .replace(/[._-]+/g, " ")
+    .split(" ")
+    .filter(Boolean)
+
+  if (parts.length === 0) return "U"
+
+  return parts
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("")
+}
 
 const formatDate = (value?: string | null) => {
   if (!value) {
@@ -62,6 +77,8 @@ export default async function ProfilePage() {
   if (!user) {
     redirect("/login?next=/profile")
   }
+
+  const initials = getInitials(user.user_metadata?.display_name, user.email)
 
   const adminSupabase = createAdminClient()
   const [
@@ -138,11 +155,15 @@ export default async function ProfilePage() {
       <div className="grid gap-8 lg:grid-cols-[1fr_2fr] items-start">
 
         {/* LEFT COLUMN: Profile Info */}
-        <div className="space-y-6 lg:sticky lg:top-8">
-          <div className="rounded-xl border border-border bg-card p-6">
+        <div className="space-y-6 lg:sticky lg:top-24">
+          <div className="relative rounded-xl border border-border bg-card p-6">
+            <EditProfileDialog
+              initialDisplayName={user.user_metadata?.display_name || user.email?.split("@")[0] || ""}
+              initialEmail={user.email || ""}
+            />
             <div className="flex flex-col items-center text-center space-y-4 mb-8">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted border border-border">
-                <UserRound className="h-8 w-8 text-muted-foreground" />
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted border border-border text-2xl font-semibold text-foreground">
+                {initials}
               </div>
               <div>
                 <h2 className="font-semibold text-lg text-foreground">Account Details</h2>
@@ -159,10 +180,10 @@ export default async function ProfilePage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                <UserRound className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Role</p>
-                  <p className="font-medium mt-0.5">{adminUser ? "Administrator" : "Participant"}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Display Name</p>
+                  <p className="font-medium mt-0.5">{user.user_metadata?.display_name || user.email?.split("@")[0] || "-"}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">

@@ -18,8 +18,8 @@ import ConfirmDialog from "@/components/confirm-dialog"
 import { Button } from "@/components/ui/button"
 
 function getInitials(user: AuthUser) {
-  const emailName = user.email?.split("@")[0] ?? "U"
-  const parts = emailName
+  const displayName = (user.user_metadata?.display_name || user.email?.split("@")[0]) ?? "U"
+  const parts = displayName
     .replace(/[._-]+/g, " ")
     .split(" ")
     .filter(Boolean)
@@ -30,7 +30,7 @@ function getInitials(user: AuthUser) {
 
   return parts
     .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
+    .map((part: string) => part[0]?.toUpperCase())
     .join("")
 }
 
@@ -55,7 +55,7 @@ export const UserProfileButton = forwardRef<HTMLButtonElement, React.ComponentPr
         {initials}
       </span>
       <span className="hidden max-w-36 truncate text-sm font-medium text-muted-foreground lg:block">
-        {user.email}
+        {user.user_metadata?.display_name || user.email?.split("@")[0] || user.email}
       </span>
     </Button>
   )
@@ -108,7 +108,7 @@ export function UserProfileDropdown({ onClose }: { onClose?: () => void }) {
             </span>
             <div className="min-w-0 flex-1 text-left md:text-right">
               <p className="truncate text-sm font-semibold text-foreground">
-                Futura account
+                {user.user_metadata?.display_name || user.email?.split("@")[0] || "Futura account"}
               </p>
               <p className="truncate text-xs font-normal text-muted-foreground">
                 {user.email}

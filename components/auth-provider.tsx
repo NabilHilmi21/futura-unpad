@@ -15,6 +15,7 @@ import { createClient } from "@/utils/supabase/client";
 export type AuthUser = {
   id: string;
   email: string | null;
+  user_metadata?: Record<string, any>;
 };
 
 type AuthContextValue = {
@@ -28,8 +29,8 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | null>(null);
 const supabase = createClient();
 
-const toAuthUser = (user: { id: string; email?: string | null } | null) =>
-  user ? { id: user.id, email: user.email ?? null } : null;
+const toAuthUser = (user: { id: string; email?: string | null; user_metadata?: Record<string, any> } | null) =>
+  user ? { id: user.id, email: user.email ?? null, user_metadata: user.user_metadata } : null;
 
 export function AuthProvider({
   children,
@@ -52,7 +53,8 @@ export function AuthProvider({
     setUser((previousUser) => {
       const isSameUser =
         previousUser?.id === nextUser?.id &&
-        previousUser?.email === nextUser?.email;
+        previousUser?.email === nextUser?.email &&
+        previousUser?.user_metadata?.display_name === nextUser?.user_metadata?.display_name;
 
       return isSameUser ? previousUser : nextUser;
     });
