@@ -36,7 +36,7 @@ export function FAQSection() {
 
       <div className="relative mx-auto max-w-4xl z-10">
         <div className="text-center">
-          <h2 className="tracking-tighter mt-6 text-5xl leading-[1.1] text-balance sm:text-6xl">
+          <h2 className="tracking-tighter mt-6 text-4xl leading-[1.1] text-balance sm:text-5xl lg:text-6xl">
             A few useful answers.
           </h2>
         </div>

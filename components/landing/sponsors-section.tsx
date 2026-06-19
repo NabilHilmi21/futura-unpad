@@ -14,7 +14,7 @@ const sponsors = [
 export default function SponsorsSection() {
   return (
     <section className="py-16 w-full overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 mb-8 text-center">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 mb-4 text-center">
         <p className="text-xl font-semibold">
           Our sponsors
         </p>

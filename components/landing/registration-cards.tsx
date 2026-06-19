@@ -73,13 +73,13 @@ export function RegistrationCards() {
         <div className="max-w-2xl text-left">
           <h2
             id="programs-heading"
-            className="font-sans tracking-tighter mt-6 text-4xl leading-[1.1] text-balance sm:text-5xl"
+            className="font-sans tracking-tighter mt-6 text-3xl leading-[1.1] text-balance sm:text-4xl lg:text-5xl"
           >
             Choose the way you want to participate.
           </h2>
         </div>
 
-        <div className="mt-16 grid gap-6 lg:grid-cols-3 items-stretch">
+        <div className="mt-12 sm:mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
           {programs.map((program) => (
             <article
               key={program.title}
@@ -96,8 +96,8 @@ export function RegistrationCards() {
                 </div>
               )}
               <div>
-                <Image src={program.image} width={200} height={200} alt={program.title} className="rounded-2xl mb-4" />
-                <h3 className="text-3xl tracking-tight font-medium leading-tight text-slate-950 group-hover:text-primary transition-colors">
+                <Image src={program.image} width={200} height={200} alt={program.title} className="rounded-2xl mb-4 w-[200px] sm:w-[240px] h-auto object-cover" />
+                <h3 className="text-2xl sm:text-3xl tracking-tight font-medium leading-tight text-slate-950 group-hover:text-primary transition-colors">
                   {program.title}
                 </h3>
               </div>

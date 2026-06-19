@@ -48,7 +48,7 @@ export default function HowToRegisterSection() {
     return (
         <section id="how-to-register" className="bg-[#fbfbf8] text-slate-950">
             <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 lg:py-28">
-                <div className="text-center md:text-left mb-16">
+                <div className="mb-16">
                     <h1 className="font-sans text-3xl tracking-tighter leading-snug sm:text-4xl lg:text-5xl">
                         How to Register
                     </h1>

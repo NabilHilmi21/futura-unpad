@@ -16,7 +16,7 @@ export function EventOverviewSection() {
         <div className="max-w-xl">
           <h2
             id="overview-heading"
-            className="tracking-tighter mt-6 text-5xl leading-[1.1] text-balance sm:text-6xl lg:text-7xl"
+            className="tracking-tighter mt-6 text-4xl leading-[1.1] text-balance sm:text-5xl lg:text-7xl"
           >
             Better technical instincts, without the noise.
           </h2>

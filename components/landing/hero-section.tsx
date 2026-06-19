@@ -6,10 +6,10 @@ export function HeroSection() {
       <div className="relative mx-auto grid min-h-[calc(100svh-65px)] max-w-6xl content-center gap-16 px-5 py-20 sm:px-8 lg:py-28 z-10">
         <div className="mx-auto max-w-4xl text-center">
 
-          <h1 className="font-sans font-heading text-3xl tracking-tight leading-tight text-balance sm:text-4xl lg:text-5xl">
+          <h1 className="font-sans font-heading tracking-tight leading-tight text-balance text-4xl lg:text-5xl">
             A small space to <span className="font-serif italic">speak</span> and <span className="font-serif italic">learn</span> what moves next.
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-600">
+          <p className="mx-auto mt-6 max-w-2xl text-slate-600">
             Join a university technology event shaped around talks, prototypes,
             research, and the useful questions that happen between them.
           </p>
