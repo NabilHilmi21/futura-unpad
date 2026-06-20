@@ -4,6 +4,7 @@ import { DataTable } from "./data-table"
 import { columns } from "./participants"
 import type { Participants } from "./participants"
 import { Button } from "@/components/ui/button"
+import { Download } from "lucide-react"
 import {
     Select,
     SelectContent,
@@ -16,20 +17,20 @@ export default function SeminarListClient({
     initialData,
     searchParam,
     categoryFilter,
+    stats,
 }: {
     initialData: Participants[]
     searchParam?: string
     categoryFilter?: string
+    stats: {
+        total: number
+        mahasiswa: number
+        siswa: number
+        dosen: number
+        umum: number
+    }
 }) {
     const participants = initialData
-    const studentCount = participants.filter(
-        (participant) =>
-            participant.status_akademika === "mahasiswa" ||
-            participant.status_akademika === "siswa"
-    ).length
-    const educatorCount = participants.filter(
-        (participant) => participant.status_akademika === "dosen"
-    ).length
 
     return (
         <main className="mx-auto w-full max-w-6xl space-y-10 px-6 py-10 sm:px-8">
@@ -64,22 +65,36 @@ export default function SeminarListClient({
                             <Button className="h-10 rounded-xl px-6">
                                 Apply
                             </Button>
+                            <Button variant="outline" className="h-10 rounded-xl px-4 shrink-0" asChild>
+                                <a href="/api/admin/seminar-registrations/export" download>
+                                    <Download className="h-4 w-4 sm:mr-2" />
+                                    <span className="hidden sm:inline">Export CSV</span>
+                                </a>
+                            </Button>
                         </div>
                     </form>
                 </div>
 
-                <div className="grid gap-3 border-y border-border py-6 mt-6 sm:grid-cols-3">
+                <div className="grid gap-3 border-y border-border py-6 mt-6 grid-cols-2 md:grid-cols-5">
                     <div className="rounded-lg border border-border bg-card/90 p-5">
-                        <p className="text-sm text-muted-foreground">Total registrations</p>
-                        <p className="mt-3 text-3xl font-semibold tracking-tight">{participants.length}</p>
+                        <p className="text-sm text-muted-foreground">Total</p>
+                        <p className="mt-3 text-3xl font-semibold tracking-tight">{stats.total}</p>
                     </div>
                     <div className="rounded-lg border border-border p-5">
-                        <p className="text-sm text-muted-foreground">Students (Mhs/Siswa)</p>
-                        <p className="mt-3 text-3xl font-semibold tracking-tight">{studentCount}</p>
+                        <p className="text-sm text-muted-foreground">Mahasiswa</p>
+                        <p className="mt-3 text-3xl font-semibold tracking-tight">{stats.mahasiswa}</p>
                     </div>
                     <div className="rounded-lg border border-border p-5">
-                        <p className="text-sm text-muted-foreground">Educators (Dosen)</p>
-                        <p className="mt-3 text-3xl font-semibold tracking-tight">{educatorCount}</p>
+                        <p className="text-sm text-muted-foreground">Siswa</p>
+                        <p className="mt-3 text-3xl font-semibold tracking-tight">{stats.siswa}</p>
+                    </div>
+                    <div className="rounded-lg border border-border p-5">
+                        <p className="text-sm text-muted-foreground">Dosen</p>
+                        <p className="mt-3 text-3xl font-semibold tracking-tight">{stats.dosen}</p>
+                    </div>
+                    <div className="rounded-lg border border-border p-5">
+                        <p className="text-sm text-muted-foreground">Umum</p>
+                        <p className="mt-3 text-3xl font-semibold tracking-tight">{stats.umum}</p>
                     </div>
                 </div>
 

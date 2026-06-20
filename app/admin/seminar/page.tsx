@@ -38,6 +38,14 @@ export default async function SeminarList({
 
     const allParticipants = (data ?? []) as Participants[]
     
+    const stats = {
+        total: allParticipants.length,
+        mahasiswa: allParticipants.filter((p) => p.status_akademika === "mahasiswa").length,
+        siswa: allParticipants.filter((p) => p.status_akademika === "siswa").length,
+        dosen: allParticipants.filter((p) => p.status_akademika === "dosen").length,
+        umum: allParticipants.filter((p) => p.status_akademika === "umum").length,
+    }
+    
     const filteredParticipants = allParticipants.filter((participant) => {
         // Only show individual registrations OR main contacts for group registrations
         if (participant.is_main_contact === false) {
@@ -67,6 +75,7 @@ export default async function SeminarList({
             initialData={filteredParticipants} 
             searchParam={searchParam}
             categoryFilter={categoryFilter}
+            stats={stats}
         />
     )
 }
