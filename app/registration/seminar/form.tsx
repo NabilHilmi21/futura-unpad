@@ -165,17 +165,15 @@ export default function SeminarRegistrationForm() {
     [watchedValues.status_akademika]
   );
 
+  const [hasPrefilled, setHasPrefilled] = useState(false);
+
   // Pre-fill email from logged-in user
   useEffect(() => {
-    if (!user?.email) return;
-    const timeout = window.setTimeout(() => {
-      const current = watchedValues.email;
-      if (!current) {
-        setValue("email", user.email ?? "", { shouldValidate: false });
-      }
-    }, 0);
-    return () => window.clearTimeout(timeout);
-  }, [user?.email, setValue, watchedValues.email]);
+    if (!user?.email || hasPrefilled) return;
+    
+    setValue("email", user.email, { shouldValidate: false });
+    setHasPrefilled(true);
+  }, [user?.email, setValue, hasPrefilled]);
 
   // Show anonymous dialog if not logged in
   useEffect(() => {
