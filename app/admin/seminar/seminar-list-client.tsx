@@ -4,7 +4,8 @@ import { DataTable } from "./data-table"
 import { columns } from "./participants"
 import type { Participants } from "./participants"
 import { Button } from "@/components/ui/button"
-import { Download } from "lucide-react"
+import { Download, Scan } from "lucide-react"
+import Link from "next/link"
 import {
     Select,
     SelectContent,
@@ -49,7 +50,7 @@ export default function SeminarListClient({
                             placeholder="Search name, email, phone"
                             className="h-10 rounded-xl border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                         />
-                        <div className="flex gap-3">
+                        <div className="flex flex-wrap gap-3">
                             <Select name="category" defaultValue={categoryFilter ?? "all"}>
                                 <SelectTrigger className="w-full h-10 rounded-xl">
                                     <SelectValue placeholder="All statuses" />
@@ -70,6 +71,12 @@ export default function SeminarListClient({
                                     <Download className="h-4 w-4 sm:mr-2" />
                                     <span className="hidden sm:inline">Export CSV</span>
                                 </a>
+                            </Button>
+                            <Button className="h-10 rounded-xl px-4 shrink-0 bg-blue-600 hover:bg-blue-700 text-white" asChild>
+                                <Link href="/admin/scanner">
+                                    <Scan className="h-4 w-4 sm:mr-2" />
+                                    <span className="hidden sm:inline">Open Scanner</span>
+                                </Link>
                             </Button>
                         </div>
                     </form>

@@ -4,8 +4,10 @@ import { useRouter } from "next/navigation";
 
 import { useEffect, useMemo, useState } from "react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
+import JSZip from "jszip";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, PencilLine, Plus, Trash2, Download } from "lucide-react";
+import { QRCodeCanvas } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -124,6 +126,7 @@ export default function SeminarRegistrationForm() {
   const [isEditing, setIsEditing] = useState(false);
   const [flashDoneButton, setFlashDoneButton] = useState(false);
   const [registrationId, setRegistrationId] = useState("");
+  const [allRegistrations, setAllRegistrations] = useState<{id: string, nama_lengkap: string, asal_institusi: string, is_main_contact: boolean}[]>([]);
   const [showAnonDialog, setShowAnonDialog] = useState(false);
 
   const activeStepIndex = steps.findIndex((item) => item.id === step);
@@ -230,80 +233,169 @@ export default function SeminarRegistrationForm() {
     }
 
     setRegistrationId(responseData.registration_id);
+    setAllRegistrations(responseData.registrations || []);
     setStep("ticket");
     setIsSubmitting(false);
   });
 
-  const downloadTicket = () => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 1200;
-    canvas.height = 720;
+  const downloadTicket = async () => {
+    if (allRegistrations.length > 1) {
+      const zip = new JSZip();
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+      for (const reg of allRegistrations) {
+        const canvas = document.createElement("canvas");
+        canvas.width = 1200;
+        canvas.height = 720;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) continue;
 
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.strokeStyle = "#111111";
-    ctx.lineWidth = 4;
-    ctx.strokeRect(48, 48, canvas.width - 96, canvas.height - 96);
+        ctx.strokeStyle = "#111111";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(48, 48, canvas.width - 96, canvas.height - 96);
 
-    ctx.fillStyle = "#111111";
-    ctx.font = "700 54px Arial";
-    ctx.fillText(`Futura Seminar${watchedValues.registration_type === "grup" ? " (Group)" : ""}`, 90, 140);
+        ctx.fillStyle = "#111111";
+        ctx.font = "700 54px Arial";
+        ctx.fillText(`Futura Seminar (${watchedValues.group_name || "Group"})`, 90, 140);
 
-    ctx.font = "400 24px Arial";
-    ctx.fillStyle = "#666666";
-    ctx.fillText("Futura Seminar", 90, 180);
+        ctx.font = "400 24px Arial";
+        ctx.fillStyle = "#666666";
+        ctx.fillText("Futura Seminar", 90, 180);
 
-    ctx.fillStyle = "#111111";
-    ctx.font = "700 46px Arial";
-    drawWrappedText(ctx, watchedValues.nama, 90, 285, 680, 56);
+        ctx.fillStyle = "#111111";
+        ctx.font = "700 46px Arial";
+        drawWrappedText(ctx, reg.nama_lengkap, 90, 285, 680, 56);
 
-    ctx.font = "400 24px Arial";
-    ctx.fillStyle = "#666666";
-    ctx.fillText(watchedValues.email, 90, 350);
-    ctx.fillText(watchedValues.telp, 90, 388);
+        // For members we don't have individual emails/telps in the UI state
+        // We just print the main contact's contact info or leave blank
+        ctx.font = "400 24px Arial";
+        ctx.fillStyle = "#666666";
+        ctx.fillText(watchedValues.email, 90, 350);
+        ctx.fillText(watchedValues.telp, 90, 388);
 
-    ctx.strokeStyle = "#d4d4d4";
-    ctx.setLineDash([12, 12]);
-    ctx.beginPath();
-    ctx.moveTo(820, 95);
-    ctx.lineTo(820, canvas.height - 95);
-    ctx.stroke();
-    ctx.setLineDash([]);
+        ctx.strokeStyle = "#d4d4d4";
+        ctx.setLineDash([12, 12]);
+        ctx.beginPath();
+        ctx.moveTo(820, 95);
+        ctx.lineTo(820, canvas.height - 95);
+        ctx.stroke();
+        ctx.setLineDash([]);
 
-    const rows = [
-      ["Institution", watchedValues.institusi],
-      ["Status", statusLabel],
-      ["Registration ID", registrationId],
-    ];
+        const rows = [
+          ["Institution", reg.asal_institusi || "-"],
+          ["Status", statusLabel],
+          ["Registration ID", reg.id],
+          ["Total Participants", `${allRegistrations.length} People`]
+        ];
 
-    if (watchedValues.registration_type === "grup") {
-      rows.push(["Total Participants", `${(watchedValues.members?.length || 0) + 1} People`]);
-    }
+        let y = 150;
+        for (const [label, value] of rows) {
+          ctx.fillStyle = "#777777";
+          ctx.font = "400 20px Arial";
+          ctx.fillText(label, 870, y);
 
-    let y = 150;
-    for (const [label, value] of rows) {
-      ctx.fillStyle = "#777777";
-      ctx.font = "400 20px Arial";
-      ctx.fillText(label, 870, y);
+          ctx.fillStyle = "#111111";
+          ctx.font = "700 24px Arial";
+          drawWrappedText(ctx, value || "-", 870, y + 34, 245, 30);
+          y += 110;
+        }
+
+        ctx.fillStyle = "#666666";
+        ctx.font = "400 22px Arial";
+        ctx.fillText("Show this ticket during seminar check-in.", 90, 650);
+
+        const qrCanvas = document.getElementById(`qr-canvas-${reg.id}`) as HTMLCanvasElement;
+        if (qrCanvas) {
+          ctx.drawImage(qrCanvas, 90, 410, 200, 200);
+        }
+
+        const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+        if (blob) {
+          const safeName = reg.nama_lengkap.replace(/[^a-z0-9]/gi, '_').toUpperCase();
+          zip.file(`${safeName}_${reg.id}.png`, blob);
+        }
+      }
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const link = document.createElement("a");
+      link.download = `Futura_Group_Tickets.zip`;
+      link.href = URL.createObjectURL(zipBlob);
+      link.click();
+    } else {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1200;
+      canvas.height = 720;
+
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.strokeStyle = "#111111";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(48, 48, canvas.width - 96, canvas.height - 96);
 
       ctx.fillStyle = "#111111";
-      ctx.font = "700 24px Arial";
-      drawWrappedText(ctx, value || "-", 870, y + 34, 245, 30);
-      y += 110;
+      ctx.font = "700 54px Arial";
+      ctx.fillText(`Futura Seminar`, 90, 140);
+
+      ctx.font = "400 24px Arial";
+      ctx.fillStyle = "#666666";
+      ctx.fillText("Futura Seminar", 90, 180);
+
+      ctx.fillStyle = "#111111";
+      ctx.font = "700 46px Arial";
+      drawWrappedText(ctx, watchedValues.nama, 90, 285, 680, 56);
+
+      ctx.font = "400 24px Arial";
+      ctx.fillStyle = "#666666";
+      ctx.fillText(watchedValues.email, 90, 350);
+      ctx.fillText(watchedValues.telp, 90, 388);
+
+      ctx.strokeStyle = "#d4d4d4";
+      ctx.setLineDash([12, 12]);
+      ctx.beginPath();
+      ctx.moveTo(820, 95);
+      ctx.lineTo(820, canvas.height - 95);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      const rows = [
+        ["Institution", watchedValues.institusi],
+        ["Status", statusLabel],
+        ["Registration ID", registrationId],
+      ];
+
+      let y = 150;
+      for (const [label, value] of rows) {
+        ctx.fillStyle = "#777777";
+        ctx.font = "400 20px Arial";
+        ctx.fillText(label, 870, y);
+
+        ctx.fillStyle = "#111111";
+        ctx.font = "700 24px Arial";
+        drawWrappedText(ctx, value || "-", 870, y + 34, 245, 30);
+        y += 110;
+      }
+
+      ctx.fillStyle = "#666666";
+      ctx.font = "400 22px Arial";
+      ctx.fillText("Show this ticket during seminar check-in.", 90, 650);
+
+      const qrCanvas = document.getElementById("qr-canvas") as HTMLCanvasElement;
+      if (qrCanvas) {
+        ctx.drawImage(qrCanvas, 90, 410, 200, 200);
+      }
+
+      const link = document.createElement("a");
+      const safeName = watchedValues.nama.replace(/[^a-z0-9]/gi, '_').toUpperCase();
+      link.download = `${safeName}_${registrationId}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
     }
-
-    ctx.fillStyle = "#666666";
-    ctx.font = "400 22px Arial";
-    ctx.fillText("Show this ticket during seminar check-in.", 90, 620);
-
-    const link = document.createElement("a");
-    link.download = `futura-seminar-ticket-${registrationId}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
   };
 
   return (
@@ -436,6 +528,25 @@ export default function SeminarRegistrationForm() {
         {step === "details" ? (
           <form onSubmit={goToVerification} noValidate>
             <FieldGroup className="gap-6">
+              
+              {watchedValues.registration_type === "grup" && (
+                <Field className="gap-2">
+                  <FieldLabel htmlFor="group_name">
+                    Nama Grup/Tim <span aria-hidden="true">*</span>
+                  </FieldLabel>
+                  <Input
+                    id="group_name"
+                    className="h-11 rounded-[8px]"
+                    placeholder="Masukkan nama grup atau komunitas Anda"
+                    aria-describedby={errors.group_name ? "group-name-error" : undefined}
+                    aria-invalid={!!errors.group_name}
+                    {...register("group_name")}
+                  />
+                  {errors.group_name ? (
+                    <FieldError id="group-name-error">{errors.group_name.message}</FieldError>
+                  ) : null}
+                </Field>
+              )}
 
               {/* Nama Lengkap */}
               <Field className="gap-2">
@@ -744,6 +855,63 @@ export default function SeminarRegistrationForm() {
                     />
                     {errors.institusi ? <FieldError id="verify-institusi-error">{errors.institusi.message}</FieldError> : null}
                   </Field>
+                  <Field className="gap-2">
+                    <FieldLabel>Status Akademika</FieldLabel>
+                    <Controller
+                      name="status_akademika"
+                      control={control}
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <SelectTrigger className="h-9 rounded-[8px]">
+                            <SelectValue placeholder="Pilih status akademika" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {statusOptions.map((option) => (
+                              <SelectItem key={option.id} value={option.id}>
+                                {option.title}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {errors.status_akademika ? (
+                      <FieldError>{errors.status_akademika.message}</FieldError>
+                    ) : null}
+                  </Field>
+                  {watchedValues.registration_type === "grup" && memberFields.length > 0 && (
+                    <div className="sm:col-span-2 space-y-4 pt-4 border-t border-border mt-2">
+                      <h3 className="text-sm font-medium">Anggota Grup</h3>
+                      {memberFields.map((field, index) => (
+                        <div key={field.id} className="grid gap-4 sm:grid-cols-2">
+                          <Field className="gap-2">
+                            <FieldLabel htmlFor={`verify-members.${index}.nama`}>Nama Anggota {index + 1}</FieldLabel>
+                            <Input
+                              id={`verify-members.${index}.nama`}
+                              className="h-9 rounded-[8px]"
+                              {...register(`members.${index}.nama` as const)}
+                              aria-invalid={!!errors.members?.[index]?.nama}
+                            />
+                            {errors.members?.[index]?.nama ? <FieldError>{errors.members[index].nama.message}</FieldError> : null}
+                          </Field>
+                          <Field className="gap-2">
+                            <FieldLabel htmlFor={`verify-members.${index}.institusi`}>
+                              Asal Institusi {!watchedValues.is_same_institution ? "" : "(Sama)"}
+                            </FieldLabel>
+                            <Input
+                              id={`verify-members.${index}.institusi`}
+                              className="h-9 rounded-[8px]"
+                              {...register(`members.${index}.institusi` as const)}
+                              disabled={watchedValues.is_same_institution}
+                              value={watchedValues.is_same_institution ? watchedValues.institusi : watchedValues.members?.[index]?.institusi || ""}
+                              aria-invalid={!!errors.members?.[index]?.institusi}
+                            />
+                            {errors.members?.[index]?.institusi ? <FieldError>{errors.members[index].institusi.message}</FieldError> : null}
+                          </Field>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <div className="sm:col-span-2 pt-2">
                     <Button
                       type="button"
@@ -755,7 +923,7 @@ export default function SeminarRegistrationForm() {
                         "bg-destructive/80 text-white hover:bg-destructive/90"
                       )}
                       onClick={async () => {
-                        const isValid = await trigger(["nama", "email", "telp", "institusi"]);
+                        const isValid = await trigger(["nama", "email", "telp", "institusi", "status_akademika", "members"]);
                         if (isValid) setIsEditing(false);
                       }}
                     >
@@ -912,12 +1080,12 @@ export default function SeminarRegistrationForm() {
                       {watchedValues.institusi} / {statusLabel}
                     </p>
                   </div>
-                  <div className="rounded-[8px] bg-muted p-3 text-sm">
-                    <p className="text-muted-foreground">Ticket</p>
-                    <p className="mt-1 font-mono text-xs font-medium">
-                      {registrationId}
-                    </p>
-                  </div>
+                  {watchedValues.registration_type !== "grup" && (
+                    <div className="rounded-[8px] bg-white border border-border p-4 flex flex-col items-center shrink-0">
+                      <QRCodeCanvas id="qr-canvas" value={registrationId} size={160} />
+                      <p className="mt-3 text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">Ticket QR</p>
+                    </div>
+                  )}
                 </div>
                 <dl className="mt-5 grid gap-3 border-t border-border pt-4 text-sm sm:grid-cols-2">
                   <div>
@@ -955,8 +1123,15 @@ export default function SeminarRegistrationForm() {
               onClick={downloadTicket}
             >
               <Download className="h-4 w-4" />
-              Download ticket
+              {allRegistrations.length > 1 ? "Download group tickets (ZIP)" : "Download ticket"}
             </Button>
+            
+            {/* Hidden canvases for generating all member QR codes in zip */}
+            <div style={{ display: 'none' }}>
+               {allRegistrations.length > 1 && allRegistrations.map(reg => (
+                 <QRCodeCanvas key={reg.id} id={`qr-canvas-${reg.id}`} value={reg.id} size={200} />
+               ))}
+            </div>
           </FieldGroup>
         ) : null}
       </section>

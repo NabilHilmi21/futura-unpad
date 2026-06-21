@@ -8,9 +8,11 @@ import { useAuth } from "@/components/auth-provider"
 import { UserProfileButton, UserProfileDropdown } from "@/components/user-profile-menu"
 import { cn } from "@/lib/utils"
 import { Menu, X, ChevronDown } from "lucide-react"
+import { usePathname } from "next/navigation"
 
 export default function Navbar() {
     const { user, isAdmin } = useAuth()
+    const pathname = usePathname()
     const [isScrolled, setIsScrolled] = useState(false)
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [isMobileRegistrationOpen, setIsMobileRegistrationOpen] = useState(false)
@@ -58,6 +60,10 @@ export default function Navbar() {
         window.addEventListener("scroll", handleScroll)
         return () => window.removeEventListener("scroll", handleScroll)
     }, [])
+
+    if (pathname.startsWith("/admin") || pathname.startsWith("/profile")) {
+        return null
+    }
 
     return (
         <>

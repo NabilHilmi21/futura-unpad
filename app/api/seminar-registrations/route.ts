@@ -78,6 +78,7 @@ export async function POST(request: Request) {
       asal_institusi: parsed.data.asal_institusi,
       status_akademika: parsed.data.status_akademika,
       registration_type: parsed.data.registration_type,
+      group_name: parsed.data.group_name || null,
       group_id: groupId,
       is_main_contact: true,
     },
@@ -93,6 +94,7 @@ export async function POST(request: Request) {
         asal_institusi: member.asal_institusi || parsed.data.asal_institusi,
         status_akademika: parsed.data.status_akademika,
         registration_type: "group",
+        group_name: parsed.data.group_name || null,
         group_id: groupId,
         is_main_contact: false,
       });
@@ -102,7 +104,7 @@ export async function POST(request: Request) {
   const { data: insertedRegistrations, error } = await adminSupabase
     .from("seminar_registrations")
     .insert(inserts)
-    .select("id, is_main_contact");
+    .select("id, is_main_contact, nama_lengkap, asal_institusi, group_name");
 
   if (error) {
     if (isUniqueViolation(error)) {
@@ -121,5 +123,6 @@ export async function POST(request: Request) {
   return NextResponse.json({
     success: true,
     registration_id: mainContact?.id,
+    registrations: insertedRegistrations || [],
   });
 }

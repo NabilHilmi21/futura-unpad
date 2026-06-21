@@ -15,14 +15,22 @@ import {
 import { createAdminClient } from "@/lib/supabase-admin"
 import { createClient } from "@/utils/supabase/server"
 import { EditProfileDialog } from "@/components/edit-profile-dialog"
+import { QRCodeSVG } from "qrcode.react"
+import { TicketDownloadButton, DownloadRegistrationData } from "./ticket-download-button"
 
 type ProfileRegistration = {
+  id: string
   nama_lengkap: string
   email: string
   no_telepon: string
   asal_institusi: string
   status_akademika: unknown
   created_at: string | null
+  attended: boolean
+  check_in_time: string | null
+  registration_type: string | null
+  group_id: string | null
+  group_name: string | null
 }
 
 type ProfileMechaturaRegistration = {
@@ -95,7 +103,7 @@ export default async function ProfilePage() {
       adminSupabase
         .from("seminar_registrations")
         .select(
-          "nama_lengkap,email,no_telepon,asal_institusi,status_akademika,created_at"
+          "id,nama_lengkap,email,no_telepon,asal_institusi,status_akademika,created_at,attended,check_in_time,registration_type,group_id,group_name"
         )
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
@@ -125,6 +133,19 @@ export default async function ProfilePage() {
       .maybeSingle<ProfileMechaturaLeader>()
     : { data: null }
 
+  let groupMembers: DownloadRegistrationData[] = []
+  if (latestRegistration?.registration_type === "group" && latestRegistration.group_id) {
+    const { data: membersData } = await adminSupabase
+      .from("seminar_registrations")
+      .select("id,nama_lengkap,email,no_telepon,asal_institusi,status_akademika,registration_type,group_name")
+      .eq("group_id", latestRegistration.group_id)
+      .eq("is_main_contact", false)
+      
+    if (membersData) {
+      groupMembers = membersData as DownloadRegistrationData[]
+    }
+  }
+
   const academicStatus = isAcademicStatus(latestRegistration?.status_akademika)
     ? latestRegistration.status_akademika
     : null
@@ -152,53 +173,7 @@ export default async function ProfilePage() {
         </div>
       </section>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_2fr] items-start">
-
-        {/* LEFT COLUMN: Profile Info */}
-        <div className="space-y-6 lg:sticky lg:top-24">
-          <div className="relative rounded-xl border border-border bg-card p-6">
-            <EditProfileDialog
-              initialDisplayName={user.user_metadata?.display_name || user.email?.split("@")[0] || ""}
-              initialEmail={user.email || ""}
-            />
-            <div className="flex flex-col items-center text-center space-y-4 mb-8">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted border border-border text-2xl font-semibold text-foreground">
-                {initials}
-              </div>
-              <div>
-                <h2 className="font-semibold text-lg text-foreground">Account Details</h2>
-                <p className="text-sm text-muted-foreground mt-1 truncate max-w-[200px]">{user.email}</p>
-              </div>
-            </div>
-
-            <div className="space-y-4 text-sm">
-              <div className="flex items-center gap-3">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <div className="overflow-hidden">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Email</p>
-                  <p className="font-medium truncate mt-0.5">{user.email ?? "-"}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <UserRound className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Display Name</p>
-                  <p className="font-medium mt-0.5">{user.user_metadata?.display_name || user.email?.split("@")[0] || "-"}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Joined</p>
-                  <p className="font-medium mt-0.5">{formatDate(user.created_at)}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN: Registrations */}
-        <div className="space-y-6">
+      <div className="space-y-6 max-w-3xl">
 
           {/* SEMINAR CARD */}
           <div className="rounded-xl border border-border bg-card overflow-hidden">
@@ -215,34 +190,56 @@ export default async function ProfilePage() {
                 </div>
               </div>
               {latestRegistration && (
-                <span className="inline-flex items-center rounded-md border border-border bg-background px-2.5 py-1 text-xs font-semibold text-foreground">
-                  <CheckCircle2 className="w-3 h-3 mr-1.5 text-muted-foreground" /> Active
-                </span>
+                <div className="flex gap-2">
+                  <span className={`inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-semibold ${latestRegistration.attended ? 'border-border bg-background text-foreground' : 'border-border bg-muted text-muted-foreground'}`}>
+                    {latestRegistration.attended ? <CheckCircle2 className="w-3 h-3 mr-1.5 text-green-500" /> : <Clock className="w-3 h-3 mr-1.5 text-muted-foreground" />}
+                    {latestRegistration.attended ? "Checked In" : "Waiting to Check In"}
+                  </span>
+                  <span className="inline-flex items-center rounded-md border border-border bg-background px-2.5 py-1 text-xs font-semibold text-foreground">
+                    <CheckCircle2 className="w-3 h-3 mr-1.5 text-muted-foreground" /> Active
+                  </span>
+                </div>
               )}
             </div>
 
             <div className="p-6">
               {latestRegistration ? (
-                <div className="grid gap-5 text-sm sm:grid-cols-2">
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Participant Name</p>
-                    <p className="font-medium">{latestRegistration.nama_lengkap}</p>
+                <>
+                  <div className="flex flex-col sm:flex-row gap-6">
+                    <div className="grid gap-5 text-sm sm:grid-cols-2 flex-grow">
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Participant Name</p>
+                        <p className="font-medium">{latestRegistration.nama_lengkap}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Institution</p>
+                        <p className="font-medium">{latestRegistration.asal_institusi}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Phone Number</p>
+                        <p className="font-medium">{latestRegistration.no_telepon}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Status / Fee</p>
+                        <p className="font-medium">
+                          {academicStatus ? statusLabels[academicStatus] : "-"} <span className="text-muted-foreground font-normal ml-1">(Free)</span>
+                        </p>
+                      </div>
+                    </div>
+                    {latestRegistration.registration_type !== "group" && (
+                      <div className="flex flex-col items-center justify-center self-start shrink-0 p-4 bg-white rounded-xl border border-border">
+                          <QRCodeSVG value={latestRegistration.id} size={120} />
+                          <p className="text-[10px] text-muted-foreground mt-3 uppercase font-semibold tracking-wider">Ticket QR</p>
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Institution</p>
-                    <p className="font-medium">{latestRegistration.asal_institusi}</p>
+                  <div className="mt-6">
+                    <TicketDownloadButton 
+                        mainContact={latestRegistration as DownloadRegistrationData} 
+                        members={groupMembers} 
+                    />
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Phone Number</p>
-                    <p className="font-medium">{latestRegistration.no_telepon}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Status / Fee</p>
-                    <p className="font-medium">
-                      {academicStatus ? statusLabels[academicStatus] : "-"} <span className="text-muted-foreground font-normal ml-1">(Free)</span>
-                    </p>
-                  </div>
-                </div>
+                </>
               ) : (
                 <div className="flex flex-col items-center justify-center py-6 text-center">
                   <p className="text-sm text-muted-foreground mb-4">You haven't registered for the National Seminar yet.</p>
@@ -352,7 +349,6 @@ export default async function ProfilePage() {
           </div>
 
         </div>
-      </div>
     </main>
   )
 }

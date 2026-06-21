@@ -60,6 +60,14 @@ export default async function SeminarRegistrationDetails({
         }
     }
 
+    const formatCheckInTime = (timeStr: string | null | undefined) => {
+        if (!timeStr) return "Not checked in"
+        return new Intl.DateTimeFormat("en-US", {
+            dateStyle: "medium",
+            timeStyle: "short",
+        }).format(new Date(timeStr))
+    }
+
     return (
         <main className="mx-auto w-full max-w-6xl space-y-10 px-6 py-10 sm:px-8">
             <div className="flex items-center gap-4">
@@ -91,7 +99,13 @@ export default async function SeminarRegistrationDetails({
                         <dt className="text-sm text-muted-foreground">Registered At</dt>
                         <dd className="mt-2 font-medium">{formattedDate}</dd>
                     </div>
-                    <div className="md:col-span-2">
+                    {isGroup && registration.group_name && (
+                        <div>
+                            <dt className="text-sm text-muted-foreground">Group Name</dt>
+                            <dd className="mt-2 font-medium break-words">{registration.group_name}</dd>
+                        </div>
+                    )}
+                    <div className="md:col-span-2 lg:col-span-1">
                         <dt className="text-sm text-muted-foreground">Registration ID</dt>
                         <dd className="mt-2 font-mono text-sm break-all">{registration.id}</dd>
                     </div>
@@ -108,6 +122,7 @@ export default async function SeminarRegistrationDetails({
                     <TableHeader>
                         <TableRow>
                             <TableHead className="h-12 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">#</TableHead>
+                            <TableHead className="h-12 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Check-In</TableHead>
                             <TableHead className="h-12 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Name</TableHead>
                             <TableHead className="h-12 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Role</TableHead>
                             <TableHead className="h-12 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Institution</TableHead>
@@ -119,6 +134,17 @@ export default async function SeminarRegistrationDetails({
                         {/* Main Contact Person */}
                         <TableRow>
                             <TableCell className="px-4 py-3 font-medium text-muted-foreground text-sm">1</TableCell>
+                            <TableCell className="px-4 py-3">
+                                {registration.attended ? (
+                                    <span className="inline-flex rounded-full bg-green-100 text-green-700 px-2.5 py-1 text-xs font-medium">
+                                        {formatCheckInTime(registration.check_in_time)}
+                                    </span>
+                                ) : (
+                                    <span className="inline-flex rounded-full bg-zinc-100 text-zinc-600 px-2.5 py-1 text-xs font-medium">
+                                        Not checked in
+                                    </span>
+                                )}
+                            </TableCell>
                             <TableCell className="px-4 py-3 font-medium text-sm">{registration.nama_lengkap}</TableCell>
                             <TableCell className="px-4 py-3">
                                 <span className="inline-flex rounded-full bg-primary/10 text-primary px-2.5 py-1 text-xs font-medium">
@@ -142,6 +168,17 @@ export default async function SeminarRegistrationDetails({
                         {isGroup && members.map((member, idx) => (
                             <TableRow key={idx}>
                                 <TableCell className="px-4 py-3 font-medium text-muted-foreground text-sm">{idx + 2}</TableCell>
+                                <TableCell className="px-4 py-3">
+                                    {member.attended ? (
+                                        <span className="inline-flex rounded-full bg-green-100 text-green-700 px-2.5 py-1 text-xs font-medium">
+                                            {formatCheckInTime(member.check_in_time)}
+                                        </span>
+                                    ) : (
+                                        <span className="inline-flex rounded-full bg-zinc-100 text-zinc-600 px-2.5 py-1 text-xs font-medium">
+                                            Not checked in
+                                        </span>
+                                    )}
+                                </TableCell>
                                 <TableCell className="px-4 py-3 font-medium text-sm">{member.nama_lengkap}</TableCell>
                                 <TableCell className="px-4 py-3">
                                     <span className="inline-flex rounded-full bg-zinc-100 text-zinc-700 px-2.5 py-1 text-xs font-medium">

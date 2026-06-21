@@ -6,6 +6,7 @@ import { Eye, Mail, MoreHorizontal, Phone, Trash, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import ConfirmDialog from "@/components/confirm-dialog";
 import {
     DropdownMenu,
@@ -28,6 +29,8 @@ export type Participants = {
     created_at?: string;
     is_main_contact?: boolean;
     members?: { nama_lengkap: string; asal_institusi?: string }[];
+    attended?: boolean;
+    check_in_time?: string | null;
 };
 
 const copyActions = [
@@ -145,6 +148,20 @@ export const columns: ColumnDef<Participants>[] = [
         cell: ({ row }) => (
             <div className="text-muted-foreground">{row.index + 1}</div>
         ),
+    },
+    {
+        accessorKey: "attended",
+        header: "Checked In",
+        cell: ({ row }) => (
+            <div className="flex items-center justify-center">
+                <Checkbox 
+                    checked={!!row.original.attended} 
+                    disabled 
+                    aria-label="Attendance status"
+                    className="cursor-default opacity-100 disabled:cursor-default disabled:opacity-100"
+                />
+            </div>
+        )
     },
     {
         accessorKey: "nama_lengkap",
