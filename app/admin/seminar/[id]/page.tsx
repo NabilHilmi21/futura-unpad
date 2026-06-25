@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { ChevronLeft } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { createAdminClient } from "@/lib/supabase-admin"
 import { requireAdminOrRedirect } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
@@ -32,13 +32,53 @@ const seminarDetailColumns = [
     "attended",
     "check_in_time",
 ].join(",")
+const pageSizeOptions = [10, 20, 30, 40] as const
+const defaultPageSize = 10
+
+type DetailSearchParams = Promise<Record<string, string | string[] | undefined>>
+
+const firstParam = (value: string | string[] | undefined) =>
+    Array.isArray(value) ? value[0] : value
+
+const normalizePositiveInt = (value: string | undefined, fallback: number) => {
+    const parsed = Number.parseInt(value ?? "", 10)
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
+}
+
+const normalizePageSize = (value: string | undefined) => {
+    const requestedPageSize = normalizePositiveInt(value, defaultPageSize)
+
+    return pageSizeOptions.includes(requestedPageSize as typeof pageSizeOptions[number])
+        ? requestedPageSize
+        : defaultPageSize
+}
+
+const buildDetailsPageHref = (id: string, page: number, pageSize: number) => {
+    const query = new URLSearchParams()
+
+    if (page > 1) {
+        query.set("page", String(page))
+    }
+
+    if (pageSize !== defaultPageSize) {
+        query.set("pageSize", String(pageSize))
+    }
+
+    const queryString = query.toString()
+    return queryString ? `/admin/seminar/${id}?${queryString}` : `/admin/seminar/${id}`
+}
 
 export default async function SeminarRegistrationDetails({
     params,
+    searchParams,
 }: {
     params: Promise<{ id: string }>
+    searchParams: DetailSearchParams
 }) {
     const { id } = await params
+    const query = await searchParams
+    const requestedPage = normalizePositiveInt(firstParam(query.page), 1)
+    const pageSize = normalizePageSize(firstParam(query.pageSize))
 
     await requireAdminOrRedirect()
 
@@ -63,19 +103,54 @@ export default async function SeminarRegistrationDetails({
         : "Unknown"
 
     let members: Participants[] = []
+    let totalMembers = 0
+    let memberOffset = 0
 
     if (isGroup && registration.group_id) {
-        const { data: memberData } = await adminSupabase
+        const { count, error: countError } = await adminSupabase
+            .from("seminar_registrations")
+            .select("id", { count: "exact", head: true })
+            .eq("group_id", registration.group_id)
+            .eq("is_main_contact", false)
+
+        if (countError) {
+            throw new Error(countError.message)
+        }
+
+        totalMembers = count ?? 0
+    }
+
+    const totalAttendees = isGroup ? totalMembers + 1 : 1
+    const totalPages = Math.max(1, Math.ceil(totalAttendees / pageSize))
+    const page = Math.min(requestedPage, totalPages)
+    const showMainContact = !isGroup || page === 1
+    const memberStartIndex = showMainContact ? 0 : (page - 1) * pageSize - 1
+    const membersToFetch = isGroup
+        ? pageSize - (showMainContact ? 1 : 0)
+        : 0
+    memberOffset = Math.max(0, memberStartIndex)
+
+    if (isGroup && registration.group_id && membersToFetch > 0) {
+        const { data: memberData, error: memberError } = await adminSupabase
             .from("seminar_registrations")
             .select(seminarDetailColumns)
             .eq("group_id", registration.group_id)
             .eq("is_main_contact", false)
             .order("created_at", { ascending: true })
+            .order("nama_lengkap", { ascending: true })
+            .range(memberOffset, memberOffset + membersToFetch - 1)
+
+        if (memberError) {
+            throw new Error(memberError.message)
+        }
 
         if (memberData) {
             members = memberData as unknown as Participants[]
         }
     }
+    const currentPageRows = (showMainContact ? 1 : 0) + members.length
+    const from = totalAttendees === 0 ? 0 : (page - 1) * pageSize + 1
+    const to = Math.min(from + currentPageRows - 1, totalAttendees)
 
     const formatCheckInTime = (timeStr: string | null | undefined) => {
         if (!timeStr) return "Not checked in"
@@ -132,7 +207,7 @@ export default async function SeminarRegistrationDetails({
             <section className="overflow-hidden rounded-xl border border-border bg-card/90">
                 <div className="p-6 border-b border-border bg-card">
                     <h3 className="font-medium text-muted-foreground text-sm uppercase tracking-wider">
-                        Registered Attendees ({isGroup ? members.length + 1 : 1})
+                        Registered Attendees ({totalAttendees})
                     </h3>
                 </div>
                 <Table>
@@ -148,43 +223,45 @@ export default async function SeminarRegistrationDetails({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {/* Main Contact Person */}
-                        <TableRow>
-                            <TableCell className="px-4 py-3 font-medium text-muted-foreground text-sm">1</TableCell>
-                            <TableCell className="px-4 py-3">
-                                {registration.attended ? (
-                                    <span className="inline-flex rounded-full bg-green-100 text-green-700 px-2.5 py-1 text-xs font-medium">
-                                        {formatCheckInTime(registration.check_in_time)}
+                        {showMainContact ? (
+                            <TableRow>
+                                <TableCell className="px-4 py-3 font-medium text-muted-foreground text-sm">1</TableCell>
+                                <TableCell className="px-4 py-3">
+                                    {registration.attended ? (
+                                        <span className="inline-flex rounded-full bg-green-100 text-green-700 px-2.5 py-1 text-xs font-medium">
+                                            {formatCheckInTime(registration.check_in_time)}
+                                        </span>
+                                    ) : (
+                                        <span className="inline-flex rounded-full bg-zinc-100 text-zinc-600 px-2.5 py-1 text-xs font-medium">
+                                            Not checked in
+                                        </span>
+                                    )}
+                                </TableCell>
+                                <TableCell className="px-4 py-3 font-medium text-sm">{registration.nama_lengkap}</TableCell>
+                                <TableCell className="px-4 py-3">
+                                    <span className="inline-flex rounded-full bg-primary/10 text-primary px-2.5 py-1 text-xs font-medium">
+                                        Main Contact
                                     </span>
-                                ) : (
-                                    <span className="inline-flex rounded-full bg-zinc-100 text-zinc-600 px-2.5 py-1 text-xs font-medium">
-                                        Not checked in
-                                    </span>
-                                )}
-                            </TableCell>
-                            <TableCell className="px-4 py-3 font-medium text-sm">{registration.nama_lengkap}</TableCell>
-                            <TableCell className="px-4 py-3">
-                                <span className="inline-flex rounded-full bg-primary/10 text-primary px-2.5 py-1 text-xs font-medium">
-                                    Main Contact
-                                </span>
-                            </TableCell>
-                            <TableCell className="px-4 py-3 text-sm">
-                                <div className="font-medium">{registration.asal_institusi}</div>
-                                <div className="text-muted-foreground text-xs capitalize mt-1">{registration.status_akademika}</div>
-                            </TableCell>
-                            <TableCell className="px-4 py-3 text-muted-foreground text-sm">
-                                <div>{registration.email || "-"}</div>
-                                <div className="mt-1">{registration.no_telepon || "-"}</div>
-                            </TableCell>
-                            <TableCell className="px-4 py-3">
-                                <ParticipantActions participant={registration as Participants} hideViewDetails={true} />
-                            </TableCell>
-                        </TableRow>
+                                </TableCell>
+                                <TableCell className="px-4 py-3 text-sm">
+                                    <div className="font-medium">{registration.asal_institusi}</div>
+                                    <div className="text-muted-foreground text-xs capitalize mt-1">{registration.status_akademika}</div>
+                                </TableCell>
+                                <TableCell className="px-4 py-3 text-muted-foreground text-sm">
+                                    <div>{registration.email || "-"}</div>
+                                    <div className="mt-1">{registration.no_telepon || "-"}</div>
+                                </TableCell>
+                                <TableCell className="px-4 py-3">
+                                    <ParticipantActions participant={registration as Participants} hideViewDetails={true} />
+                                </TableCell>
+                            </TableRow>
+                        ) : null}
 
-                        {/* Additional Members */}
                         {isGroup && members.map((member, idx) => (
-                            <TableRow key={idx}>
-                                <TableCell className="px-4 py-3 font-medium text-muted-foreground text-sm">{idx + 2}</TableCell>
+                            <TableRow key={member.id}>
+                                <TableCell className="px-4 py-3 font-medium text-muted-foreground text-sm">
+                                    {memberOffset + idx + 2}
+                                </TableCell>
                                 <TableCell className="px-4 py-3">
                                     {member.attended ? (
                                         <span className="inline-flex rounded-full bg-green-100 text-green-700 px-2.5 py-1 text-xs font-medium">
@@ -213,6 +290,65 @@ export default async function SeminarRegistrationDetails({
                         ))}
                     </TableBody>
                 </Table>
+                {isGroup ? <div className="flex flex-col gap-4 border-t border-border p-5 sm:flex-row sm:items-center sm:justify-between">
+                    <form action={`/admin/seminar/${registration.id}`} className="flex items-center gap-3">
+                        <label className="text-sm text-muted-foreground" htmlFor="pageSize">
+                            Rows per page
+                        </label>
+                        <select
+                            id="pageSize"
+                            name="pageSize"
+                            defaultValue={String(pageSize)}
+                            className="h-9 rounded-[8px] border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                        >
+                            {pageSizeOptions.map((option) => (
+                                <option key={option} value={option}>
+                                    {option}
+                                </option>
+                            ))}
+                        </select>
+                        <Button className="h-9 rounded-[8px] px-4">
+                            Apply
+                        </Button>
+                    </form>
+
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <p className="text-sm text-muted-foreground">
+                            Showing {from}-{to} of {totalAttendees} attendees
+                        </p>
+                        <div className="flex items-center gap-3">
+                            {page <= 1 ? (
+                                <Button variant="outline" className="h-9 rounded-[8px]" disabled>
+                                    <ChevronLeft className="h-4 w-4" />
+                                    Previous
+                                </Button>
+                            ) : (
+                                <Button variant="outline" className="h-9 rounded-[8px]" asChild>
+                                    <Link href={buildDetailsPageHref(registration.id, page - 1, pageSize)}>
+                                        <ChevronLeft className="h-4 w-4" />
+                                        Previous
+                                    </Link>
+                                </Button>
+                            )}
+                            <span className="min-w-20 text-center text-sm text-muted-foreground">
+                                Page {page} of {totalPages}
+                            </span>
+                            {page >= totalPages ? (
+                                <Button variant="outline" className="h-9 rounded-[8px]" disabled>
+                                    Next
+                                    <ChevronRight className="h-4 w-4" />
+                                </Button>
+                            ) : (
+                                <Button variant="outline" className="h-9 rounded-[8px]" asChild>
+                                    <Link href={buildDetailsPageHref(registration.id, page + 1, pageSize)}>
+                                        Next
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Link>
+                                </Button>
+                            )}
+                        </div>
+                    </div>
+                </div> : null}
             </section>
         </div>
     )
