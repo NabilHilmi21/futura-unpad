@@ -37,11 +37,30 @@ export async function POST(request: Request) {
     }
 
     const adminSupabase = createAdminClient()
-    
-    // First find the registration
+
+    const { data: updatedRegistration, error: updateError } = await adminSupabase
+        .from("seminar_registrations")
+        .update({
+            attended: true,
+            check_in_time: new Date().toISOString()
+        })
+        .eq("id", parsed.data.registration_id)
+        .or("attended.eq.false,attended.is.null")
+        .select("nama_lengkap")
+        .maybeSingle()
+
+    if (updateError) {
+        console.error("Verification update failed", updateError.message)
+        return serverError()
+    }
+
+    if (updatedRegistration) {
+        return NextResponse.json({ ok: true, participant: { nama_lengkap: updatedRegistration.nama_lengkap } })
+    }
+
     const { data: registration, error: fetchError } = await adminSupabase
         .from("seminar_registrations")
-        .select("id, nama_lengkap, attended")
+        .select("attended")
         .eq("id", parsed.data.registration_id)
         .maybeSingle()
 
@@ -53,19 +72,5 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Participant already checked in" }, { status: 409 })
     }
 
-    // Update attendance
-    const { error: updateError } = await adminSupabase
-        .from("seminar_registrations")
-        .update({ 
-            attended: true, 
-            check_in_time: new Date().toISOString() 
-        })
-        .eq("id", registration.id)
-
-    if (updateError) {
-        console.error("Verification update failed", updateError.message)
-        return serverError()
-    }
-
-    return NextResponse.json({ ok: true, participant: { nama_lengkap: registration.nama_lengkap } })
+    return serverError()
 }

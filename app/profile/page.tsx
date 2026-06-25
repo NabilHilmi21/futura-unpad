@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import { CalendarDays, Mail, ShieldCheck, Ticket, UserRound, Bot, BookOpen, CheckCircle2, Clock, ChevronRight } from "lucide-react"
+import { Ticket, Bot, BookOpen, CheckCircle2, Clock, ChevronRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -14,9 +14,8 @@ import {
 } from "@/lib/payment"
 import { createAdminClient } from "@/lib/supabase-admin"
 import { createClient } from "@/utils/supabase/server"
-import { EditProfileDialog } from "@/components/edit-profile-dialog"
 import { QRCodeSVG } from "qrcode.react"
-import { TicketDownloadButton, DownloadRegistrationData } from "./ticket-download-button"
+import { TicketDownloadButton, type DownloadRegistrationData } from "./ticket-download-button"
 
 type ProfileRegistration = {
   id: string
@@ -50,20 +49,6 @@ type ProfileMechaturaLeader = {
   email: string | null
   phone: string | null
 }
-const getInitials = (displayName: string | null | undefined, email: string | null | undefined) => {
-  const nameToUse = displayName || email?.split("@")[0] || "U"
-  const parts = nameToUse
-    .replace(/[._-]+/g, " ")
-    .split(" ")
-    .filter(Boolean)
-
-  if (parts.length === 0) return "U"
-
-  return parts
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("")
-}
 
 const formatDate = (value?: string | null) => {
   if (!value) {
@@ -76,6 +61,9 @@ const formatDate = (value?: string | null) => {
   }).format(new Date(value))
 }
 
+const isProfileGroupRegistration = (registration: ProfileRegistration | null | undefined) =>
+  registration?.registration_type === "group" || registration?.registration_type === "grup"
+
 export default async function ProfilePage() {
   const supabase = await createClient()
   const {
@@ -86,26 +74,19 @@ export default async function ProfilePage() {
     redirect("/login?next=/profile")
   }
 
-  const initials = getInitials(user.user_metadata?.display_name, user.email)
-
   const adminSupabase = createAdminClient()
   const [
-    { data: adminUser },
     { data: latestRegistration, error },
     { data: latestMechaturaRegistration, error: mechaturaError },
   ] =
     await Promise.all([
-      supabase
-        .from("admin_users")
-        .select("user_id")
-        .eq("user_id", user.id)
-        .maybeSingle(),
       adminSupabase
         .from("seminar_registrations")
         .select(
           "id,nama_lengkap,email,no_telepon,asal_institusi,status_akademika,created_at,attended,check_in_time,registration_type,group_id,group_name"
         )
         .eq("user_id", user.id)
+        .eq("is_main_contact", true)
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle<ProfileRegistration>(),
@@ -124,30 +105,35 @@ export default async function ProfilePage() {
     throw new Error(error?.message ?? mechaturaError?.message)
   }
 
-  const { data: mechaturaLeader } = latestMechaturaRegistration
-    ? await adminSupabase
+  const mechaturaLeaderPromise = latestMechaturaRegistration
+    ? adminSupabase
       .from("mechatura_members")
       .select("full_name,email,phone")
       .eq("registration_id", latestMechaturaRegistration.id)
       .eq("is_leader", true)
       .maybeSingle<ProfileMechaturaLeader>()
-    : { data: null }
+    : Promise.resolve({ data: null, error: null })
 
-  let groupMembers: DownloadRegistrationData[] = []
-  if (latestRegistration?.registration_type === "group" && latestRegistration.group_id) {
-    const { data: membersData } = await adminSupabase
+  const groupMembersPromise = isProfileGroupRegistration(latestRegistration) && latestRegistration?.group_id
+    ? adminSupabase
       .from("seminar_registrations")
       .select("id,nama_lengkap,email,no_telepon,asal_institusi,status_akademika,registration_type,group_name,attended")
       .eq("group_id", latestRegistration.group_id)
       .eq("is_main_contact", false)
       .order("created_at", { ascending: true })
       .order("nama_lengkap", { ascending: true })
-      
-    if (membersData) {
-      groupMembers = membersData as DownloadRegistrationData[]
-    }
+    : Promise.resolve({ data: [], error: null })
+
+  const [
+    { data: mechaturaLeader, error: mechaturaLeaderError },
+    { data: membersData, error: membersError },
+  ] = await Promise.all([mechaturaLeaderPromise, groupMembersPromise])
+
+  if (mechaturaLeaderError || membersError) {
+    throw new Error(mechaturaLeaderError?.message ?? membersError?.message)
   }
 
+  const groupMembers = (membersData ?? []) as DownloadRegistrationData[]
   const totalParticipants = latestRegistration ? 1 + groupMembers.length : 0
   const checkedInCount = latestRegistration ? (latestRegistration.attended ? 1 : 0) + groupMembers.filter(m => m.attended).length : 0
 
@@ -247,7 +233,7 @@ export default async function ProfilePage() {
                 </>
               ) : (
                 <div className="flex flex-col items-center justify-center py-6 text-center">
-                  <p className="text-sm text-muted-foreground mb-4">You haven't registered for the National Seminar yet.</p>
+                  <p className="text-sm text-muted-foreground mb-4">You have not registered for the National Seminar yet.</p>
                   <Button asChild className="h-10 rounded-xl">
                     <Link href="/registration/seminar">Register for Seminar</Link>
                   </Button>
@@ -318,7 +304,7 @@ export default async function ProfilePage() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-6 text-center">
-                  <p className="text-sm text-muted-foreground mb-4">You haven't formed a team for the Mechatura Robotics Competition yet.</p>
+                  <p className="text-sm text-muted-foreground mb-4">You have not formed a team for the Mechatura Robotics Competition yet.</p>
                   <Button asChild className="h-10 rounded-xl">
                     <Link href="/registration/mechatura">Register Team</Link>
                   </Button>

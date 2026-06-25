@@ -4,7 +4,7 @@ import { DataTable } from "./data-table"
 import { columns } from "./participants"
 import type { Participants } from "./participants"
 import { Button } from "@/components/ui/button"
-import { Download, Scan, Search, X } from "lucide-react"
+import { ChevronLeft, ChevronRight, Download, Scan, Search, X } from "lucide-react"
 import Link from "next/link"
 import {
     Select,
@@ -35,12 +35,17 @@ const attendanceOptions = [
     { value: "partial", label: "Partially checked in" },
 ]
 
+const pageSizeOptions = [10, 20, 30, 40]
+const defaultPageSize = 10
+
 export default function SeminarListClient({
     initialData,
     searchParam,
     categoryFilter,
     typeFilter,
     attendanceFilter,
+    pageSize,
+    pagination,
     stats,
 }: {
     initialData: Participants[]
@@ -48,6 +53,15 @@ export default function SeminarListClient({
     categoryFilter?: string
     typeFilter?: string
     attendanceFilter?: string
+    pageSize: number
+    pagination: {
+        page: number
+        pageSize: number
+        totalItems: number
+        totalPages: number
+        startItem: number
+        endItem: number
+    }
     stats: {
         totalRegistrations: number
         totalAttendees: number
@@ -65,7 +79,7 @@ export default function SeminarListClient({
 
     const metrics = [
         {
-            label: "Shown",
+            label: "On page",
             value: participants.length,
         },
         {
@@ -81,6 +95,19 @@ export default function SeminarListClient({
             value: stats.groupRegistrations,
         },
     ]
+    const buildPageHref = (page: number, nextPageSize = pageSize) => {
+        const query = new URLSearchParams()
+
+        if (searchParam?.trim()) query.set("search", searchParam.trim())
+        if ((categoryFilter ?? "all") !== "all") query.set("category", categoryFilter!)
+        if ((typeFilter ?? "all") !== "all") query.set("type", typeFilter!)
+        if ((attendanceFilter ?? "all") !== "all") query.set("attendance", attendanceFilter!)
+        if (page > 1) query.set("page", String(page))
+        if (nextPageSize !== defaultPageSize) query.set("pageSize", String(nextPageSize))
+
+        const queryString = query.toString()
+        return queryString ? `/admin/seminar?${queryString}` : "/admin/seminar"
+    }
 
     return (
         <div className="mx-auto w-full max-w-7xl space-y-8">
@@ -137,7 +164,7 @@ export default function SeminarListClient({
                         </div>
                     </label>
 
-                    <div className="grid gap-4 sm:grid-cols-3 xl:w-[600px]">
+                    <div className="grid gap-4 sm:grid-cols-2 xl:w-[760px] xl:grid-cols-4">
                         <div>
                             <Select name="category" defaultValue={categoryFilter ?? "all"}>
                                 <SelectTrigger className="h-12 w-full rounded-[8px] px-4">
@@ -182,6 +209,21 @@ export default function SeminarListClient({
                                 </SelectContent>
                             </Select>
                         </div>
+
+                        <div>
+                            <Select name="pageSize" defaultValue={String(pageSize)}>
+                                <SelectTrigger className="h-12 w-full rounded-[8px] px-4">
+                                    <SelectValue placeholder="Rows per page" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {pageSizeOptions.map((option) => (
+                                        <SelectItem key={option} value={String(option)}>
+                                            {option} per page
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
 
                     <div className="flex flex-col gap-3 sm:flex-row xl:shrink-0">
@@ -201,6 +243,45 @@ export default function SeminarListClient({
             </form>
 
             <DataTable columns={columns} data={participants} />
+
+            <div className="flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-muted-foreground">
+                    Showing {pagination.startItem}-{pagination.endItem} of {pagination.totalItems} registrations
+                </p>
+                <div className="flex items-center gap-3">
+                    {pagination.page <= 1 ? (
+                        <Button variant="outline" className="h-9 rounded-[8px]" disabled>
+                            <ChevronLeft className="h-4 w-4" />
+                            Previous
+                        </Button>
+                    ) : (
+                        <Button variant="outline" className="h-9 rounded-[8px]" asChild>
+                            <Link href={buildPageHref(pagination.page - 1)}>
+                                <ChevronLeft className="h-4 w-4" />
+                                Previous
+                            </Link>
+                        </Button>
+                    )}
+
+                    <span className="min-w-20 text-center text-sm text-muted-foreground">
+                        Page {pagination.page} of {pagination.totalPages}
+                    </span>
+
+                    {pagination.page >= pagination.totalPages ? (
+                        <Button variant="outline" className="h-9 rounded-[8px]" disabled>
+                            Next
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    ) : (
+                        <Button variant="outline" className="h-9 rounded-[8px]" asChild>
+                            <Link href={buildPageHref(pagination.page + 1)}>
+                                Next
+                                <ChevronRight className="h-4 w-4" />
+                            </Link>
+                        </Button>
+                    )}
+                </div>
+            </div>
         </div>
     )
 }

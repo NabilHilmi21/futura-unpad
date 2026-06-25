@@ -17,6 +17,22 @@ import { ParticipantActions, type Participants } from "../participants"
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
 
+const seminarDetailColumns = [
+    "id",
+    "nama_lengkap",
+    "email",
+    "no_telepon",
+    "asal_institusi",
+    "status_akademika",
+    "registration_type",
+    "group_name",
+    "group_id",
+    "created_at",
+    "is_main_contact",
+    "attended",
+    "check_in_time",
+].join(",")
+
 export default async function SeminarRegistrationDetails({
     params,
 }: {
@@ -27,16 +43,17 @@ export default async function SeminarRegistrationDetails({
     await requireAdminOrRedirect()
 
     const adminSupabase = createAdminClient()
-    const { data: registration, error } = await adminSupabase
+    const { data: registrationData, error } = await adminSupabase
         .from("seminar_registrations")
-        .select("*")
+        .select(seminarDetailColumns)
         .eq("id", id)
         .single()
 
-    if (error || !registration) {
+    if (error || !registrationData) {
         notFound()
     }
 
+    const registration = registrationData as unknown as Participants
     const isGroup = registration.registration_type === "group" || registration.registration_type === "grup"
     const formattedDate = registration.created_at
         ? new Intl.DateTimeFormat("en-US", {
@@ -50,13 +67,13 @@ export default async function SeminarRegistrationDetails({
     if (isGroup && registration.group_id) {
         const { data: memberData } = await adminSupabase
             .from("seminar_registrations")
-            .select("*")
+            .select(seminarDetailColumns)
             .eq("group_id", registration.group_id)
             .eq("is_main_contact", false)
             .order("created_at", { ascending: true })
 
         if (memberData) {
-            members = memberData as Participants[]
+            members = memberData as unknown as Participants[]
         }
     }
 

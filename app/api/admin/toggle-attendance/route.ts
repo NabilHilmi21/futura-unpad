@@ -31,41 +31,56 @@ export async function POST(request: Request) {
     const { registration_id, attended, bulk } = parsed.data
 
     try {
-        // First fetch the registration to check if it's a main contact
+        const checkInTime = attended ? new Date().toISOString() : null
+        const attendancePatch = {
+            attended,
+            check_in_time: checkInTime,
+        }
+
+        const updateSingleRegistration = async () => {
+            const { data: updatedRegistration, error: updateError } = await adminSupabase
+                .from("seminar_registrations")
+                .update(attendancePatch)
+                .eq("id", registration_id)
+                .select("id")
+                .maybeSingle()
+
+            if (updateError) {
+                throw updateError
+            }
+
+            return updatedRegistration
+        }
+
+        if (!bulk) {
+            const updatedRegistration = await updateSingleRegistration()
+
+            if (!updatedRegistration) {
+                return NextResponse.json({ error: "Registration not found" }, { status: 404 })
+            }
+
+            return NextResponse.json({ ok: true })
+        }
+
         const { data: registration, error: fetchError } = await adminSupabase
             .from("seminar_registrations")
             .select("id, is_main_contact, group_id")
             .eq("id", registration_id)
             .maybeSingle()
-            
+
         if (fetchError || !registration) {
             return NextResponse.json({ error: "Registration not found" }, { status: 404 })
         }
 
-        const checkInTime = attended ? new Date().toISOString() : null
-
-        // If it's a main contact for a group AND bulk is true, update everyone in the group
-        if (registration.is_main_contact && registration.group_id && bulk) {
+        if (registration.is_main_contact && registration.group_id) {
             const { error: updateError } = await adminSupabase
                 .from("seminar_registrations")
-                .update({ 
-                    attended: attended, 
-                    check_in_time: checkInTime 
-                })
+                .update(attendancePatch)
                 .eq("group_id", registration.group_id)
                 
             if (updateError) throw updateError
         } else {
-            // Otherwise just update the specific individual
-            const { error: updateError } = await adminSupabase
-                .from("seminar_registrations")
-                .update({ 
-                    attended: attended, 
-                    check_in_time: checkInTime 
-                })
-                .eq("id", registration.id)
-                
-            if (updateError) throw updateError
+            await updateSingleRegistration()
         }
 
         return NextResponse.json({ ok: true })
