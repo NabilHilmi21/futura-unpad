@@ -2,7 +2,6 @@ export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
 
 import { createAdminClient } from "@/lib/supabase-admin"
-import { requireAdminOrRedirect } from "@/lib/auth"
 import {
     isMechaturaCompetitionType,
     isPaymentStatus,
@@ -180,8 +179,6 @@ export default async function MechaturaAdminPage({
     const pageSize = normalizePageSize(pageSizeParam)
     const requestedFrom = (requestedPage - 1) * pageSize
     const requestedTo = requestedFrom + pageSize - 1
-
-    await requireAdminOrRedirect()
 
     const adminSupabase = createAdminClient()
     const paymentStatuses: PaymentStatus[] = [

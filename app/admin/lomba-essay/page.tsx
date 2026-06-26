@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
 
-import { requireAdminOrRedirect } from "@/lib/auth"
 import { AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -26,8 +25,6 @@ export default async function LKTIAdminPage({
     const searchParam = Array.isArray(params.search)
         ? params.search[0]
         : params.search
-
-    await requireAdminOrRedirect()
 
     return (
         <div className="mx-auto w-full max-w-6xl space-y-8">

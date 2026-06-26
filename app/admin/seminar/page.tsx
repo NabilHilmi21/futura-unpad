@@ -2,7 +2,6 @@ export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
 
 import { createAdminClient } from "@/lib/supabase-admin"
-import { requireAdminOrRedirect } from "@/lib/auth"
 import SeminarListClient from "./seminar-list-client"
 import type { Participants } from "./participants"
 
@@ -142,8 +141,6 @@ export default async function SeminarList({
     const pageSize = pageSizeOptions.includes(requestedPageSize as typeof pageSizeOptions[number])
         ? requestedPageSize
         : defaultPageSize
-
-    await requireAdminOrRedirect()
 
     const adminSupabase = createAdminClient()
     const searchPattern = toSearchPattern(searchFilter)

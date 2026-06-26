@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import Navbar from "@/components/layout/navbar";
 import NavigationLoading from "@/components/navigation-loading";
 import { AuthProvider, type AuthUser } from "@/components/auth-provider";
-import { createClient } from "@/utils/supabase/server";
+import { getCachedAuth } from "@/lib/auth";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -35,24 +35,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user, isAdmin } = await getCachedAuth();
   const initialUser: AuthUser | null = user
     ? { id: user.id, email: user.email ?? null, user_metadata: user.user_metadata }
     : null;
-  let initialIsAdmin = false;
-
-  if (initialUser) {
-    const { data } = await supabase
-      .from("admin_users")
-      .select("user_id")
-      .eq("user_id", initialUser.id)
-      .maybeSingle();
-
-    initialIsAdmin = !!data;
-  }
 
   return (
     <html
@@ -67,7 +53,7 @@ export default async function RootLayout({
       )}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <AuthProvider initialUser={initialUser} initialIsAdmin={initialIsAdmin}>
+        <AuthProvider initialUser={initialUser} initialIsAdmin={isAdmin}>
           <Suspense fallback={null}>
             <NavigationLoading />
           </Suspense>

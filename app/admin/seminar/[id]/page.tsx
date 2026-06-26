@@ -2,7 +2,6 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { createAdminClient } from "@/lib/supabase-admin"
-import { requireAdminOrRedirect } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import {
     Table,
@@ -79,8 +78,6 @@ export default async function SeminarRegistrationDetails({
     const query = await searchParams
     const requestedPage = normalizePositiveInt(firstParam(query.page), 1)
     const pageSize = normalizePageSize(firstParam(query.pageSize))
-
-    await requireAdminOrRedirect()
 
     const adminSupabase = createAdminClient()
     const { data: registrationData, error } = await adminSupabase
