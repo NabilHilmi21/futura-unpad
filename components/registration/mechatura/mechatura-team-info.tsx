@@ -3,7 +3,7 @@ import type { MechaturaFormValues } from "@/lib/validation/mechatura";
 
 export default function MechaturaTeamInfo() {
   return (
-    <section className="space-y-4" aria-labelledby="team-section-label">
+    <section className="space-y-4 border rounded-2xl p-4" aria-labelledby="team-section-label">
       <div>
         <h2 id="team-section-label" className="text-base font-semibold">
           Identitas Tim
@@ -15,8 +15,8 @@ export default function MechaturaTeamInfo() {
 
       <FormTextField<MechaturaFormValues>
         name="team_name"
-        label="Nama Grup/Tim"
-        placeholder="Masukkan nama grup atau komunitas Anda"
+        label="Nama Tim"
+        placeholder="Masukkan nama tim anda"
         required
       />
 
@@ -24,7 +24,7 @@ export default function MechaturaTeamInfo() {
         <FormTextField<MechaturaFormValues>
           name="institution"
           label="Asal Institusi"
-          placeholder="Nama sekolah, kampus, instansi, atau komunitas"
+          placeholder="Nama sekolah, kampus atau instansi"
           autoComplete="organization"
           required
         />

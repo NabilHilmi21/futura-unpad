@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldGroup } from "@/components/ui/field";
 
 import MechaturaTeamInfo from "./mechatura-team-info";
+import MechaturaCoachInfo from "./mechatura-coach-info";
+import MechaturaMemberInfo from "./mechatura-member-info";
 
 type MechaturaIdentityStepProps = {
   isSubmitting: boolean;
@@ -21,6 +23,8 @@ export default function MechaturaIdentityStep({
       <FieldGroup className="gap-6">
 
         <MechaturaTeamInfo />
+        <MechaturaCoachInfo />
+        <MechaturaMemberInfo />
 
         <Field className="grid gap-3 sm:grid-cols-2">
           <Button

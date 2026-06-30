@@ -10,12 +10,15 @@ import {
 
 import { useAuth } from "@/components/auth-provider";
 import StepProgress from "@/components/registration/step-progress";
+import { useFormDraft } from "@/hooks/use-form-draft";
 import { useRegistrationStep } from "@/hooks/use-registration-step";
 import EssayDetailsStep from "../../../components/registration/lomba-essay/essay-details-step";
 import EssayPaymentStep from "../../../components/registration/lomba-essay/essay-payment-step";
 import EssayVerificationStep from "../../../components/registration/lomba-essay/essay-verification-step";
 import { ESSAY_VERIFICATION_FIELDS } from "../../../lib/essay/essay-verification-fields";
 import { essaySubThemeOptions } from "../../../lib/essay/essay-options";
+
+const ESSAY_DRAFT_STORAGE_KEY = "futura:registration:lomba-essay:draft";
 
 export default function EssayRegistrationForm() {
   const { user } = useAuth();
@@ -43,6 +46,10 @@ export default function EssayRegistrationForm() {
       sub_theme: "teknologi",
       identity_confirmed: false,
     },
+  });
+  useFormDraft({
+    form,
+    storageKey: ESSAY_DRAFT_STORAGE_KEY,
   });
   const { handleSubmit, setValue, trigger } = form;
 
@@ -86,7 +93,7 @@ export default function EssayRegistrationForm() {
     setIsSubmitting(true);
     setSubmitError("");
 
-    // Simulate API call - replace with real API when backend is ready
+    // simluasi api call
     setTimeout(() => {
       setRegistrationId(
         `ESSAY-${Math.random().toString(36).substring(2, 9).toUpperCase()}`
@@ -101,7 +108,7 @@ export default function EssayRegistrationForm() {
     setTimeout(() => {
       setIsSubmitting(false);
       alert(
-        "Simulated: Redirecting to Xendit Payment Gateway...\n(Backend integration is currently disabled for testing)"
+        "Simulated: Redirecting to payment gateway...\n(Backend integration is currently disabled for testing)"
       );
     }, 1000);
   };

@@ -94,38 +94,8 @@ export const paymentStatusLabels: Record<PaymentStatus, string> = {
   settled: "Settled",
 };
 
-export const normalizeXenditInvoiceStatus = (
-  status: unknown
-): PaymentStatus => {
-  if (typeof status !== "string") {
-    return "pending";
-  }
-
-  switch (status.toUpperCase()) {
-    case "PENDING":
-      return "pending";
-    case "PAID":
-      return "paid";
-    case "SETTLED":
-      return "settled";
-    case "EXPIRED":
-      return "expired";
-    case "FAILED":
-      return "failed";
-    case "CANCELLED":
-    case "CANCELED":
-    case "VOIDED":
-      return "cancelled";
-    default:
-      return "pending";
-  }
-};
-
 export const isPaymentStatus = (value: unknown): value is PaymentStatus =>
   typeof value === "string" && value in paymentStatusLabels;
-
-export const getXenditPaidAt = (invoice: { paid_at?: unknown }) =>
-  typeof invoice.paid_at === "string" ? invoice.paid_at : new Date().toISOString();
 
 export const createRegistrationToken = () => {
   const randomValue =

@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/components/auth-provider";
 import StepProgress from "@/components/registration/step-progress";
+import { useFormDraft } from "@/hooks/use-form-draft";
 import {
   clientSeminarFormSchema,
   type ClientSeminarFormValues,
@@ -31,6 +32,8 @@ import SeminarDetailsStep from "../../../components/registration/seminar/seminar
 import SeminarRegistrationOptionStep from "../../../components/registration/seminar/seminar-registration-option-step";
 import SeminarTicketStep from "../../../components/registration/seminar/seminar-ticket-step";
 import SeminarVerificationStep from "../../../components/registration/seminar/seminar-verification-step";
+
+const SEMINAR_DRAFT_STORAGE_KEY = "futura:registration:seminar:draft";
 
 export default function SeminarRegistrationForm() {
   const router = useRouter();
@@ -60,7 +63,11 @@ export default function SeminarRegistrationForm() {
       members: [],
     },
   });
-  const { handleSubmit, setValue, trigger } = form;
+  useFormDraft({
+    form,
+    storageKey: SEMINAR_DRAFT_STORAGE_KEY,
+  });
+  const { getValues, handleSubmit, setValue, trigger } = form;
 
   const statusAkademika = useWatch({
     control: form.control,
@@ -79,9 +86,12 @@ export default function SeminarRegistrationForm() {
   useEffect(() => {
     if (!user?.email || hasPrefilled.current) return;
 
-    setValue("email", user.email, { shouldValidate: false });
+    if (!getValues("email")) {
+      setValue("email", user.email, { shouldValidate: false });
+    }
+
     hasPrefilled.current = true;
-  }, [user?.email, setValue]);
+  }, [getValues, user?.email, setValue]);
 
   const goToDetails = async (e?: React.BaseSyntheticEvent) => {
     e?.preventDefault();
