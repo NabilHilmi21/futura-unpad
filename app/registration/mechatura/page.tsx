@@ -1,6 +1,42 @@
-import MechaturaRegistrationForm from "./form"
+import { redirect } from "next/navigation";
 
-export default function MechaturaPage() {
+import {
+    deleteMechaturaRegistration,
+    findLatestMechaturaRegistrationForUser,
+    getMechaturaRegistrationStepHref,
+    isMechaturaPaymentExpired,
+} from "@/lib/mechatura/registration";
+import { createAdminClient } from "@/lib/supabase-admin";
+import { createClient } from "@/utils/supabase/server";
+import ExpiredRegistrationDialog from "./expired-registration-dialog";
+import MechaturaRegistrationForm from "./form";
+
+export default async function MechaturaPage() {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+        redirect("/login?next=/registration/mechatura");
+    }
+
+    const adminSupabase = createAdminClient();
+    const latestRegistration = await findLatestMechaturaRegistrationForUser(
+        adminSupabase,
+        user.id
+    );
+    const expiredTeamName =
+        latestRegistration && isMechaturaPaymentExpired(latestRegistration)
+            ? latestRegistration.teamName
+            : null;
+
+    if (latestRegistration && expiredTeamName) {
+        await deleteMechaturaRegistration(adminSupabase, latestRegistration.id);
+    } else if (latestRegistration) {
+        redirect(getMechaturaRegistrationStepHref(latestRegistration));
+    }
+
     return (
         <main className="mx-auto w-full max-w-3xl items-start space-y-12 px-6 py-16 sm:px-8">
             <section>
@@ -9,15 +45,18 @@ export default function MechaturaPage() {
                         Formulir Lomba Mechatura
                     </h1>
                     <p className="max-w-lg text-sm leading-6 text-muted-foreground">
-                        Reserve your seminar seat, verify the certificate
-                        identity details, then download your participant ticket.
+                        Register your team, upload the required documents,
+                        verify the details, then continue to payment.
                     </p>
                 </div>
             </section>
 
             <section>
+                {expiredTeamName ? (
+                    <ExpiredRegistrationDialog teamName={expiredTeamName} />
+                ) : null}
                 <MechaturaRegistrationForm />
             </section>
         </main>
-    )
+    );
 }

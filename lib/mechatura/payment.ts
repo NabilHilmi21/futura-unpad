@@ -27,6 +27,7 @@ type MechaturaRegistrationPaymentRow = {
   payment_amount: number | null;
   midtrans_order_id: string;
   user_id: string | null;
+  created_at: string | null;
   paid_at?: string | null;
 };
 
@@ -46,6 +47,7 @@ export type MechaturaPaymentOrder = {
   paymentAmount: number;
   paymentOrderId: string;
   userId: string | null;
+  createdAt: string | null;
   paidAt: string | null;
   leader: {
     name: string;
@@ -55,7 +57,7 @@ export type MechaturaPaymentOrder = {
 };
 
 export const mechaturaPaymentOrderSelect =
-  "id,team_name,institution,competition_type,robot_name,payment_status,payment_amount,midtrans_order_id,user_id,paid_at";
+  "id,team_name,institution,competition_type,robot_name,payment_status,payment_amount,midtrans_order_id,user_id,created_at,paid_at";
 
 export async function findMechaturaPaymentOrder(
   supabase: SupabaseAdminClient,
@@ -103,6 +105,7 @@ export async function findMechaturaPaymentOrder(
     paymentAmount: registration.payment_amount ?? mechaturaPaymentAmount,
     paymentOrderId: registration.midtrans_order_id,
     userId: registration.user_id,
+    createdAt: registration.created_at,
     paidAt: registration.paid_at ?? null,
     leader: {
       name: leader.full_name,

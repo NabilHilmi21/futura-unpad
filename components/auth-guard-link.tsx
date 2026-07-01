@@ -5,8 +5,6 @@ import { useAuth } from "@/components/auth-provider"
 import { useState } from "react"
 import {
     AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
     AlertDialogFooter,
@@ -56,7 +54,7 @@ export function AuthGuardLink({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Sign in Required</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Please log in or create a new account to continue to the Lomba Essay registration form.
+                            Please log in or create a new account to continue to this registration form.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="flex flex-col sm:flex-row gap-2 sm:justify-end mt-4">

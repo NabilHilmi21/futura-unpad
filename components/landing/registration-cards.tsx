@@ -17,6 +17,11 @@ type Program = {
   featured?: boolean
 }
 
+const authRequiredRegistrationHrefs = new Set([
+  "/registration/mechatura",
+  "/registration/lomba-kti",
+])
+
 const programs: Program[] = [
   {
     image: "/teacher.gif",
@@ -104,7 +109,7 @@ export function RegistrationCards() {
               <div>
                 <AuthGuardLink
                   href={program.href}
-                  requireAuth={program.href === "/registration/lomba-kti"}
+                  requireAuth={authRequiredRegistrationHrefs.has(program.href)}
                   className={cn(
                     "mt-8 flex w-full items-center justify-center gap-2 rounded-lg px-6 py-4 text-sm font-semibold transition-all",
                     program.featured

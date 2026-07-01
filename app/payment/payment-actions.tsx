@@ -24,6 +24,11 @@ export default function PaymentActions({ orderId }: PaymentActionsProps) {
     });
     const data = await response.json().catch(() => null);
 
+    if (data?.redirect_url) {
+      window.location.assign(data.redirect_url);
+      return;
+    }
+
     if (!response.ok || !data?.redirect_url) {
       setErrorMessage(data?.error ?? "Unable to start payment. Please try again.");
       setIsLoading(false);

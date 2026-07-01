@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { AuthGuardLink } from "@/components/auth-guard-link"
 
 type RegistrationProgram = {
@@ -11,6 +10,11 @@ type RegistrationProgram = {
     href?: string
     guidebook?: boolean
 }
+
+const authRequiredRegistrationHrefs = new Set([
+    "/registration/mechatura",
+    "/registration/lomba-kti",
+])
 
 const programs: RegistrationProgram[] = [
     {
@@ -91,7 +95,7 @@ export default function RegistrationPage() {
                                     {program.href ? (
                                         <AuthGuardLink
                                             href={program.href}
-                                            requireAuth={program.href === "/registration/lomba-kti"}
+                                            requireAuth={authRequiredRegistrationHrefs.has(program.href)}
                                             className="text-sm font-medium rounded-lg bg-black px-4 py-2 text-white"
                                         >
                                             Continue to form

@@ -8,7 +8,6 @@ import type { FieldPath } from "react-hook-form";
 import { FormProvider, useForm } from "react-hook-form";
 
 import MechaturaIdentityStep from "@/components/registration/mechatura/mechatura-identity-step";
-import StepPlaceholder from "@/components/registration/step-placeholder";
 import StepProgress from "@/components/registration/step-progress";
 import { clearFormDraft, useFormDraft } from "@/hooks/use-form-draft";
 import { useRegistrationStep } from "@/hooks/use-registration-step";
@@ -50,7 +49,6 @@ export default function MechaturaRegistrationForm() {
   const { step, setStep, steps } = useRegistrationStep("mechatura");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const currentStepLabel = steps.find((item) => item.id === step)?.label ?? "Next";
   const form = useForm<MechaturaFormValues>({
     resolver: zodResolver(mechaturaSchema),
     mode: "onChange",
@@ -171,6 +169,17 @@ export default function MechaturaRegistrationForm() {
     });
     const data = await response.json().catch(() => null);
 
+    if (data?.payment_url) {
+      clearFormDraft(MECHATURA_DRAFT_STORAGE_KEY);
+      router.push(data.payment_url);
+      return;
+    }
+
+    if (response.status === 401) {
+      router.push("/login?next=/registration/mechatura");
+      return;
+    }
+
     if (!response.ok || !data?.payment_url) {
       setSubmitError(
         data?.error ?? "Registration failed. Please check your data and try again."
@@ -178,10 +187,6 @@ export default function MechaturaRegistrationForm() {
       setIsSubmitting(false);
       return;
     }
-
-    clearFormDraft(MECHATURA_DRAFT_STORAGE_KEY);
-    setStep("payment");
-    router.push(data.payment_url);
   };
 
   return (
@@ -220,14 +225,6 @@ export default function MechaturaRegistrationForm() {
             onBack={() => setStep("lampiran")}
             onSubmit={submitVerification}
             submitError={submitError}
-          />
-        ) : null}
-
-        {step === "payment" ? (
-          <StepPlaceholder
-            title={currentStepLabel}
-            description="This Mechatura registration step is not available yet."
-            onBack={() => setStep("verifikasi")}
           />
         ) : null}
       </section>

@@ -29,10 +29,8 @@ const timeBlocks: { key: keyof ReturnType<typeof calculateTimeLeft>; label: stri
 
 export function CountdownPrizeSection() {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft)
-  const [hasMounted, setHasMounted] = useState(false)
 
   useEffect(() => {
-    setHasMounted(true)
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft())
     }, 1000)
@@ -54,10 +52,11 @@ export function CountdownPrizeSection() {
             <div key={block.key} className="flex items-center gap-3 sm:gap-5">
               <div className="flex flex-col items-center">
                 <div className="flex h-20 w-20 sm:h-28 sm:w-28 lg:h-32 lg:w-32 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-xl shadow-slate-950/20 transition-transform duration-300 hover:scale-105">
-                  <span className="text-3xl sm:text-5xl lg:text-6xl font-bold tabular-nums tracking-tight">
-                    {hasMounted
-                      ? String(timeLeft[block.key]).padStart(2, "0")
-                      : "--"}
+                  <span
+                    className="text-3xl sm:text-5xl lg:text-6xl font-bold tabular-nums tracking-tight"
+                    suppressHydrationWarning
+                  >
+                    {String(timeLeft[block.key]).padStart(2, "0")}
                   </span>
                 </div>
                 <span className="mt-3 text-xs sm:text-sm font-semibold uppercase tracking-widest text-slate-500">

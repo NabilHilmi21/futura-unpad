@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 
-import { invalidRequest, rateLimited, serverError } from "@/lib/http";
+import { invalidRequest, jsonError, rateLimited, serverError } from "@/lib/http";
+import {
+  deleteMechaturaRegistration,
+  findLatestMechaturaRegistrationForUser,
+  getMechaturaRegistrationStepHref,
+  isMechaturaPaymentExpired,
+} from "@/lib/mechatura/registration";
 import {
   createRegistrationToken,
   mechaturaPaymentAmount,
@@ -71,6 +77,50 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Payload too large" }, { status: 413 });
   }
 
+  const authSupabase = await createClient();
+  const {
+    data: { user },
+  } = await authSupabase.auth.getUser();
+
+  if (!user) {
+    return jsonError("Please log in before registering for Mechatura.", 401);
+  }
+
+  const adminSupabase = createAdminClient();
+  const existingRegistration = await findLatestMechaturaRegistrationForUser(
+    adminSupabase,
+    user.id
+  ).catch((error) => {
+    console.error("Mechatura registration lookup failed", error.message);
+    return undefined;
+  });
+
+  if (existingRegistration === undefined) {
+    return serverError();
+  }
+
+  if (existingRegistration && isMechaturaPaymentExpired(existingRegistration)) {
+    const deleted = await deleteMechaturaRegistration(
+      adminSupabase,
+      existingRegistration.id
+    ).catch((error) => {
+      console.error("Expired Mechatura registration cleanup failed", error.message);
+      return null;
+    });
+
+    if (deleted === null) {
+      return serverError();
+    }
+  } else if (existingRegistration) {
+    return NextResponse.json(
+      {
+        error: "This account already has a Mechatura registration.",
+        payment_url: getMechaturaRegistrationStepHref(existingRegistration),
+      },
+      { status: 409 }
+    );
+  }
+
   const formData = await request.formData().catch(() => null);
 
   if (!formData) {
@@ -106,11 +156,6 @@ export async function POST(request: Request) {
     return invalidRequest();
   }
 
-  const authSupabase = await createClient();
-  const {
-    data: { user },
-  } = await authSupabase.auth.getUser();
-  const adminSupabase = createAdminClient();
   const registrationId = crypto.randomUUID();
   const paymentOrderId = createRegistrationToken();
   const values = parsed.data;
@@ -121,7 +166,7 @@ export async function POST(request: Request) {
     .from("mechatura_registrations")
     .insert({
       id: registrationId,
-      user_id: user?.id ?? null,
+      user_id: user.id,
       team_id: createTeamId(),
       team_name: values.team_name,
       institution: values.institution,
@@ -143,6 +188,22 @@ export async function POST(request: Request) {
       "Mechatura registration insert failed",
       registrationError?.message
     );
+
+    const latestRegistration = await findLatestMechaturaRegistrationForUser(
+      adminSupabase,
+      user.id
+    ).catch(() => null);
+
+    if (latestRegistration) {
+      return NextResponse.json(
+        {
+          error: "This account already has a Mechatura registration.",
+          payment_url: getMechaturaRegistrationStepHref(latestRegistration),
+        },
+        { status: 409 }
+      );
+    }
+
     return serverError();
   }
 

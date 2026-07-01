@@ -12,9 +12,14 @@ import {
   type RegistrationProgram,
 } from "@/lib/payment";
 import { findMechaturaPaymentOrder } from "@/lib/mechatura/payment";
+import {
+  getMechaturaPaymentExpiresAt,
+  isMechaturaPaymentExpired,
+} from "@/lib/mechatura/registration";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { createClient } from "@/utils/supabase/server";
 import PaymentActions from "./payment-actions";
+import PaymentDeadline from "./payment-deadline";
 
 type PaymentSearchParams = Promise<
   Record<string, string | string[] | undefined>
@@ -32,6 +37,7 @@ type PaymentOrder = {
   paymentStatus: string | null;
   externalId: string;
   userId: string | null;
+  createdAt: string | null;
   amount: number;
   details: Array<[string, string]>;
 };
@@ -77,6 +83,7 @@ const findMechaturaOrder = async (
     paymentStatus: order.paymentStatus,
     externalId: order.paymentOrderId,
     userId: order.userId,
+    createdAt: order.createdAt,
     amount: order.paymentAmount,
     details: [
       ["Team Name", order.teamName],
@@ -131,6 +138,11 @@ export default async function PaymentPage({
     ? order.paymentStatus
     : "unpaid";
   const isPaid = paymentStatus === "paid" || paymentStatus === "settled";
+  const isExpired = isMechaturaPaymentExpired({
+    createdAt: order.createdAt,
+    paymentStatus,
+  });
+  const expiresAt = getMechaturaPaymentExpiresAt(order.createdAt);
 
   return (
     <main className="mx-auto w-full max-w-3xl space-y-12 px-6 py-16 sm:px-8">
@@ -145,6 +157,10 @@ export default async function PaymentPage({
       </section>
 
       <PaymentProgress program={order.program} />
+
+      {!isPaid && expiresAt ? (
+        <PaymentDeadline expiresAt={expiresAt.toISOString()} />
+      ) : null}
 
       <section className="overflow-hidden rounded-xl border border-border bg-card">
         <div className="border-b border-border p-5">
@@ -210,6 +226,16 @@ export default async function PaymentPage({
             View receipt
           </Link>
         </Button>
+      ) : isExpired ? (
+        <section className="space-y-3">
+          <p role="alert" className="text-sm leading-6 text-destructive">
+            This Mechatura payment window has expired. Please return to the
+            Mechatura registration page to start a new registration.
+          </p>
+          <Button asChild className="h-11 rounded-xl">
+            <Link href="/registration/mechatura">Register again</Link>
+          </Button>
+        </section>
       ) : (
         <PaymentActions orderId={order.externalId} />
       )}

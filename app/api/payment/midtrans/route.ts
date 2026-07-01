@@ -7,6 +7,7 @@ import {
   findMechaturaPaymentOrder,
   getMechaturaPaymentItemName,
 } from "@/lib/mechatura/payment";
+import { isMechaturaPaymentExpired } from "@/lib/mechatura/registration";
 import {
   createMidtransSnapTransaction,
   getMidtransEnvironment,
@@ -81,6 +82,16 @@ export async function POST(request: Request) {
         existingOrder.paymentOrderId
       )}`,
     });
+  }
+
+  if (isMechaturaPaymentExpired(existingOrder)) {
+    return NextResponse.json(
+      {
+        error: "This Mechatura payment window has expired.",
+        redirect_url: "/registration/mechatura",
+      },
+      { status: 410 }
+    );
   }
 
   const order = await ensureMidtransCompatibleMechaturaOrder(
