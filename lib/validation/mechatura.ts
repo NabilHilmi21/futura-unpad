@@ -1,14 +1,74 @@
 import z from "zod";
+import { isMechaturaCompetitionType } from "@/lib/payment";
 import { emailSchema, requiredText, requiredPhone } from "./helper";
 
-// IDENTITIY STEP VALIDATIONS
-export const MechaturaFormSchema = z.object({
+export const DEFAULT_MECHATURA_DOCUMENT_MAX_SIZE = 2 * 1024 * 1024;
 
+type CreateMechaturaSchemaOptions = {
+    documentMaxSizeInBytes?: number;
+};
+
+type CoachFields = {
+    has_coach?: boolean;
+    coach_name?: unknown;
+    coach_email?: unknown;
+    coach_phone?: unknown;
+};
+
+function formatFileSize(bytes: number) {
+    const sizeInMb = bytes / (1024 * 1024);
+    return `${Number.isInteger(sizeInMb) ? sizeInMb : sizeInMb.toFixed(1)} MB`;
+}
+
+function createDocumentSchema(maxSizeInBytes: number) {
+    return z
+        .custom<FileList>(
+            (value) =>
+                typeof FileList !== "undefined" &&
+                value instanceof FileList &&
+                value.length > 0,
+            "Dokumen wajib diunggah"
+        )
+        .refine(
+            (files) => files[0]?.type === "application/pdf",
+            "Dokumen harus berupa file PDF"
+        )
+        .refine(
+            (files) => files[0]?.size <= maxSizeInBytes,
+            `Ukuran dokumen maksimal ${formatFileSize(maxSizeInBytes)}`
+        );
+}
+
+function optionalText(max = 120) {
+    return z.string().trim().max(max).optional().or(z.literal(""));
+}
+
+function addIssue(
+    ctx: z.RefinementCtx,
+    path: string,
+    message: string
+) {
+    ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: [path],
+        message,
+    });
+}
+
+const mechaturaCompetitionShape = {
+    competition_type: z
+        .custom<"sumo" | "transporter">(
+            isMechaturaCompetitionType,
+            "Tipe robot wajib dipilih."
+        ),
+};
+
+const mechaturaIdentityShape = {
     // Team Identity
     team_name: requiredText("Nama tim"),
-    institution: requiredText("Nama institusi"),
+    institution: requiredText("Asal institusi"),
     province: requiredText("Lokasi institusi"),
-    
+
     // Team Leader Identity
     leader_name: requiredText("Nama ketua"),
     leader_email: emailSchema("Email ketua"),
@@ -16,14 +76,105 @@ export const MechaturaFormSchema = z.object({
 
     // Team Member Identity
     member2_name: z.string().trim().max(120).optional().or(z.literal("")),
+    member2_email: emailSchema("Email member ke-2").optional().or(z.literal("")),
+    member2_phone: requiredPhone("Nomor member ke-2").optional().or(z.literal("")),
+
     member3_name: z.string().trim().max(120).optional().or(z.literal("")),
+    member3_email: emailSchema("Email member ke-3").optional().or(z.literal("")),
+    member3_phone: requiredPhone("Nomor member ke-3").optional().or(z.literal("")),
 
     // Team Coach Identity
-    coach_name: requiredText("Nama pembimbing"),
-    coach_email: emailSchema("Email pembimbing"),
-    coach_phone: requiredPhone("Nomor pembimbing"),
-})
+    has_coach: z.boolean(),
+    coach_name: optionalText(),
+    coach_email: emailSchema("Email pembimbing").optional().or(z.literal("")),
+    coach_phone: requiredPhone("Nomor pembimbing").optional().or(z.literal("")),
+};
 
-export type MechaturaValues = z.infer<typeof MechaturaFormSchema>;
+const mechaturaAttachmentShape = {
+    member_document: createDocumentSchema(DEFAULT_MECHATURA_DOCUMENT_MAX_SIZE),
+    robot_name: requiredText("Nama robot"),
+    robot_document: createDocumentSchema(DEFAULT_MECHATURA_DOCUMENT_MAX_SIZE),
+};
+
+const mechaturaVerificationShape = {
+    identity_confirmed: z.boolean().refine(Boolean, {
+        message: "Konfirmasi data wajib dicentang.",
+    }),
+};
+
+const mechaturaSubmissionShape = {
+    ...mechaturaCompetitionShape,
+    ...mechaturaIdentityShape,
+    robot_name: requiredText("Nama robot"),
+    identity_confirmed: z.boolean().refine(Boolean, {
+        message: "Konfirmasi data wajib dicentang.",
+    }),
+};
+
+export const MECHATURA_COMPETITION_FIELDS = Object.keys(mechaturaCompetitionShape);
+export const MECHATURA_IDENTITY_FIELDS = Object.keys(mechaturaIdentityShape);
+export const MECHATURA_ATTACHMENT_FIELDS = Object.keys(mechaturaAttachmentShape);
+export const MECHATURA_EDITABLE_FIELDS = [
+    ...MECHATURA_COMPETITION_FIELDS,
+    ...MECHATURA_IDENTITY_FIELDS,
+    ...MECHATURA_ATTACHMENT_FIELDS,
+];
+export const MECHATURA_VERIFICATION_FIELDS = [
+    ...MECHATURA_EDITABLE_FIELDS,
+    ...Object.keys(mechaturaVerificationShape),
+];
+
+function requireCoachWhenSelected<T extends z.ZodRawShape>(schema: z.ZodObject<T>) {
+    return schema.superRefine((values, ctx) => {
+        const coach = values as CoachFields;
+
+        if (!coach.has_coach) {
+            return;
+        }
+
+        const coachName = requiredText("Nama pembimbing").safeParse(coach.coach_name);
+        const coachEmail = emailSchema("Email pembimbing").safeParse(coach.coach_email);
+        const coachPhone = requiredPhone("Nomor pembimbing").safeParse(coach.coach_phone);
+
+        if (!coachName.success) {
+            addIssue(ctx, "coach_name", coachName.error.issues[0]?.message ?? "Nama pembimbing wajib diisi.");
+        }
+
+        if (!coachEmail.success) {
+            addIssue(ctx, "coach_email", coachEmail.error.issues[0]?.message ?? "Email pembimbing wajib diisi.");
+        }
+
+        if (!coachPhone.success) {
+            addIssue(ctx, "coach_phone", coachPhone.error.issues[0]?.message ?? "Nomor pembimbing wajib diisi.");
+        }
+    });
+}
+
+export const mechaturaIdentitySchema = requireCoachWhenSelected(
+    z.object(mechaturaIdentityShape)
+);
+
+export const mechaturaCompetitionSchema = z.object(mechaturaCompetitionShape);
+export const mechaturaSubmissionSchema = requireCoachWhenSelected(
+    z.object(mechaturaSubmissionShape)
+);
+
+// IDENTITIY STEP VALIDATIONS
+export function createMechaturaSchema({
+    documentMaxSizeInBytes = DEFAULT_MECHATURA_DOCUMENT_MAX_SIZE,
+}: CreateMechaturaSchemaOptions = {}) {
+    return requireCoachWhenSelected(z.object({
+        ...mechaturaCompetitionShape,
+        ...mechaturaIdentityShape,
+        // Team Attachments
+        member_document: createDocumentSchema(documentMaxSizeInBytes),
+        robot_name: requiredText("Nama robot"),
+        robot_document: createDocumentSchema(documentMaxSizeInBytes),
+        ...mechaturaVerificationShape,
+    }));
+}
+
+export const MechaturaFormSchema = createMechaturaSchema();
+export type MechaturaValues = z.infer<ReturnType<typeof createMechaturaSchema>>;
 export const mechaturaSchema = MechaturaFormSchema;
 export type MechaturaFormValues = MechaturaValues;

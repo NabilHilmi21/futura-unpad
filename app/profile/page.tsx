@@ -40,7 +40,7 @@ type ProfileMechaturaRegistration = {
   registration_status: string | null
   payment_status: string | null
   payment_amount: number | null
-  xendit_external_id: string
+  midtrans_order_id: string
   created_at: string | null
 }
 
@@ -93,7 +93,7 @@ export default async function ProfilePage() {
       adminSupabase
         .from("mechatura_registrations")
         .select(
-          "id,team_name,competition_type,robot_name,registration_status,payment_status,payment_amount,xendit_external_id,created_at"
+          "id,team_name,competition_type,robot_name,registration_status,payment_status,payment_amount,midtrans_order_id,created_at"
         )
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
@@ -296,7 +296,7 @@ export default async function ProfilePage() {
 
                   <div className="sm:col-span-2 lg:col-span-3 mt-4">
                     <Button asChild variant="secondary" className="h-10 rounded-xl w-full sm:w-auto">
-                      <Link href={`/payment?order_id=${encodeURIComponent(latestMechaturaRegistration.xendit_external_id)}`}>
+                      <Link href={`/payment?order_id=${encodeURIComponent(latestMechaturaRegistration.midtrans_order_id)}`}>
                         Open Payment Details <ChevronRight className="w-4 h-4 ml-1" />
                       </Link>
                     </Button>
