@@ -6,7 +6,9 @@ import { cn } from "@/lib/utils";
 import Navbar from "@/components/layout/navbar";
 import NavigationLoading from "@/components/navigation-loading";
 import AuthRouteGuard from "@/components/auth-route-guard";
-import { AuthProvider, type AuthUser } from "@/components/auth-provider";
+import { AuthProvider } from "@/components/auth-provider";
+import QueryProvider from "@/components/query-provider";
+import type { AuthSession } from "@/lib/api/auth-session";
 import { getCachedAuth } from "@/lib/auth";
 
 const inter = Inter({
@@ -37,9 +39,16 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const { user, isAdmin } = await getCachedAuth();
-  const initialUser: AuthUser | null = user
-    ? { id: user.id, email: user.email ?? null, user_metadata: user.user_metadata }
-    : null;
+  const initialAuthSession: AuthSession = {
+    user: user
+      ? {
+          id: user.id,
+          email: user.email ?? null,
+          user_metadata: user.user_metadata,
+        }
+      : null,
+    isAdmin,
+  };
 
   return (
     <html
@@ -54,16 +63,18 @@ export default async function RootLayout({
       )}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <AuthProvider initialUser={initialUser} initialIsAdmin={isAdmin}>
-          <Suspense fallback={null}>
-            <NavigationLoading />
-          </Suspense>
-          <Suspense fallback={null}>
-            <AuthRouteGuard />
-          </Suspense>
-          <Navbar />
-          {children}
-        </AuthProvider>
+        <QueryProvider>
+          <AuthProvider initialSession={initialAuthSession}>
+            <Suspense fallback={null}>
+              <NavigationLoading />
+            </Suspense>
+            <Suspense fallback={null}>
+              <AuthRouteGuard />
+            </Suspense>
+            <Navbar />
+            {children}
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

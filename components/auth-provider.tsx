@@ -6,20 +6,19 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+
+import {
+  type AuthSession,
+  type AuthSessionUser,
+} from "@/lib/api/auth-session";
+import { queryKeys } from "@/lib/query/keys";
+import { useAuthSessionQuery } from "@/hooks/queries/use-auth-session-query";
 import { createClient } from "@/utils/supabase/client";
 
-export type AuthUser = {
-  id: string;
-  email: string | null;
-  user_metadata?: {
-    display_name?: string;
-    username?: string;
-    [key: string]: unknown;
-  };
-};
+export type AuthUser = AuthSessionUser;
 
 type AuthContextValue = {
   user: AuthUser | null;
@@ -37,83 +36,42 @@ const toAuthUser = (user: { id: string; email?: string | null; user_metadata?: A
 
 export function AuthProvider({
   children,
-  initialUser,
-  initialIsAdmin,
+  initialSession,
 }: {
   children: React.ReactNode;
-  initialUser: AuthUser | null;
-  initialIsAdmin: boolean;
+  initialSession: AuthSession;
 }) {
-  const [user, setUser] = useState<AuthUser | null>(initialUser);
-  const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
-  const [isLoading, setIsLoading] = useState(false);
-  const authVersion = useRef(0);
-  const currentUser = useRef<AuthUser | null>(initialUser);
+  const queryClient = useQueryClient();
+  const authSession = useAuthSessionQuery({ initialData: initialSession });
+  const [isMutatingAuth, setIsMutatingAuth] = useState(false);
+  const user = authSession.data?.user ?? null;
+  const isAdmin = authSession.data?.isAdmin ?? false;
 
-  const setAuthUser = useCallback((nextUser: AuthUser | null) => {
-    currentUser.current = nextUser;
-    setUser((previousUser) => {
-      const isSameUser =
-        previousUser?.id === nextUser?.id &&
-        previousUser?.email === nextUser?.email &&
-        previousUser?.user_metadata?.display_name === nextUser?.user_metadata?.display_name &&
-        previousUser?.user_metadata?.username === nextUser?.user_metadata?.username;
-
-      return isSameUser ? previousUser : nextUser;
-    });
-  }, []);
-
-  const checkAdmin = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
-      .from("admin_users")
-      .select("user_id")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    return !error && !!data;
-  }, []);
+  const setCachedSession = useCallback(
+    (nextSession: AuthSession) => {
+      queryClient.setQueryData(queryKeys.auth.session, nextSession);
+    },
+    [queryClient]
+  );
 
   const refreshAuth = useCallback(async () => {
-    const version = authVersion.current + 1;
-    authVersion.current = version;
-    setIsLoading(true);
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    const nextUser = toAuthUser(user);
-
-    if (version !== authVersion.current) {
-      return;
-    }
-
-    setAuthUser(nextUser);
-    const nextIsAdmin = nextUser ? await checkAdmin(nextUser.id) : false;
-
-    if (version !== authVersion.current) {
-      return;
-    }
-
-    setIsAdmin(nextIsAdmin);
-    setIsLoading(false);
-  }, [checkAdmin, setAuthUser]);
+    await queryClient.invalidateQueries({ queryKey: queryKeys.auth.session });
+  }, [queryClient]);
 
   const signOut = useCallback(async () => {
-    authVersion.current += 1;
-    setIsLoading(true);
+    setIsMutatingAuth(true);
     const { error } = await supabase.auth.signOut();
 
     if (error) {
-      setIsLoading(false);
+      setIsMutatingAuth(false);
       return { error };
     }
 
-    setAuthUser(null);
-    setIsAdmin(false);
-    setIsLoading(false);
+    setCachedSession({ user: null, isAdmin: false });
+    setIsMutatingAuth(false);
 
     return { error: null };
-  }, [setAuthUser]);
+  }, [setCachedSession]);
 
   useEffect(() => {
     let isMounted = true;
@@ -122,48 +80,35 @@ export function AuthProvider({
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       const nextUser = toAuthUser(session?.user ?? null);
-      const previousUserId = currentUser.current?.id ?? null;
-      const nextUserId = nextUser?.id ?? null;
-      const userChanged = previousUserId !== nextUserId;
 
       if (!isMounted) {
         return;
       }
 
-      setAuthUser(nextUser);
-
       if (!nextUser) {
-        setIsAdmin(false);
+        setCachedSession({ user: null, isAdmin: false });
+        return;
       }
 
-      if (nextUser && userChanged) {
-        const version = authVersion.current + 1;
-        authVersion.current = version;
-        setIsAdmin(false);
-        checkAdmin(nextUser.id).then((nextIsAdmin) => {
-          if (isMounted && version === authVersion.current) {
-            setIsAdmin(nextIsAdmin);
-          }
-        });
-      }
-
+      setCachedSession({ user: nextUser, isAdmin: false });
+      queryClient.invalidateQueries({ queryKey: queryKeys.auth.session });
     });
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [checkAdmin, setAuthUser]);
+  }, [queryClient, setCachedSession]);
 
   const value = useMemo(
     () => ({
       user,
       isAdmin,
-      isLoading,
+      isLoading: authSession.isFetching || isMutatingAuth,
       refreshAuth,
       signOut,
     }),
-    [isAdmin, isLoading, refreshAuth, signOut, user]
+    [authSession.isFetching, isAdmin, isMutatingAuth, refreshAuth, signOut, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
