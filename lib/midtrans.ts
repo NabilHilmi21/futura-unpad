@@ -73,43 +73,30 @@ const getServerKey = () => {
   return serverKey;
 };
 
-const isSandboxKey = (serverKey: string) => serverKey.startsWith("SB-");
-
-const getEnvironment = (serverKey: string): MidtransEnvironment => {
+const getEnvironment = (): MidtransEnvironment => {
   const environment = process.env.MIDTRANS_ENVIRONMENT?.trim().toLowerCase();
 
   if (environment === "sandbox" || environment === "production") {
     return environment;
   }
 
-  return isSandboxKey(serverKey) ? "sandbox" : "production";
+  if (environment) {
+    throw new Error("MIDTRANS_ENVIRONMENT must be sandbox or production");
+  }
+
+  return "sandbox";
 };
 
-const assertEnvironmentMatchesKey = (
-  environment: MidtransEnvironment,
-  serverKey: string
-) => {
-  const isSandbox = isSandboxKey(serverKey);
-
-  if (environment === "sandbox" && !isSandbox) {
-    throw new Error("MIDTRANS_ENVIRONMENT=sandbox requires a sandbox server key");
-  }
-
-  if (environment === "production" && isSandbox) {
-    throw new Error(
-      "MIDTRANS_ENVIRONMENT=production requires a production server key"
-    );
-  }
-
-  if (!serverKey.includes("-server-")) {
+const assertServerKey = (serverKey: string) => {
+  if (!serverKey.toLowerCase().includes("-server-")) {
     throw new Error("MIDTRANS_SERVER_KEY must be a Midtrans server key");
   }
 };
 
 const getMidtransBaseUrls = () => {
   const serverKey = getServerKey();
-  const environment = getEnvironment(serverKey);
-  assertEnvironmentMatchesKey(environment, serverKey);
+  const environment = getEnvironment();
+  assertServerKey(serverKey);
   const isSandbox = environment === "sandbox";
 
   return {
@@ -125,7 +112,7 @@ const getMidtransBaseUrls = () => {
 };
 
 export function getMidtransEnvironment() {
-  return getEnvironment(getServerKey());
+  return getMidtransBaseUrls().environment;
 }
 
 const createAuthorizationHeader = (serverKey: string) =>

@@ -2,7 +2,9 @@ import "server-only";
 
 import type { createAdminClient } from "@/lib/supabase-admin";
 import {
+  createRegistrationToken,
   isMechaturaCompetitionType,
+  isMidtransCompatibleOrderId,
   mechaturaCompetitionLabels,
   mechaturaPaymentAmount,
   type MechaturaCompetitionType,
@@ -112,6 +114,37 @@ export async function findMechaturaPaymentOrder(
 
 export function getMechaturaPaymentItemName(order: MechaturaPaymentOrder) {
   return `Mechatura ${mechaturaCompetitionLabels[order.competitionType]}`;
+}
+
+export async function ensureMidtransCompatibleMechaturaOrder(
+  supabase: SupabaseAdminClient,
+  order: MechaturaPaymentOrder
+): Promise<MechaturaPaymentOrder> {
+  if (isMidtransCompatibleOrderId(order.paymentOrderId)) {
+    return order;
+  }
+
+  const nextOrderId = createRegistrationToken();
+  const { data, error } = await supabase
+    .from("mechatura_registrations")
+    .update({ midtrans_order_id: nextOrderId })
+    .eq("id", order.id)
+    .eq("midtrans_order_id", order.paymentOrderId)
+    .select("midtrans_order_id")
+    .maybeSingle<{ midtrans_order_id: string }>();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data?.midtrans_order_id) {
+    throw new Error("Unable to rotate Midtrans order id");
+  }
+
+  return {
+    ...order,
+    paymentOrderId: data.midtrans_order_id,
+  };
 }
 
 export async function updateMechaturaPaymentStatus(

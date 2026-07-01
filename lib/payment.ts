@@ -55,7 +55,8 @@ export const mechaturaCompetitionLabels: Record<MechaturaCompetitionType, string
   transporter: "Robot Transporter",
 };
 
-export const mechaturaPaymentAmount = 250000;
+export const mechaturaPaymentAmount = 10000;
+export const midtransOrderIdMaxLength = 50;
 
 export const formatCurrency = (value: number) =>
   `Rp. ${value.toLocaleString("id-ID")}`;
@@ -97,15 +98,24 @@ export const paymentStatusLabels: Record<PaymentStatus, string> = {
 export const isPaymentStatus = (value: unknown): value is PaymentStatus =>
   typeof value === "string" && value in paymentStatusLabels;
 
-export const createRegistrationToken = () => {
-  const randomValue =
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : Math.random().toString(36).slice(2);
+const createOrderRandomSuffix = () => {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase();
+  }
 
-  return `FUTURA-${Date.now()}-${randomValue}`;
+  return Math.random().toString(36).slice(2, 14).toUpperCase();
+};
+
+export const createRegistrationToken = () => {
+  const timestamp = Date.now().toString(36).toUpperCase();
+
+  return `FUTURA-${timestamp}-${createOrderRandomSuffix()}`;
 };
 
 export const isRegistrationToken = (value: unknown): value is string =>
   typeof value === "string" &&
-  /^FUTURA-\d{10,}-[a-zA-Z0-9-]+$/.test(value);
+  value.length <= 80 &&
+  /^FUTURA-[a-zA-Z0-9]+-[a-zA-Z0-9-]+$/.test(value);
+
+export const isMidtransCompatibleOrderId = (value: string) =>
+  isRegistrationToken(value) && value.length <= midtransOrderIdMaxLength;

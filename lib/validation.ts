@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isRegistrationToken } from "./payment";
 
 export * from "./validation/auth";
 export * from "./validation/essay";
@@ -12,7 +13,7 @@ export const requiredText = (field: string, max = 120) =>
     .max(max, `${field} terlalu panjang.`);
 
 export const orderSchema = z.object({
-  order_id: z.string().regex(/^FUTURA-\d{10,}-[a-zA-Z0-9-]+$/),
+  order_id: z.string().refine(isRegistrationToken),
 });
 
 export const idParamSchema = z.object({

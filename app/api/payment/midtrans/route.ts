@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { invalidRequest, rateLimited, readJsonBody, serverError } from "@/lib/http";
 import {
+  ensureMidtransCompatibleMechaturaOrder,
   findMechaturaPaymentOrder,
   getMechaturaPaymentItemName,
 } from "@/lib/mechatura/payment";
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
   }
 
   const adminSupabase = createAdminClient();
-  const order = await findMechaturaPaymentOrder(
+  const existingOrder = await findMechaturaPaymentOrder(
     adminSupabase,
     parsed.data.order_id
   ).catch((error) => {
@@ -56,27 +57,42 @@ export async function POST(request: Request) {
     return null;
   });
 
-  if (!order) {
+  if (!existingOrder) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
 
-  if (order.userId) {
+  if (existingOrder.userId) {
     const authSupabase = await createClient();
     const {
       data: { user },
     } = await authSupabase.auth.getUser();
 
-    if (order.userId !== user?.id) {
+    if (existingOrder.userId !== user?.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
   }
 
-  if (order.paymentStatus === "paid" || order.paymentStatus === "settled") {
+  if (
+    existingOrder.paymentStatus === "paid" ||
+    existingOrder.paymentStatus === "settled"
+  ) {
     return NextResponse.json({
       redirect_url: `/payment/success?order_id=${encodeURIComponent(
-        order.paymentOrderId
+        existingOrder.paymentOrderId
       )}`,
     });
+  }
+
+  const order = await ensureMidtransCompatibleMechaturaOrder(
+    adminSupabase,
+    existingOrder
+  ).catch((error) => {
+    console.error("Midtrans order id rotation failed", error.message);
+    return null;
+  });
+
+  if (!order) {
+    return serverError();
   }
 
   const origin = getOrigin(request);
