@@ -218,12 +218,40 @@
   animation: accordion-up 0.22s ease-out;
 }
 
+@keyframes countdown-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@utility animate-countdown-pulse {
+  animation: countdown-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes prize-shine {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+@utility animate-prize-shine {
+  animation: prize-shine 3s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-sponsor-scroll,
   .animate-fade-up,
   .animate-gradient-border,
   .animate-accordion-down,
-  .animate-accordion-up {
+  .animate-accordion-up,
+  .animate-countdown-pulse,
+  .animate-prize-shine {
     animation: none;
   }
 }

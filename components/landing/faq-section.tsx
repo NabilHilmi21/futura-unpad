@@ -82,6 +82,15 @@ export function FAQSection() {
             </div>
           </div>
         </div>
+
+        {/* See all FAQs button */}
+        <div className="mt-12 flex justify-center">
+          <button
+            className="group relative inline-flex overflow-hidden rounded-full border-2 border-slate-950 px-8 py-4 text-sm font-semibold text-slate-950 transition-all duration-300 hover:bg-slate-950 hover:text-white hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10"
+          >
+            See all FAQs
+          </button>
+        </div>
       </div>
     </section>
   )

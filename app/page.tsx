@@ -7,6 +7,9 @@ import { Footer } from "@/components/layout/footer"
 import { HeroSection } from "@/components/landing/hero-section"
 import { RegistrationCards } from "@/components/landing/registration-cards"
 import HowToRegisterSection from "@/components/landing/how-to-register"
+import { ReasonToJoinSection } from "@/components/landing/reason-to-join-section"
+import { WhoCanJoinSection } from "@/components/landing/who-can-join-section"
+import { CountdownPrizeSection } from "@/components/landing/countdown-prize-section"
 
 export const metadata: Metadata = {
   title: "Coming Soon!",
@@ -19,6 +22,9 @@ export default function Home() {
     <main className="bg-[#fbfbf8]">
       <HeroSection />
       <AboutSection />
+      <ReasonToJoinSection />
+      <WhoCanJoinSection />
+      <CountdownPrizeSection />
       <HowToRegisterSection />
       <RegistrationCards />
       <EventOverviewSection />
