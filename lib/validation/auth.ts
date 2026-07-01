@@ -1,5 +1,6 @@
 import z from "zod";
-import { normalizeEmail } from "../email";
+
+const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
 export const emailSchema = z
   .string()

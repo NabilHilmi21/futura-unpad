@@ -38,7 +38,7 @@ export function Sidebar({ isMobileOpen, setIsMobileOpen, width, setWidth }: { is
                 setWidth(newWidth)
             }
         }
-    }, [isResizing])
+    }, [isResizing, setWidth])
 
     useEffect(() => {
         window.addEventListener("mousemove", resize)

@@ -1,4 +1,3 @@
-import Link from "next/link"
 import Image from "next/image"
 import SponsorsSection from "./sponsors-section"
 import MediaPartnersSection from "./media-partners-section"

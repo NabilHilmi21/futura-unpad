@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
-import SummaryItem from "@/components/registration/summary-item";
+import { SummaryItem } from "@/components/form/summary-item";
 import type { ClientLombaEssayFormValues } from "@/lib/validation/essay";
 import { essaySubThemeOptions } from "../../../lib/essay/essay-options";
 
