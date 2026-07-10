@@ -43,10 +43,10 @@ export default async function AccountPage() {
     <div className="mx-auto w-full max-w-3xl">
       <section className="flex flex-col gap-4 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between mb-8">
         <div className="space-y-2">
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground">
+          <h1 className="text-3xl sm:text-3xl sm:text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
             Account Details
           </h1>
-          <p className="max-w-xl text-sm leading-6 text-muted-foreground">
+          <p className="max-w-xl text-sm font-medium leading-relaxed text-neutral-500">
             Manage your personal profile information and settings.
           </p>
         </div>

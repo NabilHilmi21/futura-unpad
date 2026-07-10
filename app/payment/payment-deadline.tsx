@@ -59,7 +59,7 @@ export default function PaymentDeadline({ expiresAt }: PaymentDeadlineProps) {
           <p className="text-2xl font-semibold tracking-tight" suppressHydrationWarning>
             {isExpired ? "Expired" : formatRemainingTime(remainingMs)}
           </p>
-          <p className="text-sm leading-6 text-muted-foreground">
+          <p className="text-sm font-medium leading-relaxed text-neutral-500">
             Complete your payment before {formattedDeadline}. If the due time
             expires, your Mechatura team registration will be reset and you will
             need to register again.

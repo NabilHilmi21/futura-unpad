@@ -6,6 +6,7 @@ import {
   ensureMidtransCompatibleMechaturaOrder,
   findMechaturaPaymentOrder,
   getMechaturaPaymentItemName,
+  isCompletedMechaturaPaymentStatus,
 } from "@/lib/mechatura/payment";
 import { isMechaturaPaymentExpired } from "@/lib/mechatura/registration";
 import {
@@ -73,10 +74,7 @@ export async function POST(request: Request) {
     }
   }
 
-  if (
-    existingOrder.paymentStatus === "paid" ||
-    existingOrder.paymentStatus === "settled"
-  ) {
+  if (isCompletedMechaturaPaymentStatus(existingOrder.paymentStatus)) {
     return NextResponse.json({
       redirect_url: `/payment/success?order_id=${encodeURIComponent(
         existingOrder.paymentOrderId

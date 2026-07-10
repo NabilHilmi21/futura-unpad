@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 import { createAdminClient } from "@/lib/supabase-admin"
 import { requireAdminOrRedirect } from "@/lib/auth"
+import { isCompletedPaymentStatus } from "@/lib/payment"
 
 type SeminarDashboardRow = {
     status_akademika: string | null
@@ -53,7 +54,7 @@ export default async function AdminPage() {
     const dosenCount = countBy(seminarRegistrations, (row) => row.status_akademika === "dosen")
     const umumCount = countBy(seminarRegistrations, (row) => row.status_akademika === "umum")
     const totalMechaturaCount = mechaturaRegistrations.length
-    const mechaturaPaidCount = countBy(mechaturaRegistrations, (row) => row.payment_status === "paid" || row.payment_status === "settled")
+    const mechaturaPaidCount = countBy(mechaturaRegistrations, (row) => isCompletedPaymentStatus(row.payment_status))
     const sumoCount = countBy(mechaturaRegistrations, (row) => row.competition_type === "sumo")
     const transporterCount = countBy(mechaturaRegistrations, (row) => row.competition_type === "transporter")
 
@@ -65,10 +66,10 @@ export default async function AdminPage() {
                         Admin Dashboard
                     </p>
                     <div className="space-y-2">
-                        <h1 className="text-4xl font-semibold tracking-tight text-balance">
+                        <h1 className="text-3xl sm:text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-balance">
                             Futura Overview
                         </h1>
-                        <p className="max-w-xl text-sm leading-6 text-muted-foreground">
+                        <p className="max-w-xl text-sm font-medium leading-relaxed text-neutral-500">
                             Welcome back, {user.email}. Monitor registration progress and
                             payment health from one place. Navigate to specific events using the top navigation.
                         </p>

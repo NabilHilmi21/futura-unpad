@@ -73,17 +73,17 @@ export default function LoginForm() {
                         <FormTextField<LoginFormValues>
                             name="password"
                             label={
-                                <div className="flex justify-between w-full mb-1.5">
+                                <div className="flex justify-between w-full">
                                     <span>Password</span>
-                                    <Link href="/forgot-password" prefetch={false} className="text-right text-sm text-muted-foreground hover:text-black transition">Forgot password?</Link>
+                                    <Link href="/forgot-password" prefetch={false} className="text-right text-sm text-muted-foreground hover:text-white transition">Forgot password?</Link>
                                 </div>
                             }
                             type="password"
                             placeholder="Enter your password"
                             autoComplete="current-password"
-                            fieldClassName="gap-0 w-full"
+                            fieldClassName="gap-2 w-full"
                         />
-
+                        
                         <Field orientation="horizontal" className="items-center gap-2">
                             <Checkbox
                                 id="keepSignedIn"

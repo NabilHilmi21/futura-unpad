@@ -9,7 +9,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { mechaturaCompetitionLabels, paymentStatusLabels } from "@/lib/payment";
-import { ChevronLeft, ChevronRight, Download, Search, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Scan, Search, X } from "lucide-react";
 import Link from "next/link";
 import MechaturaTable, {
     type AdminMechaturaLeader,
@@ -91,12 +91,20 @@ export default function MechaturaListClient({
                         Manage robotics competition teams, leaders, and payment status.
                     </p>
                 </div>
-                <Button variant="outline" className="h-11 rounded-[8px] px-5" asChild>
-                    <a href="/api/admin/mechatura-registrations/export" download>
-                        <Download className="h-4 w-4" />
-                        Export CSV
-                    </a>
-                </Button>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <Button variant="outline" className="h-11 rounded-[8px] px-5" asChild>
+                        <a href="/api/admin/mechatura-registrations/export" download>
+                            <Download className="h-4 w-4 mr-2" />
+                            Export CSV
+                        </a>
+                    </Button>
+                    <Button className="h-11 rounded-[8px] px-5 bg-blue-600 text-white hover:bg-blue-700" asChild>
+                        <Link href="/admin/scanner" prefetch={false}>
+                            <Scan className="h-4 w-4 mr-2" />
+                            Open Scanner
+                        </Link>
+                    </Button>
+                </div>
             </div>
 
             <div className="grid gap-y-8 border-y border-border py-7 sm:grid-cols-2 xl:grid-cols-4">

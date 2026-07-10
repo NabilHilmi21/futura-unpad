@@ -1,5 +1,6 @@
 import "server-only";
 
+import { isCompletedPaymentStatus } from "@/lib/payment";
 import type { createAdminClient } from "@/lib/supabase-admin";
 
 type SupabaseAdminClient = ReturnType<typeof createAdminClient>;
@@ -32,7 +33,6 @@ type MechaturaDeleteTarget = {
 const latestMechaturaRegistrationSelect =
   "id,team_name,payment_status,midtrans_order_id,created_at";
 
-const completedPaymentStatuses = new Set(["paid", "settled"]);
 const expiredPaymentStatuses = new Set(["expired", "failed", "cancelled"]);
 
 export { MECHATURA_PAYMENT_DUE_HOURS };
@@ -84,10 +84,7 @@ export function getMechaturaPaymentRemainingMs(
   registration: Pick<LatestMechaturaRegistration, "createdAt" | "paymentStatus">,
   now = new Date()
 ) {
-  if (
-    registration.paymentStatus &&
-    completedPaymentStatuses.has(registration.paymentStatus)
-  ) {
+  if (isCompletedPaymentStatus(registration.paymentStatus)) {
     return null;
   }
 
@@ -104,10 +101,7 @@ export function isMechaturaPaymentExpired(
   registration: Pick<LatestMechaturaRegistration, "createdAt" | "paymentStatus">,
   now = new Date()
 ) {
-  if (
-    registration.paymentStatus &&
-    completedPaymentStatuses.has(registration.paymentStatus)
-  ) {
+  if (isCompletedPaymentStatus(registration.paymentStatus)) {
     return false;
   }
 
@@ -128,7 +122,7 @@ export function getMechaturaRegistrationStepHref(
 ) {
   const orderId = encodeURIComponent(registration.paymentOrderId);
 
-  if (registration.paymentStatus && completedPaymentStatuses.has(registration.paymentStatus)) {
+  if (isCompletedPaymentStatus(registration.paymentStatus)) {
     return `/payment/success?order_id=${orderId}`;
   }
 

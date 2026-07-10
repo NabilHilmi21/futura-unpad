@@ -1,14 +1,14 @@
-import { FormTextField } from "@/components/registration/form-text-field";
+import { FormTextField } from "@/components/form/form-text-field";
 import type { ClientLombaEssayFormValues } from "@/lib/validation/essay";
 
 export default function EssayMembersSection() {
   return (
     <section className="space-y-4" aria-labelledby="members-section-label">
       <div>
-        <h2 id="members-section-label" className="text-base font-semibold">
+        <h2 id="members-section-label" className="text-lg font-semibold">
           Anggota Tim
         </h2>
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+        <p className="mt-1 text-sm font-medium leading-relaxed text-neutral-500">
           Opsional. Tambahkan hingga 2 anggota tambahan.
         </p>
       </div>

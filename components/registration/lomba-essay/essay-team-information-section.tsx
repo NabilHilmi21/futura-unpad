@@ -1,14 +1,14 @@
-import { FormTextField } from "@/components/registration/form-text-field";
+import { FormTextField } from "@/components/form/form-text-field";
 import type { ClientLombaEssayFormValues } from "@/lib/validation/essay";
 
 export default function EssayTeamInformationSection() {
   return (
     <section className="space-y-4" aria-labelledby="team-section-label">
       <div>
-        <h2 id="team-section-label" className="text-base font-semibold">
+        <h2 id="team-section-label" className="text-lg font-semibold">
           Informasi Tim
         </h2>
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+        <p className="mt-1 text-sm font-medium leading-relaxed text-neutral-500">
           Satu tim dapat terdiri dari 1-3 orang peserta.
         </p>
       </div>

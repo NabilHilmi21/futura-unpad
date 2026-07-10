@@ -1,7 +1,7 @@
 import type { UseFormTrigger } from "react-hook-form";
 
-import { FormSelectField } from "@/components/registration/form-select-field";
-import { FormTextField } from "@/components/registration/form-text-field";
+import { FormSelectField } from "@/components/form/form-select-field";
+import { FormTextField } from "@/components/form/form-text-field";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ClientLombaEssayFormValues } from "@/lib/validation/essay";
@@ -39,15 +39,10 @@ export default function EssayVerificationEditForm({
         id="verify-faculty"
         inputClassName="h-9 rounded-[8px] text-sm"
       />
-      <FormSelectField<
-        ClientLombaEssayFormValues,
-        "sub_theme",
-        ClientLombaEssayFormValues["sub_theme"]
-      >
+      <FormSelectField<ClientLombaEssayFormValues>
         name="sub_theme"
         label="Sub-Tema"
         options={essaySubThemeOptions}
-        id="verify-sub_theme"
       />
       <FormTextField<ClientLombaEssayFormValues>
         name="paper_title"

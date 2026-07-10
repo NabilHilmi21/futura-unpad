@@ -28,9 +28,10 @@ import {
 } from "@/lib/payment";
 import { formatMechaturaDateTime } from "@/lib/mechatura/format";
 import { useDeleteMechaturaRegistrationMutation } from "@/hooks/mutations/use-admin-mutations";
-import { Eye, Mail, MoreHorizontal, Phone, Tags, Trash, Users } from "lucide-react";
+import { CheckCircle2, Clock, Eye, Mail, MoreHorizontal, Phone, Tags, Trash, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import MechaturaAttendanceToggle from "./mechatura-attendance-toggle";
 
 export type AdminMechaturaRegistration = {
     id: string;
@@ -40,6 +41,8 @@ export type AdminMechaturaRegistration = {
     competition_type: unknown;
     robot_name: string;
     payment_status: string | null;
+    attended: boolean | null;
+    check_in_time: string | null;
     created_at: string | null;
 };
 
@@ -159,7 +162,10 @@ export default function MechaturaTable({
                         <TableHead className="h-12 w-12 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                             #
                         </TableHead>
-                        <TableHead className="h-12 min-w-72 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        <TableHead className="h-12 min-w-12 px-4 text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            Checked In
+                        </TableHead>
+                        <TableHead className="h-12 min-w-64 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                             Team
                         </TableHead>
                         <TableHead className="h-12 min-w-56 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -171,6 +177,7 @@ export default function MechaturaTable({
                         <TableHead className="h-12 min-w-36 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                             Payment
                         </TableHead>
+
                         <TableHead className="h-12 min-w-36 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                             Submitted
                         </TableHead>
@@ -195,14 +202,17 @@ export default function MechaturaTable({
                                         {index + 1}
                                     </TableCell>
                                     <TableCell className="px-4 py-3">
+                                        <div className="flex items-center justify-center">
+
+                                            <MechaturaAttendanceToggle
+                                                registrationId={registration.id}
+                                                attended={!!registration.attended}
+                                            />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="px-4 py-3">
                                         <div className="min-w-0">
                                             <p className="font-medium">{registration.team_name}</p>
-                                            <p className="mt-1 text-xs text-muted-foreground">
-                                                {registration.team_id}
-                                            </p>
-                                            <p className="mt-1 max-w-72 truncate text-xs text-muted-foreground">
-                                                {registration.institution}
-                                            </p>
                                         </div>
                                     </TableCell>
                                     <TableCell className="px-4 py-3">
@@ -245,7 +255,7 @@ export default function MechaturaTable({
                     ) : (
                         <TableRow>
                             <TableCell
-                                colSpan={7}
+                                colSpan={8}
                                 className="h-32 px-4 text-center text-muted-foreground"
                             >
                                 <div className="flex flex-col items-center gap-2">

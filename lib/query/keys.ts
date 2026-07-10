@@ -26,6 +26,7 @@ export const queryKeys = {
     mechatura: {
       all: ["admin", "mechatura"] as const,
       detail: (id: string) => ["admin", "mechatura", id] as const,
+      scanner: ["admin", "mechatura", "scanner"] as const,
     },
   },
 } as const;
@@ -58,6 +59,8 @@ export const mutationKeys = {
       delete: ["admin", "seminar", "delete"] as const,
     },
     mechatura: {
+      verify: ["admin", "mechatura", "verify"] as const,
+      toggleAttendance: ["admin", "mechatura", "toggle-attendance"] as const,
       delete: ["admin", "mechatura", "delete"] as const,
     },
   },

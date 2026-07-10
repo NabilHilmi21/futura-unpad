@@ -1,6 +1,14 @@
 import Link from "next/link";
-import { CheckCircle2, Clock } from "lucide-react";
+import type { Metadata } from "next";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+} from "lucide-react";
+
 import PaymentProgress from "@/components/registration/payment-progress";
+import { ReceiptImage, type ReceiptData } from "@/components/registration/payment-receipt";
+import { MechaturaSuccessModal } from "./mechatura-success-modal";
 import { Button } from "@/components/ui/button";
 import {
   formatCurrency,
@@ -11,17 +19,22 @@ import {
 } from "@/lib/payment";
 import {
   findMechaturaPaymentOrder,
+  isCompletedMechaturaPaymentStatus,
   syncMechaturaPaymentStatus,
 } from "@/lib/mechatura/payment";
 import { getCachedAuth } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase-admin";
-import ReceiptImage, { type ReceiptData } from "./receipt-image";
+
+export const metadata: Metadata = {
+  title: "Payment Complete | Futura",
+};
 
 type SuccessSearchParams = Promise<
   Record<string, string | string[] | undefined>
 >;
 
 type VerificationOrder = {
+  id: string;
   program: RegistrationProgram;
   table: "mechatura_registrations";
   name: string;
@@ -34,6 +47,7 @@ type VerificationOrder = {
   paymentStatus: string | null;
   externalId: string;
   userId: string | null;
+  rawOrder?: import("@/lib/mechatura/payment").MechaturaPaymentOrder;
 };
 
 const createReceipt = (order: VerificationOrder): ReceiptData => ({
@@ -61,6 +75,7 @@ const findMechaturaOrder = async (
   }
 
   return {
+    id: order.id,
     program: "mechatura",
     table: "mechatura_registrations",
     name: `${order.teamName} / ${order.leader.name}`,
@@ -73,6 +88,7 @@ const findMechaturaOrder = async (
     paymentStatus: order.paymentStatus,
     externalId: order.paymentOrderId,
     userId: order.userId,
+    rawOrder: order,
   };
 };
 
@@ -80,11 +96,7 @@ const findOrder = findMechaturaOrder;
 
 async function verifyPayment(orderId: string) {
   const supabase = createAdminClient();
-  await syncMechaturaPaymentStatus(supabase, orderId).catch((error) => {
-    console.error("Midtrans payment sync failed", error.message);
-  });
-
-  const order = await findOrder(supabase, orderId);
+  let order = await findOrder(supabase, orderId);
 
   if (!order) {
     return { status: "invalid" as const };
@@ -98,11 +110,23 @@ async function verifyPayment(orderId: string) {
     }
   }
 
-  if (order.paymentStatus === "paid" || order.paymentStatus === "settled") {
+  if (!isCompletedMechaturaPaymentStatus(order.paymentStatus)) {
+    await syncMechaturaPaymentStatus(supabase, orderId).catch((error) => {
+      console.error("Midtrans payment sync failed", error.message);
+    });
+    order = await findOrder(supabase, orderId);
+
+    if (!order) {
+      return { status: "invalid" as const };
+    }
+  }
+
+  if (isCompletedMechaturaPaymentStatus(order.paymentStatus)) {
     return {
       status: "paid" as const,
       program: order.program,
       receipt: createReceipt(order),
+      order: order,
     };
   }
 
@@ -123,36 +147,51 @@ export default async function PaymentSuccessPage({
     : { status: "invalid" as const };
 
   const isPaid = result.status === "paid";
+  const paymentHref = isRegistrationToken(orderIdParam)
+    ? `/payment?order_id=${encodeURIComponent(orderIdParam)}`
+    : "/registration";
+  const isInvalid = result.status === "invalid";
   const Icon = isPaid ? CheckCircle2 : Clock;
+  const title = isPaid
+    ? "Payment Complete."
+    : isInvalid
+      ? "Payment Not Found."
+      : "Payment Verification Pending.";
+  const description = isPaid
+    ? "Your Mechatura registration payment is verified. Keep the receipt below for committee validation."
+    : isInvalid
+      ? "We could not find a valid payment order for this link. Please return to your registration flow."
+      : "We received the payment redirect, but the gateway confirmation is not final yet. Please wait a moment, then refresh once.";
 
   return (
-    <main className="mx-auto w-full max-w-3xl space-y-12 px-6 py-16 sm:px-8">
-      <PaymentProgress program={"program" in result ? result.program : undefined} />
-
-      <section className="rounded-xl p-8 text-center">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-          <Icon className="h-7 w-7 text-foreground" />
-        </div>
-
-        <h1 className="mt-6 text-3xl font-semibold tracking-tight">
-          {isPaid ? "Payment Successful" : "Payment Verification Pending"}
-        </h1>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">
-          {isPaid
-            ? "Thank you. Your Futura registration payment has been completed and verified."
-            : "We received the payment redirect, but the payment has not been verified yet. Please wait a moment or refresh this page."}
-        </p>
-
-        <div className="mt-8 flex justify-center">
-          <Button asChild className="h-11 rounded-xl px-4 py-5">
-            <Link href={isPaid ? "/" : "/registration"} prefetch={false}>
-              {isPaid ? "Back to Home" : "Back to Registration"}
-            </Link>
-          </Button>
+    <main className="mx-auto w-full max-w-3xl items-start space-y-12 px-6 py-16 sm:px-8">
+      <section>
+        <div className="space-y-2">
+          <h1 className="max-w-xl text-3xl sm:text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+            {title}
+          </h1>
+          <p className="max-w-lg text-sm font-medium leading-relaxed text-neutral-500">
+            {description}
+          </p>
         </div>
       </section>
 
-      {isPaid && result.receipt ? <ReceiptImage receipt={result.receipt} /> : null}
+      <section className="space-y-8">
+        <PaymentProgress program={"program" in result ? result.program : undefined} />
+      </section>
+
+      {isPaid && result.receipt ? (
+        <section className="space-y-8">
+          <ReceiptImage 
+            receipt={result.receipt} 
+            mechaturaOrder={result.program === "mechatura" ? result.order?.rawOrder : undefined} 
+          />
+
+          {result.program === "mechatura" && result.order?.rawOrder && (
+            <MechaturaSuccessModal />
+          )}
+        </section>
+      ) : null}
     </main>
   );
 }

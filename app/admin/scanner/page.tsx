@@ -3,7 +3,10 @@
 import { useRef, useState } from "react"
 import { Scanner } from "@yudiel/react-qr-scanner"
 import { CheckCircle2, XCircle } from "lucide-react"
-import { useVerifySeminarRegistrationMutation } from "@/hooks/mutations/use-admin-mutations"
+import {
+    useVerifyMechaturaTeamMutation,
+    useVerifySeminarRegistrationMutation,
+} from "@/hooks/mutations/use-admin-mutations"
 
 const hasRawValue = (value: unknown): value is { rawValue: string } =>
     typeof value === "object" &&
@@ -12,21 +15,39 @@ const hasRawValue = (value: unknown): value is { rawValue: string } =>
     typeof value.rawValue === "string"
 
 export default function ScannerPage() {
-    const verifyRegistration = useVerifySeminarRegistrationMutation()
+    const verifySeminarRegistration = useVerifySeminarRegistrationMutation()
+    const verifyMechaturaTeam = useVerifyMechaturaTeamMutation()
     const [scanResult, setScanResult] = useState<{ success: boolean; message: string; name?: string } | null>(null)
     const isScanningRef = useRef(false)
     const lastScannedIdRef = useRef<string | null>(null)
 
     async function onScanSuccess(decodedText: string) {
-        if (isScanningRef.current || decodedText === lastScannedIdRef.current) return
+        const rawValue = decodedText.trim()
+        const isMechaturaTicket = rawValue.startsWith("mechatura:")
+        const registrationId = isMechaturaTicket ? rawValue.slice("mechatura:".length) : rawValue
+
+        if (isScanningRef.current || rawValue === lastScannedIdRef.current) return
 
         isScanningRef.current = true
-        lastScannedIdRef.current = decodedText
+        lastScannedIdRef.current = rawValue
         setScanResult(null)
 
         try {
-            const data = await verifyRegistration.mutateAsync({ registration_id: decodedText })
-            setScanResult({ success: true, message: "Successfully checked in!", name: data.participant.nama_lengkap })
+            if (isMechaturaTicket) {
+                const data = await verifyMechaturaTeam.mutateAsync({ registration_id: registrationId })
+                setScanResult({
+                    success: true,
+                    message: `Mechatura team checked in (${data.team.member_count} members)`,
+                    name: data.team.team_name,
+                })
+            } else {
+                const data = await verifySeminarRegistration.mutateAsync({ registration_id: registrationId })
+                setScanResult({
+                    success: true,
+                    message: "Seminar participant checked in",
+                    name: data.participant.nama_lengkap,
+                })
+            }
         } catch (error) {
             setScanResult({
                 success: false,
@@ -44,11 +65,11 @@ export default function ScannerPage() {
     return (
         <div className="mx-auto w-full max-w-2xl">
             <div className="space-y-4 mb-8 text-center">
-                <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+                <h1 className="text-3xl sm:text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-balance text-foreground">
                     QR Scanner
                 </h1>
                 <p className="text-muted-foreground">
-                    Scan participant QR codes to verify registration and check them in.
+                    Scan seminar participant or Mechatura team QR codes to check them in.
                 </p>
             </div>
 

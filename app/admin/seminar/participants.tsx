@@ -254,7 +254,7 @@ export const columns: ColumnDef<Participants>[] = [
     },
     {
         accessorKey: "attended",
-        header: "Checked In",
+        header: () => <div className="text-center">Checked In</div>,
         cell: ({ row }) => (
             <div className="flex items-center justify-center">
                 <AttendanceCheckbox participant={row.original} />

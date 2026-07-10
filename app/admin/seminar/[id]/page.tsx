@@ -11,7 +11,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { ParticipantActions, type Participants } from "../participants"
+import { ParticipantActions, AttendanceCheckbox, type Participants } from "../participants"
 
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
@@ -211,11 +211,12 @@ export default async function SeminarRegistrationDetails({
                     <TableHeader>
                         <TableRow>
                             <TableHead className="h-12 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">#</TableHead>
-                            <TableHead className="h-12 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Check-In</TableHead>
+                            <TableHead className="h-12 px-4 text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">Checked In</TableHead>
                             <TableHead className="h-12 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Name</TableHead>
                             <TableHead className="h-12 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Role</TableHead>
                             <TableHead className="h-12 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Institution</TableHead>
                             <TableHead className="h-12 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Contact</TableHead>
+                            <TableHead className="h-12 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Arrival Time</TableHead>
                             <TableHead className="h-12 px-4 w-[50px]"></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -224,15 +225,9 @@ export default async function SeminarRegistrationDetails({
                             <TableRow>
                                 <TableCell className="px-4 py-3 font-medium text-muted-foreground text-sm">1</TableCell>
                                 <TableCell className="px-4 py-3">
-                                    {registration.attended ? (
-                                        <span className="inline-flex rounded-full bg-green-100 text-green-700 px-2.5 py-1 text-xs font-medium">
-                                            {formatCheckInTime(registration.check_in_time)}
-                                        </span>
-                                    ) : (
-                                        <span className="inline-flex rounded-full bg-zinc-100 text-zinc-600 px-2.5 py-1 text-xs font-medium">
-                                            Not checked in
-                                        </span>
-                                    )}
+                                    <div className="flex items-center justify-center">
+                                        <AttendanceCheckbox participant={registration as Participants} />
+                                    </div>
                                 </TableCell>
                                 <TableCell className="px-4 py-3 font-medium text-sm">{registration.nama_lengkap}</TableCell>
                                 <TableCell className="px-4 py-3">
@@ -249,6 +244,17 @@ export default async function SeminarRegistrationDetails({
                                     <div className="mt-1">{registration.no_telepon || "-"}</div>
                                 </TableCell>
                                 <TableCell className="px-4 py-3">
+                                    {registration.attended ? (
+                                        <span className="inline-flex rounded-full bg-green-100 text-green-700 px-2.5 py-1 text-xs font-medium">
+                                            {formatCheckInTime(registration.check_in_time)}
+                                        </span>
+                                    ) : (
+                                        <span className="inline-flex rounded-full bg-zinc-100 text-zinc-600 px-2.5 py-1 text-xs font-medium">
+                                            Not checked in
+                                        </span>
+                                    )}
+                                </TableCell>
+                                <TableCell className="px-4 py-3">
                                     <ParticipantActions participant={registration as Participants} hideViewDetails={true} />
                                 </TableCell>
                             </TableRow>
@@ -260,15 +266,9 @@ export default async function SeminarRegistrationDetails({
                                     {memberOffset + idx + 2}
                                 </TableCell>
                                 <TableCell className="px-4 py-3">
-                                    {member.attended ? (
-                                        <span className="inline-flex rounded-full bg-green-100 text-green-700 px-2.5 py-1 text-xs font-medium">
-                                            {formatCheckInTime(member.check_in_time)}
-                                        </span>
-                                    ) : (
-                                        <span className="inline-flex rounded-full bg-zinc-100 text-zinc-600 px-2.5 py-1 text-xs font-medium">
-                                            Not checked in
-                                        </span>
-                                    )}
+                                    <div className="flex items-center justify-center">
+                                        <AttendanceCheckbox participant={member} />
+                                    </div>
                                 </TableCell>
                                 <TableCell className="px-4 py-3 font-medium text-sm">{member.nama_lengkap}</TableCell>
                                 <TableCell className="px-4 py-3">
@@ -280,6 +280,17 @@ export default async function SeminarRegistrationDetails({
                                     <div className="font-medium">{member.asal_institusi || registration.asal_institusi}</div>
                                 </TableCell>
                                 <TableCell className="px-4 py-3 text-muted-foreground text-sm">-</TableCell>
+                                <TableCell className="px-4 py-3">
+                                    {member.attended ? (
+                                        <span className="inline-flex rounded-full bg-green-100 text-green-700 px-2.5 py-1 text-xs font-medium">
+                                            {formatCheckInTime(member.check_in_time)}
+                                        </span>
+                                    ) : (
+                                        <span className="inline-flex rounded-full bg-zinc-100 text-zinc-600 px-2.5 py-1 text-xs font-medium">
+                                            Not checked in
+                                        </span>
+                                    )}
+                                </TableCell>
                                 <TableCell className="px-4 py-3">
                                     <ParticipantActions participant={member} hideViewDetails={true} />
                                 </TableCell>

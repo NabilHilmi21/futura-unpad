@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import {
   okResponseSchema,
+  verifyMechaturaTeamResponseSchema,
   verifyRegistrationResponseSchema,
 } from "@/lib/api/responses";
 import { fetchJson, postJson } from "@/lib/query/fetch-json";
@@ -48,6 +49,41 @@ export function useToggleSeminarAttendanceMutation() {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.seminar.all });
       queryClient.invalidateQueries({
         queryKey: queryKeys.admin.seminar.detail(values.registration_id),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.profile.summary });
+    },
+  });
+}
+
+export function useVerifyMechaturaTeamMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: mutationKeys.admin.mechatura.verify,
+    mutationFn: (values: VerifyRegistrationValues) =>
+      postJson(
+        "/api/admin/verify-mechatura-team",
+        verifyMechaturaTeamResponseSchema,
+        values
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.mechatura.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.profile.summary });
+    },
+  });
+}
+
+export function useToggleMechaturaAttendanceMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: mutationKeys.admin.mechatura.toggleAttendance,
+    mutationFn: (values: ToggleAttendanceValues) =>
+      postJson("/api/admin/toggle-mechatura-attendance", okResponseSchema, values),
+    onSuccess: (_data, values) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.admin.mechatura.all });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.admin.mechatura.detail(values.registration_id),
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.profile.summary });
     },

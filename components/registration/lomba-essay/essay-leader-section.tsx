@@ -1,14 +1,14 @@
-import { FormTextField } from "@/components/registration/form-text-field";
+import { FormTextField } from "@/components/form/form-text-field";
 import type { ClientLombaEssayFormValues } from "@/lib/validation/essay";
 
 export default function EssayLeaderSection() {
   return (
     <section className="space-y-4" aria-labelledby="leader-section-label">
       <div>
-        <h2 id="leader-section-label" className="text-base font-semibold">
+        <h2 id="leader-section-label" className="text-lg font-semibold">
           Ketua Tim
         </h2>
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+        <p className="mt-1 text-sm font-medium leading-relaxed text-neutral-500">
           Ketua tim adalah penanggung jawab utama dan kontak panitia.
         </p>
       </div>

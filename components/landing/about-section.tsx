@@ -4,17 +4,17 @@ import MediaPartnersSection from "./media-partners-section"
 
 export default function AboutSection() {
     return (
-        <section id="about" className="bg-[#fbfbf8] text-slate-950">
-            <div className="lg:mx-auto max-w-6xl gap-16 px-5 py-20 sm:px-8 lg:py-28">
+        <section id="about" className="relative bg-background px-5 sm:px-8">
+            <div className="mx-auto max-w-[82rem] gap-16">
                 <div className="mx-auto max-w-4xl text-center">
                     <div className="flex items-center justify-center gap-4 sm:gap-12 mb-8">
                         <Image src="/hmte-unpad.png" width={170} height={170} alt="hmte-unpad.png" className="w-28 sm:w-[170px] h-auto" />
                         <Image src="/futura-logo-2025.png" alt="futura-logo-2025.png" width={250} height={250} className="w-42 sm:w-[250px] h-auto" />
                     </div>
-                    <h1 className="font-sans text-3xl tracking-tighter leading-snug text-balance text-center md:text-4xl lg:text-5xl">
+                    <h1 className="text-center text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-balance">
                         FUTURA by Himpunan Mahasiswa Teknik Elektro UNPAD
                     </h1>
-                    <p className="mx-auto mt-4 max-w-2xl text-base leading-8 text-slate-600">
+                    <p className="mx-auto mt-4 max-w-2xl text-base leading-8">
                         FUTURA is an annual event organized by Himpunan Mahasiswa Teknik Elektro UNPAD which aims to <span className="font-serif italic">bring together students, researchers, and professionals to share their knowledge, ideas, and innovations in the field of electrical engineering</span>
                     </p>
 

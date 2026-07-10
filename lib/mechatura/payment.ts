@@ -5,6 +5,7 @@ import {
   createRegistrationToken,
   isMechaturaCompetitionType,
   isMidtransCompatibleOrderId,
+  isCompletedPaymentStatus,
   mechaturaCompetitionLabels,
   mechaturaPaymentAmount,
   type MechaturaCompetitionType,
@@ -119,6 +120,10 @@ export function getMechaturaPaymentItemName(order: MechaturaPaymentOrder) {
   return `Mechatura ${mechaturaCompetitionLabels[order.competitionType]}`;
 }
 
+export function isCompletedMechaturaPaymentStatus(status: string | null) {
+  return isCompletedPaymentStatus(status);
+}
+
 export async function ensureMidtransCompatibleMechaturaOrder(
   supabase: SupabaseAdminClient,
   order: MechaturaPaymentOrder
@@ -155,7 +160,7 @@ export async function updateMechaturaPaymentStatus(
   orderId: string,
   status: PaymentStatus
 ) {
-  const completed = status === "paid" || status === "settled";
+  const completed = isCompletedPaymentStatus(status);
 
   const { error } = await supabase
     .from("mechatura_registrations")
@@ -175,6 +180,15 @@ export async function syncMechaturaPaymentStatus(
   supabase: SupabaseAdminClient,
   orderId: string
 ) {
+  const existingOrder = await findMechaturaPaymentOrder(supabase, orderId);
+
+  if (
+    existingOrder &&
+    isCompletedMechaturaPaymentStatus(existingOrder.paymentStatus)
+  ) {
+    return existingOrder.paymentStatus as PaymentStatus;
+  }
+
   const status = await getMidtransTransactionStatus(orderId);
 
   if (!status) {

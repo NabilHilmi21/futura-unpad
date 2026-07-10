@@ -19,11 +19,11 @@ export default function VerificationStepCard({
   children,
 }: VerificationStepCardProps) {
   return (
-    <div className="rounded-[8px] border border-border bg-card p-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border p-8">
         <div>
           <h2 className="text-lg font-semibold">{title}</h2>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+          <p className="mt-1 text-sm font-medium leading-relaxed text-neutral-500">
             {description}
           </p>
         </div>
@@ -41,7 +41,9 @@ export default function VerificationStepCard({
         )}
       </div>
 
-      {children}
+      <div className="p-8">
+        {children}
+      </div>
     </div>
   );
 }

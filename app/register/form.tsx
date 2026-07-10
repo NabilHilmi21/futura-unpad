@@ -315,7 +315,7 @@ function LegalDialog({
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4 text-sm leading-6 text-muted-foreground">
+                <div className="space-y-4 text-sm font-medium leading-relaxed text-neutral-500">
                     {isTerms ? <TermsContent /> : <PrivacyContent />}
                 </div>
 

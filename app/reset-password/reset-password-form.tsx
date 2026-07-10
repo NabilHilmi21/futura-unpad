@@ -51,10 +51,10 @@ export default function ResetPasswordForm() {
     return (
         <main className="mx-auto w-full max-w-xl space-y-10 px-6 py-16 sm:px-8">
             <section className="space-y-2">
-                <h1 className="text-4xl font-semibold tracking-tight text-balance">
+                <h1 className="text-3xl sm:text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-balance">
                     Create a new password
                 </h1>
-                <p className="text-sm leading-6 text-muted-foreground">
+                <p className="text-sm font-medium leading-relaxed text-neutral-500">
                     Use at least 8 characters. After updating, you will sign in again.
                 </p>
             </section>

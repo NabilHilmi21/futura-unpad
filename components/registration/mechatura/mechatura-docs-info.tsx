@@ -9,20 +9,22 @@ export default function MechaturaDocsInfo({
     documentMaxSizeInBytes,
 }: MechaturaDocsInfoProps){
     return (
-        <section className="space-y-4 border rounded-2xl p-4" aria-labelledby="team-section-label">
-            <div>
-                <h2 id="team-section-label" className="font-semibold">
+        <section className="overflow-hidden rounded-xl border border-border bg-card" aria-labelledby="team-section-label">
+            <div className="border-b border-border p-8">
+                <h2 id="team-section-label" className="text-lg font-semibold">
                     Lampiran Anggota Tim
                 </h2>
-                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                <p className="mt-1 text-sm font-medium leading-relaxed text-neutral-500">
                     Mohon isi input di bawah berikut dengan satu file PDF yang berisi atas 3 hal, yaitu:
                 </p>
-                <ul className="mt-1 text-sm leading-6 text-muted-foreground">
+                <ul className="mt-1 text-sm font-medium leading-relaxed text-neutral-500">
                     <li>- Student ID (KTM/Kartu Pelajar) Leader</li>
                     <li>- Student ID Member 2</li>
                     <li>- Student ID Member 3</li>
                 </ul>
             </div>
+    
+            <div className="space-y-6 p-8">
     
             <FormFileField<MechaturaFormValues>
                 name="member_document"
@@ -32,6 +34,7 @@ export default function MechaturaDocsInfo({
                 maxSizeInBytes={documentMaxSizeInBytes}
                 required
             />
+            </div>
         </section>
     )
 }

@@ -1,17 +1,19 @@
-import { FormTextField } from "../form-text-field"
+import { FormTextField } from "@/components/form/form-text-field"
 import { MechaturaFormValues } from "@/lib/validation"
 
 export default function MechaturaMemberInfo(){
     return (
-        <section className="space-y-4 border rounded-2xl p-4" aria-labelledby="team-section-label">
-            <div>
-                <h2 id="team-section-label" className="text-base font-semibold">
+        <section className="overflow-hidden rounded-xl border border-border bg-card" aria-labelledby="team-section-label">
+            <div className="border-b border-border p-8">
+                <h2 id="team-section-label" className="text-lg font-semibold">
                     Identitas Anggota Tim
                 </h2>
-                <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                <p className="mt-1 text-sm font-medium leading-relaxed text-neutral-500">
                     Mohon isi data member tim
                 </p>
             </div>
+            
+            <div className="space-y-6 p-8">
     
             {/* FORM KETUA TIM */}
             <FormTextField<MechaturaFormValues>
@@ -76,6 +78,7 @@ export default function MechaturaMemberInfo(){
                     label="No. WhatsApp Anggota 2"
                     placeholder="Masukkan nama WhatsApp anggota anda"
                 />
+            </div>
             </div>
         </section>
     )

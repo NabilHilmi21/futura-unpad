@@ -11,7 +11,10 @@ import {
   registrationProgramLabels,
   type RegistrationProgram,
 } from "@/lib/payment";
-import { findMechaturaPaymentOrder } from "@/lib/mechatura/payment";
+import {
+  findMechaturaPaymentOrder,
+  isCompletedMechaturaPaymentStatus,
+} from "@/lib/mechatura/payment";
 import {
   getMechaturaPaymentExpiresAt,
   isMechaturaPaymentExpired,
@@ -50,7 +53,7 @@ function InvalidPaymentState() {
         <h1 className="text-2xl font-semibold tracking-tight">
           Payment link is invalid.
         </h1>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        <p className="mt-2 text-sm font-medium leading-relaxed text-neutral-500">
           Please return to registration and submit the form again.
         </p>
         <Button asChild className="mt-6 rounded-xl">
@@ -134,7 +137,7 @@ export default async function PaymentPage({
   const paymentStatus = isPaymentStatus(order.paymentStatus)
     ? order.paymentStatus
     : "unpaid";
-  const isPaid = paymentStatus === "paid" || paymentStatus === "settled";
+  const isPaid = isCompletedMechaturaPaymentStatus(paymentStatus);
   const isExpired = isMechaturaPaymentExpired({
     createdAt: order.createdAt,
     paymentStatus,
@@ -144,10 +147,10 @@ export default async function PaymentPage({
   return (
     <main className="mx-auto w-full max-w-3xl space-y-12 px-6 py-16 sm:px-8">
       <section className="space-y-2">
-        <h1 className="max-w-xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+        <h1 className="max-w-xl text-3xl sm:text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
           Complete Payment.
         </h1>
-        <p className="max-w-lg text-sm leading-6 text-muted-foreground">
+        <p className="max-w-lg text-sm font-medium leading-relaxed text-neutral-500">
           Review your {registrationProgramLabels[order.program]} order before
           continuing to payment.
         </p>

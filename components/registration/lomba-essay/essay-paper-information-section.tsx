@@ -1,6 +1,7 @@
 import { Controller, useFormContext } from "react-hook-form";
 
-import { FormTextField } from "@/components/registration/form-text-field";
+import { FormFileField } from "@/components/form/form-file-field";
+import { FormTextField } from "@/components/form/form-text-field";
 import {
   Field,
   FieldContent,
@@ -22,7 +23,7 @@ export default function EssayPaperInformationSection() {
   return (
     <section className="space-y-4" aria-labelledby="paper-section-label">
       <div>
-        <h2 id="paper-section-label" className="text-base font-semibold">
+        <h2 id="paper-section-label" className="text-lg font-semibold">
           Karya Tulis
         </h2>
       </div>

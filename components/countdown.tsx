@@ -19,29 +19,23 @@ export default function Countdown({ targetDate }: CountdownProps) {
   }, [targetDate]);
 
   return (
-    <div className="flex items-center justify-center gap-3 sm:gap-5">
-      {timeBlocks.map((block, index) => (
-        <div key={block.key} className="flex items-center gap-3 sm:gap-5">
-          <div className="flex flex-col items-center">
-            <div className="flex h-20 w-20 sm:h-28 sm:w-28 lg:h-32 lg:w-32 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-xl shadow-slate-950/20 transition-transform duration-300 hover:scale-105">
-              <span
-                className="text-3xl sm:text-5xl lg:text-6xl font-bold tabular-nums tracking-tight"
-                suppressHydrationWarning
-              >
-                {String(timeLeft[block.key]).padStart(2, "0")}
-              </span>
-            </div>
-
-            <span className="mt-3 text-xs sm:text-sm font-semibold uppercase tracking-widest text-slate-500">
-              {block.label}
+    <div className="flex items-center justify-center gap-2 sm:gap-4 lg:gap-6">
+      {timeBlocks.map((block) => (
+        <div key={block.key} className="flex flex-col items-center">
+          {/* Techy, minimalistic box */}
+          <div className="relative flex h-18 w-18 lg:h-24 lg:w-24 items-center justify-center rounded-xl border border-white/10 bg-white/[0.02] backdrop-blur-md shadow-2xl transition-all duration-300 hover:bg-white/[0.05] hover:border-white/20">
+            {/* Subtle glow effect on hover can be added by tweaking borders/bg */}
+            <span
+              className="text-4xl lg:text-5xl font-mono font-medium text-white tabular-nums tracking-tighter"
+              suppressHydrationWarning
+            >
+              {String(timeLeft[block.key]).padStart(2, "0")}
             </span>
           </div>
 
-          {index < timeBlocks.length - 1 && (
-            <span className="text-2xl sm:text-4xl font-bold text-slate-300 -mt-6 sm:-mt-8 animate-countdown-pulse">
-              :
-            </span>
-          )}
+          <span className="mt-3 sm:mt-4 text-[0.6rem] sm:text-xs font-medium uppercase tracking-[0.2em] text-neutral-500">
+            {block.label}
+          </span>
         </div>
       ))}
     </div>

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import LoginForm from "./form"
 import { getCachedAuth } from "@/lib/auth"
+import { Metadata } from "next"
 
 type LoginSearchParams = Promise<Record<string, string | string[] | undefined>>
 
@@ -22,6 +23,11 @@ const getSafeRedirectPath = (value: string | string[] | undefined) => {
     return next
 }
 
+export const metadata: Metadata = {
+  title: "Log in",
+  description: "Please fill your Futura account identity"
+}
+
 export default async function LoginPage({
     searchParams,
 }: {
@@ -35,12 +41,12 @@ export default async function LoginPage({
     }
 
     return (
-        <main className="w-full mx-auto max-w-xl items-start space-y-12 px-6 py-16 sm:px-8 ">
+        <main className="w-full grid content-center mx-auto max-w-xl min-h-[calc(106svh-0px)] items-start space-y-12 px-6 py-16 sm:px-8 ">
             <section className="space-y-2">
-                <h1 className="max-w-md text-4xl font-semibold tracking-tight text-balance">
+                <h1 className="max-w-md text-3xl sm:text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-balance">
                     Sign in to your Futura account
                 </h1>
-                <p className="max-w-sm text-sm leading-6 text-muted-foreground">
+                <p className="max-w-sm text-sm font-medium leading-relaxed text-neutral-500">
                     Get notified on every seminar
                 </p>
             </section>

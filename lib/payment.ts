@@ -98,6 +98,15 @@ export const paymentStatusLabels: Record<PaymentStatus, string> = {
 export const isPaymentStatus = (value: unknown): value is PaymentStatus =>
   typeof value === "string" && value in paymentStatusLabels;
 
+export const completedPaymentStatuses = ["paid", "settled"] as const satisfies readonly PaymentStatus[];
+
+const completedPaymentStatusSet = new Set<PaymentStatus>(completedPaymentStatuses);
+
+export const isCompletedPaymentStatus = (
+  value: unknown
+): value is (typeof completedPaymentStatuses)[number] =>
+  isPaymentStatus(value) && completedPaymentStatusSet.has(value);
+
 const createOrderRandomSuffix = () => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID().replaceAll("-", "").slice(0, 12).toUpperCase();

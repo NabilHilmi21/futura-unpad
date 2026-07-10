@@ -25,7 +25,7 @@ export default function EssayPaymentStep({
 }: EssayPaymentStepProps) {
   return (
     <FieldGroup className="gap-6">
-      <div className="rounded-[8px] border border-border bg-card p-6">
+      <div className="overflow-hidden rounded-xl border border-border bg-card p-8">
         <div className="mb-5 rounded-[8px] bg-muted p-3">
           <p className="text-xs text-muted-foreground">Registration ID</p>
           <p className="font-mono text-sm font-semibold">{registrationId}</p>
@@ -53,7 +53,7 @@ export default function EssayPaymentStep({
         </dl>
       </div>
 
-      <div className="rounded-[8px] border p-4 text-sm leading-6 text-muted-foreground">
+      <div className="rounded-[8px] border p-4 text-sm font-medium leading-relaxed text-neutral-500">
         Setelah langkah ini, registrasi tim akan disimpan dan halaman pembayaran
         akan membuat atau membuka kembali invoice untuk tim ini.
       </div>

@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
 import { createAdminClient } from "@/lib/supabase-admin";
+import { isCompletedPaymentStatus } from "@/lib/payment";
 import MechaturaListClient from "./mechatura-list-client";
 import type {
     AdminMechaturaLeader,
@@ -162,7 +163,7 @@ export default async function MechaturaAdminPage({
             stats={{
                 totalTeams: statsRegistrations.length,
                 paidTeams: countBy(statsRegistrations, (registration) =>
-                    registration.payment_status === "paid" || registration.payment_status === "settled"
+                    isCompletedPaymentStatus(registration.payment_status)
                 ),
                 sumoTeams: countBy(statsRegistrations, (registration) => registration.competition_type === "sumo"),
                 transporterTeams: countBy(statsRegistrations, (registration) => registration.competition_type === "transporter"),

@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { EB_Garamond, Geist_Mono, Inter } from "next/font/google";
+import { EB_Garamond, Geist_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import Navbar from "@/components/layout/navbar";
+import { NavbarDemo } from "@/components/layout/navbar";
 import NavigationLoading from "@/components/navigation-loading";
 import AuthRouteGuard from "@/components/auth-route-guard";
 import { AuthProvider } from "@/components/auth-provider";
 import QueryProvider from "@/components/query-provider";
 import type { AuthSession } from "@/lib/api/auth-session";
 import { getCachedAuth } from "@/lib/auth";
+import HoverFooter from "@/components/layout/footer"
 
-const inter = Inter({
+const space_grotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
@@ -29,8 +30,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Futura Seminar",
-  description: "Minimal seminar registration for Futura.",
+  title: "Futura 2026",
+  description: "by HMTE Universitas Padjadjaran",
 };
 
 export default async function RootLayout({
@@ -56,13 +57,13 @@ export default async function RootLayout({
       className={cn(
         "h-full",
         "antialiased",
-        inter.variable,
+        space_grotesk.variable,
         ebGaramond.variable,
         geistMono.variable,
         "font-sans"
       )}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="dark">
         <QueryProvider>
           <AuthProvider initialSession={initialAuthSession}>
             <Suspense fallback={null}>
@@ -71,8 +72,11 @@ export default async function RootLayout({
             <Suspense fallback={null}>
               <AuthRouteGuard />
             </Suspense>
-            <Navbar />
-            {children}
+            <NavbarDemo />
+            <div className="w-full flex-1">
+              {children}
+            </div>
+            <HoverFooter />
           </AuthProvider>
         </QueryProvider>
       </body>

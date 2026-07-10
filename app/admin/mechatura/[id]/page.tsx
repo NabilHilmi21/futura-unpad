@@ -37,6 +37,8 @@ const detailColumns = [
     "member_document_path",
     "robot_document_path",
     "created_at",
+    "paid_at",
+    "check_in_time",
 ].join(",");
 
 type MechaturaDetailRegistration = {
@@ -51,6 +53,8 @@ type MechaturaDetailRegistration = {
     member_document_path: string | null;
     robot_document_path: string | null;
     created_at: string | null;
+    paid_at: string | null;
+    check_in_time: string | null;
 };
 
 type MechaturaDetailMember = {
@@ -189,6 +193,14 @@ export default async function MechaturaRegistrationDetails({
                     <DetailItem
                         label="Submitted"
                         value={formatMechaturaDateTime(registrationData.created_at)}
+                    />
+                    <DetailItem
+                        label="Checked In"
+                        value={formatMechaturaDateTime(registrationData.check_in_time)}
+                    />
+                    <DetailItem
+                        label="Paid At"
+                        value={formatMechaturaDateTime(registrationData.paid_at)}
                     />
                     <DetailItem
                         label="Payment"

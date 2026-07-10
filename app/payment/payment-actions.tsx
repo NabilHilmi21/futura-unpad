@@ -2,20 +2,27 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCreateMidtransPaymentMutation } from "@/hooks/mutations/use-payment-mutations";
 import { ApiError } from "@/lib/query/fetch-json";
+import { toInternalAppHref } from "@/lib/navigation";
 
 type PaymentActionsProps = {
   orderId: string;
 };
 
 export default function PaymentActions({ orderId }: PaymentActionsProps) {
+  const router = useRouter();
   const [errorMessage, setErrorMessage] = useState("");
   const createPayment = useCreateMidtransPaymentMutation();
 
   const handlePay = async () => {
+    if (createPayment.isPending) {
+      return;
+    }
+
     setErrorMessage("");
 
     const data = await createPayment.mutateAsync({ order_id: orderId }).catch((error) => {
@@ -37,6 +44,13 @@ export default function PaymentActions({ orderId }: PaymentActionsProps) {
     });
 
     if (data?.redirect_url) {
+      const appHref = toInternalAppHref(data.redirect_url, window.location.origin);
+
+      if (appHref) {
+        router.push(appHref);
+        return;
+      }
+
       window.location.assign(data.redirect_url);
       return;
     }

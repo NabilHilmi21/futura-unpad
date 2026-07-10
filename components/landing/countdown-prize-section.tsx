@@ -19,17 +19,17 @@ export function CountdownPrizeSection() {
   return (
     <section
       id="countdown"
-      className="relative bg-[#fbfbf8] px-5 py-24 text-slate-950 sm:px-8 overflow-hidden"
+      className="relative overflow-hidden bg-background px-5 py-24 text-slate-950 sm:px-8"
     >
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-primary/5 blur-[140px] pointer-events-none rounded-[100%]" />
 
-      <div className="relative mx-auto max-w-4xl z-10">
+      <div className="relative mx-auto max-w-[82rem] z-10">
         {/* Countdown Timer */}
         <div className="flex items-center justify-center gap-3 sm:gap-5">
           {timeBlocks.map((block, index) => (
             <div key={block.key} className="flex items-center gap-3 sm:gap-5">
               <div className="flex flex-col items-center">
-                <div className="flex h-20 w-20 sm:h-28 sm:w-28 lg:h-32 lg:w-32 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-xl shadow-slate-950/20 transition-transform duration-300 hover:scale-105">
+                <div className="flex h-20 w-20 sm:h-28 sm:w-28 lg:h-32 lg:w-32 items-center justify-center rounded-2xl bg-slate-100 text-black shadow-xl shadow-slate-950/20 transition-transform duration-300 hover:scale-105">
                   <span
                     className="text-3xl sm:text-5xl lg:text-6xl font-bold tabular-nums tracking-tight"
                     suppressHydrationWarning
@@ -54,7 +54,7 @@ export function CountdownPrizeSection() {
 
         {/* Prize Text */}
         <div className="mt-16 text-center">
-          <p className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tighter leading-tight text-slate-950">
+          <p className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tighter leading-tight">
             Win a total prize of
           </p>
           <div className="mt-4 inline-block relative">

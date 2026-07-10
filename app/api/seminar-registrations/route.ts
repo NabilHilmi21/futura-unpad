@@ -99,7 +99,7 @@ export async function POST(request: Request) {
         status_akademika: parsed.data.status_akademika,
         registration_type: "group",
         group_name: parsed.data.group_name || null,
-        group_id: groupId,
+        group_id: groupId, 
         is_main_contact: false,
       });
     }

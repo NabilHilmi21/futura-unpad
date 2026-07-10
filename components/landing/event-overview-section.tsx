@@ -9,10 +9,10 @@ const points = [
 
 export function EventOverviewSection() {
   return (
-    <section id="programs" aria-labelledby="overview-heading" className="relative bg-[#fbfbf8] px-5 py-24 text-slate-950 sm:px-8">
+    <section id="programs" aria-labelledby="overview-heading" className="relative bg-background px-5 py-24 text-slate-950 sm:px-8">
       <div className="absolute right-0 top-0 w-[30%] h-[30%] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
-      <div className="relative mx-auto grid max-w-6xl gap-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-start z-10">
+      <div className="relative mx-auto grid max-w-[82rem] gap-16 lg:grid-cols-[0.9fr_1.1fr] lg:items-start z-10">
         <div className="max-w-xl">
           <h2
             id="overview-heading"

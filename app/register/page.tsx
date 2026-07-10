@@ -34,12 +34,12 @@ export default async function LoginPage({
     }
 
     return (
-        <main className="mx-auto w-full max-w-xl items-start space-y-12 px-6 py-16 sm:px-8">
+        <main className="mx-auto w-full max-w-xl min-h-[calc(106svh-0px)] items-start space-y-12 px-6 py-32 sm:px-8">
             <section className="space-y-2">
-                <h1 className="max-w-md text-4xl font-semibold tracking-tight text-balance">
+                <h1 className="max-w-md text-3xl sm:text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-balance">
                     Create a Futura account
                 </h1>
-                <p className="max-w-sm text-sm leading-6 text-muted-foreground">
+                <p className="max-w-sm text-sm font-medium leading-relaxed text-neutral-500">
                     Set up your futura account 
                 </p>
             </section>

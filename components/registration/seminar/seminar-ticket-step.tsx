@@ -23,8 +23,8 @@ export default function SeminarTicketStep({
 }: SeminarTicketStepProps) {
   return (
     <FieldGroup className="gap-6">
-      <section className="rounded-[8px] border border-border bg-card p-6">
-        <div className="flex items-start gap-4">
+      <section className="overflow-hidden rounded-xl border border-border bg-card">
+        <div className="flex items-start gap-4 p-8 border-b">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-muted">
             <CheckCircle2 className="h-5 w-5 text-foreground" />
           </span>
@@ -32,19 +32,16 @@ export default function SeminarTicketStep({
             <h2 className="text-lg font-semibold">
               Your seminar ticket is ready
             </h2>
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            <p className="mt-2 text-sm font-medium leading-relaxed text-neutral-500">
               Your Futura seminar registration is saved. Download your ticket or
               keep the registration ID for check-in.
             </p>
           </div>
         </div>
 
-        <div className="mt-6 rounded-[8px] border border-dashed border-border p-5">
+        <div className="p-8">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                Futura Seminar
-              </p>
               <h3 className="mt-3 text-2xl font-semibold tracking-tight">
                 {values.nama}
               </h3>

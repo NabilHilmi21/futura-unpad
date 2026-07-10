@@ -40,6 +40,13 @@ export const verifyRegistrationResponseSchema = okResponseSchema.extend({
   }),
 });
 
+export const verifyMechaturaTeamResponseSchema = okResponseSchema.extend({
+  team: z.object({
+    team_name: z.string(),
+    member_count: z.number(),
+  }),
+});
+
 export type AuthRegisterResponse = z.infer<typeof authRegisterResponseSchema>;
 export type SeminarRegistrationResponse = z.infer<
   typeof seminarRegistrationResponseSchema
@@ -52,4 +59,7 @@ export type MidtransPaymentResponse = z.infer<
 >;
 export type VerifyRegistrationResponse = z.infer<
   typeof verifyRegistrationResponseSchema
+>;
+export type VerifyMechaturaTeamResponse = z.infer<
+  typeof verifyMechaturaTeamResponseSchema
 >;

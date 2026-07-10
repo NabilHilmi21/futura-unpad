@@ -27,15 +27,15 @@ export default function MechaturaCoachInfo() {
 
   return (
     <section
-      className="space-y-4 border rounded-2xl p-4"
+      className="overflow-hidden rounded-xl border border-border bg-card"
       aria-labelledby="coach-section-label"
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border p-8">
         <div>
-          <h2 id="coach-section-label" className="text-base font-semibold">
+          <h2 id="coach-section-label" className="text-lg font-semibold">
             Identitas pembina tim
           </h2>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+          <p className="mt-1 text-sm font-medium leading-relaxed text-neutral-500">
             Tambahkan pembina jika tim anda memiliki pembina.
           </p>
         </div>
@@ -59,6 +59,7 @@ export default function MechaturaCoachInfo() {
         )}
       </div>
 
+      <div className="space-y-6 p-8">
       {hasCoach ? (
         <>
           <FormTextField<MechaturaFormValues>
@@ -85,6 +86,7 @@ export default function MechaturaCoachInfo() {
           </div>
         </>
       ) : null}
+      </div>
     </section>
   );
 }

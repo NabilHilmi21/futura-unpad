@@ -1,4 +1,8 @@
-import type { MechaturaCompetitionType, PaymentStatus } from "@/lib/payment";
+import {
+    completedPaymentStatuses as sharedCompletedPaymentStatuses,
+    type MechaturaCompetitionType,
+    type PaymentStatus,
+} from "@/lib/payment";
 
 export type AdminSearchParams = Promise<Record<string, string | string[] | undefined>>;
 export type MechaturaCategoryFilter = "all" | MechaturaCompetitionType;
@@ -15,7 +19,7 @@ export const paymentFilters: MechaturaPaymentFilter[] = [
     "expired",
     "cancelled",
 ];
-export const completedPaymentStatuses: PaymentStatus[] = ["paid", "settled"];
+export const completedPaymentStatuses = [...sharedCompletedPaymentStatuses];
 export const pageSizeOptions = [10, 20, 30, 40] as const;
 export const defaultPageSize = 10;
 
@@ -27,6 +31,8 @@ export const mechaturaRegistrationColumns = [
     "competition_type",
     "robot_name",
     "payment_status",
+    "attended",
+    "check_in_time",
     "created_at",
 ].join(",");
 
