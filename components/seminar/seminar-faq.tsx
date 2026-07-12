@@ -6,7 +6,7 @@ import {
 
 const seminarFaqGroups: FAQGroup[] = [
   {
-    title: "National Seminar",
+    title: "Seminar Nasional",
     headingPadding: "pb-6",
     faqs: nationalSeminarFaqs,
   },
@@ -16,7 +16,7 @@ export function SeminarFAQ() {
   return (
     <FAQSection
       id="seminar-faq"
-      title="Seminar Questions."
+      title="FAQ Seminar Nasionals"
       groups={seminarFaqGroups}
       showAllButton={false}
     />

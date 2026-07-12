@@ -18,12 +18,12 @@ export default function AboutSection() {
                         FUTURA is an annual event organized by Himpunan Mahasiswa Teknik Elektro UNPAD which aims to <span className="font-serif italic">bring together students, researchers, and professionals to share their knowledge, ideas, and innovations in the field of electrical engineering</span>
                     </p>
 
-                    <div className="mt-8 w-full text-sm font-medium">
+                    {/* <div className="mt-8 w-full text-sm font-medium">
                         <SponsorsSection />
                     </div>
                     <div className="w-full text-sm font-medium">
                         <MediaPartnersSection />
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </section>

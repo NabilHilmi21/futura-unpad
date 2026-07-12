@@ -36,7 +36,7 @@ export function RuangLingkup() {
           Seminar ini akan membawa kamu mengeksplorasi berbagai inovasi yang sedang mengubah dunia. Berikut adalah beberapa topik seru yang akan kita kupas tuntas!
         </p>
       </div>
-      {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {scopes.map((scope, idx) => (
           <WobbleCard key={idx} containerClassName={`min-h-[300px] ${scope.className}`}>
             <h2 className="max-w-80 text-left text-balance text-2xl lg:text-3xl font-semibold tracking-tight text-white">
@@ -47,7 +47,7 @@ export function RuangLingkup() {
             </p>
           </WobbleCard>
         ))}
-      </div> */}
+      </div>
     </section>
   );
 }
