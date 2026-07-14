@@ -127,11 +127,8 @@
 import React from "react";
 
 import { AnimatePresence, motion } from "motion/react";
-import { CanvasRevealEffect } from "@/components/ui/canvas-reveal-effect";
 
 export function RegistrationCards({ title = "I'm static and I know it.", image, speaker }: { title?: string; image?: string; speaker?: string }) {
-  // Set this to true to enable the dots background
-  const showDotsBackground = false;
 
   return (
     <div className="border border-black/[0.2] group/canvas-card flex items-center justify-center dark:border-white/[0.2] max-w-xs w-full p-4 relative h-[24rem] sm:h-[30rem] bg-white dark:bg-black">
@@ -146,22 +143,6 @@ export function RegistrationCards({ title = "I'm static and I know it.", image, 
           alt={speaker || title} 
           className="absolute inset-0 w-full h-full object-cover z-10 group-hover/canvas-card:opacity-0 transition duration-500" 
         />
-      )}
-
-      {showDotsBackground && (
-        <AnimatePresence>
-          <div className="h-full w-full absolute inset-0 z-0">
-            <CanvasRevealEffect
-              animationSpeed={3}
-              containerClassName="bg-black"
-              colors={[
-                [236, 72, 153],
-                [232, 121, 249],
-              ]}
-              dotSize={2}
-            />
-          </div>
-        </AnimatePresence>
       )}
 
       <div className="relative z-20">

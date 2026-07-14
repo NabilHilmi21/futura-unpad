@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 
 import PaymentProgress from "@/components/registration/payment-progress";
-import { ReceiptImage, type ReceiptData } from "@/components/registration/payment-receipt";
+import { ReceiptImage, type ReceiptData } from "@/components/registration/mechatura-invoice";
 import { MechaturaSuccessModal } from "./mechatura-success-modal";
 import { Button } from "@/components/ui/button";
 import {

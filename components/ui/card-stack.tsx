@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion, useInView } from "framer-motion";
 import { SquareArrowOutUpRight } from "lucide-react";
 import Link from "next/link";
 
@@ -124,6 +124,8 @@ export function CardStack<T extends CardStackItem>({
         wrapIndex(initialIndex, len),
     );
     const [hovering, setHovering] = React.useState(false);
+    const containerRef = React.useRef<HTMLDivElement>(null);
+    const isInView = useInView(containerRef, { once: false, amount: 0.2 });
 
     // keep active in bounds if items change
     React.useEffect(() => {
@@ -167,6 +169,7 @@ export function CardStack<T extends CardStackItem>({
         if (!autoAdvance) return;
         if (reduceMotion) return;
         if (!len) return;
+        if (!isInView) return;
         if (pauseOnHover && hovering) return;
 
         const id = window.setInterval(
@@ -183,6 +186,7 @@ export function CardStack<T extends CardStackItem>({
         hovering,
         pauseOnHover,
         reduceMotion,
+        isInView,
         len,
         loop,
         active,
@@ -195,6 +199,7 @@ export function CardStack<T extends CardStackItem>({
 
     return (
         <div
+            ref={containerRef}
             className={cn("w-full", className)}
             onMouseEnter={() => setHovering(true)}
             onMouseLeave={() => setHovering(false)}

@@ -3,11 +3,12 @@ export const fetchCache = "force-no-store";
 
 import { createAdminClient } from "@/lib/supabase-admin";
 import { isCompletedPaymentStatus } from "@/lib/payment";
+import { requireAdminOrRedirect } from "@/lib/auth";
 import MechaturaListClient from "./mechatura-list-client";
 import type {
     AdminMechaturaLeader,
     AdminMechaturaRegistration,
-} from "./_components/mechatura-table";
+} from "./teams";
 import {
     type AdminSearchParams,
     applyMechaturaFilters,
@@ -20,6 +21,8 @@ import {
     paymentFilters,
     toSearchPattern,
 } from "./_lib/mechatura-utils";
+import { Suspense } from "react"
+import AdminLoading from "../admin-loading"
 
 type MechaturaStatsRow = {
     payment_status: string | null;
@@ -31,11 +34,12 @@ const countBy = <TRow,>(
     predicate: (row: TRow) => boolean
 ) => rows.reduce((count, row) => count + (predicate(row) ? 1 : 0), 0);
 
-export default async function MechaturaAdminPage({
+async function MechaturaAdminData({
     searchParams,
 }: {
     searchParams: AdminSearchParams;
 }) {
+    await requireAdminOrRedirect();
     const params = await searchParams;
     const categoryParam = firstParam(params.category);
     const paymentParam = firstParam(params.payment);
@@ -171,3 +175,4 @@ export default async function MechaturaAdminPage({
         />
     );
 }
+export default function MechaturaAdminPage({ searchParams }: { searchParams: AdminSearchParams }) { return <Suspense fallback={<AdminLoading />}><MechaturaAdminData searchParams={searchParams} /></Suspense> }

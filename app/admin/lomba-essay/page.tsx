@@ -3,6 +3,7 @@ export const fetchCache = "force-no-store"
 
 import { AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { requireAdminOrRedirect } from "@/lib/auth"
 import {
     Select,
     SelectContent,
@@ -10,14 +11,17 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { Suspense } from "react"
+import AdminLoading from "../admin-loading"
 
 type AdminSearchParams = Promise<Record<string, string | string[] | undefined>>
 
-export default async function LKTIAdminPage({
+async function LKTIAdminData({
     searchParams,
 }: {
     searchParams: AdminSearchParams
 }) {
+    await requireAdminOrRedirect()
     const params = await searchParams
     const categoryParam = Array.isArray(params.category)
         ? params.category[0]
@@ -96,3 +100,4 @@ export default async function LKTIAdminPage({
         </div>
     )
 }
+export default function LKTIAdminPage({ searchParams }: { searchParams: AdminSearchParams }) { return <Suspense fallback={<AdminLoading />}><LKTIAdminData searchParams={searchParams} /></Suspense> }

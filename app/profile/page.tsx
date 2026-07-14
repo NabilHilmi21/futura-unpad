@@ -2,7 +2,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { Ticket, Bot, BookOpen, CheckCircle2, Clock, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { ReceiptDownloadButton, type ReceiptData } from "@/components/registration/payment-receipt"
+import { ReceiptDownloadButton, type ReceiptData } from "@/components/registration/mechatura-invoice"
 import {
   formatCurrency,
   isAcademicStatus,
@@ -106,14 +106,13 @@ export default async function ProfilePage() {
     throw new Error(error?.message ?? mechaturaError?.message)
   }
 
-  const mechaturaLeaderPromise = latestMechaturaRegistration
+  const mechaturaMembersPromise = latestMechaturaRegistration
     ? adminSupabase
       .from("mechatura_members")
-      .select("full_name,email,phone")
+      .select("full_name,email,phone,is_leader")
       .eq("registration_id", latestMechaturaRegistration.id)
-      .eq("is_leader", true)
-      .maybeSingle<ProfileMechaturaLeader>()
-    : Promise.resolve({ data: null, error: null })
+      .order("is_leader", { ascending: false })
+    : Promise.resolve({ data: [], error: null })
 
   const groupMembersPromise = isProfileGroupRegistration(latestRegistration) && latestRegistration?.group_id
     ? adminSupabase
@@ -126,13 +125,16 @@ export default async function ProfilePage() {
     : Promise.resolve({ data: [], error: null })
 
   const [
-    { data: mechaturaLeader, error: mechaturaLeaderError },
+    { data: mechaturaMembersRaw, error: mechaturaMembersError },
     { data: membersData, error: membersError },
-  ] = await Promise.all([mechaturaLeaderPromise, groupMembersPromise])
+  ] = await Promise.all([mechaturaMembersPromise, groupMembersPromise])
 
-  if (mechaturaLeaderError || membersError) {
-    throw new Error(mechaturaLeaderError?.message ?? membersError?.message)
+  if (mechaturaMembersError || membersError) {
+    throw new Error(mechaturaMembersError?.message ?? membersError?.message)
   }
+
+  const mechaturaMembers = mechaturaMembersRaw || [];
+  const mechaturaLeader = mechaturaMembers.find(m => m.is_leader);
 
   const groupMembers = (membersData ?? []) as DownloadRegistrationData[]
   const totalParticipants = latestRegistration ? 1 + groupMembers.length : 0
@@ -161,12 +163,12 @@ export default async function ProfilePage() {
   const mechaturaReceipt: ReceiptData | null =
     latestMechaturaRegistration && isMechaturaPaymentComplete
       ? {
-        title: "Mechatura Payment Receipt",
+        title: "Mechatura Event Registration",
         name: `${latestMechaturaRegistration.team_name} / ${mechaturaLeader?.full_name ?? "Team Leader"}`,
         email: mechaturaLeader?.email ?? user.email ?? "-",
         phone: mechaturaLeader?.phone ?? "-",
         institution: latestMechaturaRegistration.institution ?? "-",
-        program: "Mechatura",
+        program: "Mechatura Robotics Competition",
         ticket: mechaturaTicketLabel,
         amount: formatCurrency(latestMechaturaRegistration.payment_amount ?? 0),
         paidAt: latestMechaturaRegistration.paid_at
@@ -174,11 +176,21 @@ export default async function ProfilePage() {
           : "-",
         invoiceId: latestMechaturaRegistration.midtrans_order_id,
         referenceId: latestMechaturaRegistration.midtrans_order_id,
+        mechaturaDetails: {
+          teamName: latestMechaturaRegistration.team_name || "-",
+          robotName: latestMechaturaRegistration.robot_name || "-",
+          competitionType: mechaturaCompetition ? mechaturaCompetitionLabels[mechaturaCompetition] : "-",
+          members: mechaturaMembers.map(m => ({
+            name: m.full_name || "-",
+            email: m.email || "-",
+            phone: m.phone || "-"
+          }))
+        }
       }
       : null
 
   return (
-    <div className="mx-auto w-full max-w-6xl">
+    <div className="mx-auto w-full max-w-7xl">
       <section className="flex flex-col gap-4 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between mb-8">
         <div className="space-y-2">
           <h1 className="text-3xl sm:text-3xl sm:text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
@@ -192,217 +204,209 @@ export default async function ProfilePage() {
 
       <div className="space-y-6 max-w-3xl">
 
-          {/* SEMINAR CARD */}
-          <div className="rounded-xl border border-border bg-card overflow-hidden">
-            <div className="border-b border-border bg-muted/30 px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-3 pr-6">
-                <div className="bg-background border border-border p-2 rounded-lg">
-                  <Ticket className="h-4 w-4 text-foreground" />
-                </div>
-                <div>
-                  <h2 className="font-semibold">National Seminar</h2>
-                  <p className="text-xs text-muted-foreground">
-                    {latestRegistration ? `Registered on ${formatDate(latestRegistration.created_at)}` : "No active registration"}
-                  </p>
-                </div>
+        {/* SEMINAR CARD */}
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+          <div className="border-b border-border bg-muted/30 px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3 pr-6">
+              <div className="bg-background border border-border p-2 rounded-lg">
+                <Ticket className="h-4 w-4 text-foreground" />
               </div>
-              {latestRegistration && (
-                <>
-                  <div className="flex lg:hidden gap-2">
-                    <span className={`inline-flex items-center rounded-md border p-2 text-xs font-semibold ${checkedInCount > 0 ? 'border-border bg-background text-foreground' : 'border-border bg-muted text-muted-foreground'}`}>
-                      {checkedInCount > 0 ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Clock className="w-4 h-4 text-muted-foreground" />}
-                    </span>
-                  </div>
-                  <div className="hidden lg:flex gap-2">
-                    <span className={`inline-flex items-center rounded-md border py-2 px-3 text-xs font-semibold ${checkedInCount > 0 ? 'border-border bg-background text-foreground' : 'border-border bg-muted text-muted-foreground'}`}>
-                      {checkedInCount > 0 ? <CheckCircle2 className="w-4 h-4 mr-1.5 text-green-500" /> : <Clock className="w-4 h-4 mr-1.5 text-muted-foreground" />}
-                      {latestRegistration.registration_type === "group" ? `${checkedInCount}/${totalParticipants} Checked In` : (latestRegistration.attended ? "Checked In" : "Waiting to Check In")}
-                    </span>
-                  </div>
-                </>
-                
-              )}
+              <div>
+                <h2 className="font-semibold">National Seminar</h2>
+                <p className="text-xs text-muted-foreground">
+                  {latestRegistration ? `Registered on ${formatDate(latestRegistration.created_at)}` : "No active registration"}
+                </p>
+              </div>
             </div>
-
-            <div className="p-6">
-              {latestRegistration ? (
-                <>
-                  <div className="flex flex-col sm:flex-row gap-6">
-                    <div className="grid gap-5 text-sm sm:grid-cols-2 flex-grow">
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Participant Name</p>
-                        <p className="font-medium">{latestRegistration.nama_lengkap}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Institution</p>
-                        <p className="font-medium">{latestRegistration.asal_institusi}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Phone Number</p>
-                        <p className="font-medium">{latestRegistration.no_telepon}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Status / Fee</p>
-                        <p className="font-medium">
-                          {academicStatus ? statusLabels[academicStatus] : "-"} <span className="text-muted-foreground font-normal ml-1">(Free)</span>
-                        </p>
-                      </div>
-                    </div>
-                    {latestRegistration.registration_type !== "group" && (
-                      <div className="flex flex-col items-center justify-center self-start shrink-0 p-4 bg-white rounded-xl border border-border">
-                          <QRCodeSVG value={latestRegistration.id} size={120} />
-                          <p className="text-[10px] text-muted-foreground mt-3 uppercase font-semibold tracking-wider">Ticket QR</p>
-                      </div>
-                    )}
-                  </div>
-                  <div className="mt-6">
-                    <TicketDownloadButton 
-                        mainContact={latestRegistration as DownloadRegistrationData} 
-                        members={groupMembers} 
-                    />
-                  </div>
-                </>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-6 text-center">
-                  <p className="text-sm text-muted-foreground mb-4">You have not registered for the National Seminar yet.</p>
-                  <Button asChild className="h-10 rounded-xl">
-                    <Link href="/registration/seminar" prefetch={false}>Register for Seminar</Link>
-                  </Button>
+            {latestRegistration && (
+              <>
+                <div className="flex lg:hidden gap-2">
+                  <span className={`inline-flex items-center rounded-md border p-2 text-xs font-semibold ${checkedInCount > 0 ? 'border-border bg-background text-foreground' : 'border-border bg-muted text-muted-foreground'}`}>
+                    {checkedInCount > 0 ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Clock className="w-4 h-4 text-muted-foreground" />}
+                  </span>
                 </div>
-              )}
-            </div>
+                <div className="hidden lg:flex gap-2">
+                  <span className={`inline-flex items-center rounded-md border py-2 px-3 text-xs font-semibold ${checkedInCount > 0 ? 'border-border bg-background text-foreground' : 'border-border bg-muted text-muted-foreground'}`}>
+                    {checkedInCount > 0 ? <CheckCircle2 className="w-4 h-4 mr-1.5 text-green-500" /> : <Clock className="w-4 h-4 mr-1.5 text-muted-foreground" />}
+                    {latestRegistration.registration_type === "group" ? `${checkedInCount}/${totalParticipants} Checked In` : (latestRegistration.attended ? "Checked In" : "Waiting to Check In")}
+                  </span>
+                </div>
+              </>
+
+            )}
           </div>
 
-          {/* MECHATURA CARD */}
-          <div className="rounded-xl border border-border bg-card overflow-hidden">
-            <div className="border-b border-border bg-muted/30 px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="bg-background border border-border p-2 rounded-lg">
-                  <Bot className="h-4 w-4 text-foreground" />
-                </div>
-                <div>
-                  <h2 className="font-semibold">Mechatura Competition</h2>
-                  <p className="text-xs text-muted-foreground">
-                    {latestMechaturaRegistration ? `Registered on ${formatDate(latestMechaturaRegistration.created_at)}` : "No active registration"}
-                  </p>
-                </div>
-              </div>
-              {latestMechaturaRegistration && (
-                <span className={`inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-semibold ${isMechaturaPaymentComplete ? 'border-border bg-background text-foreground' : 'border-border bg-muted text-muted-foreground'}`}>
-                  {isMechaturaPaymentComplete ? <CheckCircle2 className="w-3 h-3 mr-1.5 text-muted-foreground" /> : <Clock className="w-3 h-3 mr-1.5 text-muted-foreground" />}
-                  {paymentStatusLabels[mechaturaPaymentStatus]}
-                </span>
-              )}
-            </div>
-
-            <div className="p-6">
-              {latestMechaturaRegistration ? (
-                <>
-                  <div className="flex flex-col sm:flex-row gap-6">
-                    <div className="grid gap-5 text-sm sm:grid-cols-2 lg:grid-cols-3 flex-grow">
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Team Name</p>
-                        <p className="font-medium">{latestMechaturaRegistration.team_name}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Category</p>
-                        <p className="font-medium">
-                          {mechaturaCompetition ? mechaturaCompetitionLabels[mechaturaCompetition] : "-"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Robot Name</p>
-                        <p className="font-medium">{latestMechaturaRegistration.robot_name}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Team Leader</p>
-                        <p className="font-medium">{mechaturaLeader?.full_name ?? "-"}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Registration Status</p>
-                        <p className="font-medium capitalize">{latestMechaturaRegistration.registration_status?.replace('_', ' ') ?? "-"}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Amount Due</p>
-                        <p className="font-medium">{formatCurrency(latestMechaturaRegistration.payment_amount ?? 0)}</p>
-                      </div>
+          <div className="p-6">
+            {latestRegistration ? (
+              <>
+                <div className="flex flex-col sm:flex-row gap-6">
+                  <div className="grid gap-5 text-sm sm:grid-cols-2 flex-grow">
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Participant Name</p>
+                      <p className="font-medium">{latestRegistration.nama_lengkap}</p>
                     </div>
-                    
-                    {isMechaturaPaymentComplete && (
-                      <div className="flex flex-col items-center justify-center self-start shrink-0 p-4 bg-white rounded-xl border border-border">
-                          <QRCodeSVG value={`mechatura:${latestMechaturaRegistration.id}`} size={120} />
-                          <p className="text-[10px] text-muted-foreground mt-3 uppercase font-semibold tracking-wider">Ticket QR</p>
-                      </div>
-                    )}
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Institution</p>
+                      <p className="font-medium">{latestRegistration.asal_institusi}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Phone Number</p>
+                      <p className="font-medium">{latestRegistration.no_telepon}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Status / Fee</p>
+                      <p className="font-medium">
+                        {academicStatus ? statusLabels[academicStatus] : "-"} <span className="text-muted-foreground font-normal ml-1">(Free)</span>
+                      </p>
+                    </div>
                   </div>
-
-                  <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                    {isMechaturaPaymentComplete && (
-                      <MechaturaTicketDownloadButton 
-                          registrationId={latestMechaturaRegistration.id}
-                          teamName={latestMechaturaRegistration.team_name}
-                          institution={latestMechaturaRegistration.institution || "-"}
-                          competitionType={mechaturaCompetition}
-                          robotName={latestMechaturaRegistration.robot_name}
-                          leaderName={mechaturaLeader?.full_name ?? "Leader"}
-                          className="w-full sm:flex-1"
-                      />
-                    )}
-                    {mechaturaReceipt ? (
-                      <ReceiptDownloadButton
-                        receipt={mechaturaReceipt}
-                        variant="outline"
-                        className="w-full sm:flex-1"
-                      >
-                        Save Receipt
-                      </ReceiptDownloadButton>
-                    ) : (
-                      <Button asChild variant="secondary" className="w-full sm:w-auto">
-                        <Link href={`/payment?order_id=${encodeURIComponent(latestMechaturaRegistration.midtrans_order_id)}`} prefetch={false}>
-                          Open Payment Details <ChevronRight className="w-4 h-4 ml-1" />
-                        </Link>
-                      </Button>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-6 text-center">
-                  <p className="text-sm text-muted-foreground mb-4">You have not formed a team for the Mechatura Robotics Competition yet.</p>
-                  <Button asChild className="h-10 rounded-xl">
-                    <Link href="/registration/mechatura" prefetch={false}>Register Team</Link>
-                  </Button>
+                  {latestRegistration.registration_type !== "group" && (
+                    <div className="flex flex-col items-center justify-center self-start shrink-0 p-4 bg-white rounded-xl border border-border">
+                      <QRCodeSVG value={latestRegistration.id} size={120} />
+                      <p className="text-[10px] text-muted-foreground mt-3 uppercase font-semibold tracking-wider">Ticket QR</p>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
-
-          {/* LOMBA KTI CARD (UI ONLY) */}
-          <div className="rounded-xl border border-border bg-card overflow-hidden">
-            <div className="border-b border-border bg-muted/30 px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="bg-background border border-border p-2 rounded-lg">
-                  <BookOpen className="h-4 w-4 text-foreground" />
+                <div className="mt-6">
+                  <TicketDownloadButton
+                    mainContact={latestRegistration as DownloadRegistrationData}
+                    members={groupMembers}
+                  />
                 </div>
-                <div>
-                  <h2 className="font-semibold">Lomba KTI</h2>
-                  <p className="text-xs text-muted-foreground">
-                    Scientific Paper Competition
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6">
+              </>
+            ) : (
               <div className="flex flex-col items-center justify-center py-6 text-center">
-                <p className="text-sm text-muted-foreground mb-4">No active Lomba KTI registration found for this account.</p>
+                <p className="text-sm text-muted-foreground mb-4">You have not registered for the National Seminar yet.</p>
                 <Button asChild className="h-10 rounded-xl">
-                  <Link href="/registration/lomba-kti" prefetch={false}>Register for Lomba KTI</Link>
+                  <Link href="/registration/seminar" prefetch={false}>Register for Seminar</Link>
                 </Button>
               </div>
+            )}
+          </div>
+        </div>
+
+        {/* MECHATURA CARD */}
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+          <div className="border-b border-border bg-muted/30 px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-background border border-border p-2 rounded-lg">
+                <Bot className="h-4 w-4 text-foreground" />
+              </div>
+              <div>
+                <h2 className="font-semibold">Mechatura Competition</h2>
+                <p className="text-xs text-muted-foreground">
+                  {latestMechaturaRegistration ? `Registered on ${formatDate(latestMechaturaRegistration.created_at)}` : "No active registration"}
+                </p>
+              </div>
+            </div>
+            {latestMechaturaRegistration && (
+              <span className={`inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-semibold ${isMechaturaPaymentComplete ? 'border-border bg-background text-foreground' : 'border-border bg-muted text-muted-foreground'}`}>
+                {isMechaturaPaymentComplete ? <CheckCircle2 className="w-3 h-3 mr-1.5 text-muted-foreground" /> : <Clock className="w-3 h-3 mr-1.5 text-muted-foreground" />}
+                {paymentStatusLabels[mechaturaPaymentStatus]}
+              </span>
+            )}
+          </div>
+
+          <div className="p-6">
+            {latestMechaturaRegistration ? (
+              <>
+                <div className="flex flex-col sm:flex-row gap-6">
+                  <div className="grid gap-5 text-sm sm:grid-cols-2 flex-grow">
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Team Name</p>
+                      <p className="font-medium">{latestMechaturaRegistration.team_name}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Category</p>
+                      <p className="font-medium">
+                        {mechaturaCompetition ? mechaturaCompetitionLabels[mechaturaCompetition] : "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Robot Name</p>
+                      <p className="font-medium">{latestMechaturaRegistration.robot_name}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Team Leader</p>
+                      <p className="font-medium">{mechaturaLeader?.full_name ?? "-"}</p>
+                    </div>
+                  </div>
+
+                  {isMechaturaPaymentComplete && (
+                    <div className="flex flex-col items-center justify-center self-start shrink-0 p-4 bg-white rounded-xl border border-border">
+                      <QRCodeSVG value={`mechatura:${latestMechaturaRegistration.id}`} size={120} />
+                      <p className="text-[10px] text-muted-foreground mt-3 uppercase font-semibold tracking-wider">Ticket QR</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  {isMechaturaPaymentComplete && (
+                    <MechaturaTicketDownloadButton
+                      registrationId={latestMechaturaRegistration.id}
+                      teamName={latestMechaturaRegistration.team_name}
+                      institution={latestMechaturaRegistration.institution || "-"}
+                      competitionType={mechaturaCompetition}
+                      robotName={latestMechaturaRegistration.robot_name}
+                      leaderName={mechaturaLeader?.full_name ?? "Leader"}
+                      className="w-full sm:flex-1"
+                    />
+                  )}
+                  {mechaturaReceipt ? (
+                    <ReceiptDownloadButton
+                      receipt={mechaturaReceipt}
+                      variant="outline"
+                      className="w-full sm:flex-1"
+                    >
+                      Save Invoice
+                    </ReceiptDownloadButton>
+                  ) : (
+                    <Button asChild variant="secondary" className="w-full sm:w-auto">
+                      <Link href={`/payment?order_id=${encodeURIComponent(latestMechaturaRegistration.midtrans_order_id)}`} prefetch={false}>
+                        Open Payment Details <ChevronRight className="w-4 h-4 ml-1" />
+                      </Link>
+                    </Button>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <p className="text-sm text-muted-foreground mb-4">You have not formed a team for the Mechatura Robotics Competition yet.</p>
+                <Button asChild className="h-10 rounded-xl">
+                  <Link href="/registration/mechatura" prefetch={false}>Register Team</Link>
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* LOMBA KTI CARD (UI ONLY) */}
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+          <div className="border-b border-border bg-muted/30 px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-background border border-border p-2 rounded-lg">
+                <BookOpen className="h-4 w-4 text-foreground" />
+              </div>
+              <div>
+                <h2 className="font-semibold">Lomba KTI</h2>
+                <p className="text-xs text-muted-foreground">
+                  Scientific Paper Competition
+                </p>
+              </div>
             </div>
           </div>
 
+          <div className="p-6">
+            <div className="flex flex-col items-center justify-center py-6 text-center">
+              <p className="text-sm text-muted-foreground mb-4">No active Lomba KTI registration found for this account.</p>
+              <Button asChild className="h-10 rounded-xl">
+                <Link href="/registration/lomba-kti" prefetch={false}>Register for Lomba KTI</Link>
+              </Button>
+            </div>
+          </div>
         </div>
+
+      </div>
     </div>
   )
 }

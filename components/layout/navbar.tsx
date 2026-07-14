@@ -11,7 +11,8 @@ import {
   MobileNavMenu,
 } from "@/components/ui/resizable-navbar";
 import { useAuth } from "@/components/auth-provider";
-import { User } from "lucide-react";
+import ConfirmDialog from "@/components/confirm-dialog";
+import { LogOut, User } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
@@ -21,7 +22,7 @@ type NavbarItem = {
 };
 
 export function NavbarDemo() {
-  const { user } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   const pathname = usePathname();
   const navItems: NavbarItem[] = [
     {
@@ -43,10 +44,27 @@ export function NavbarDemo() {
   ];
  
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+      setIsLoggingOut(true)
+      const { error } = await signOut()
+
+      if (error) {
+          console.error(error)
+          setIsLoggingOut(false)
+          return
+      }
+      setIsLoggingOut(false)
+      setLogoutOpen(false)
+  }
  
   if (pathname === "/admin" || pathname.startsWith("/admin/") || pathname === "/profile" || pathname.startsWith("/profile/")) {
     return null;
   }
+
+  const profileHref = isAdmin ? "/admin" : "/profile";
 
   return (
     <div className="relative w-full">
@@ -57,14 +75,24 @@ export function NavbarDemo() {
           <NavItems items={navItems} />
           <div className="flex items-center gap-4">
             {user ? (
-              <NavbarButton
-                href="/profile"
-                variant="secondary"
-                className="flex h-10 w-10 items-center justify-center rounded-full px-0 py-0"
-                aria-label="Open profile"
-              >
-                <User className="h-5 w-5" />
-              </NavbarButton>
+              <>
+                <NavbarButton
+                  href={profileHref}
+                  variant="secondary"
+                  className="flex h-10 w-10 items-center justify-center rounded-full px-0 py-0"
+                  aria-label="Open dashboard"
+                >
+                  <User className="h-5 w-5" />
+                </NavbarButton>
+                <NavbarButton
+                  onClick={() => setLogoutOpen(true)}
+                  variant="secondary"
+                  className="flex h-10 w-10 items-center justify-center rounded-full px-0 py-0 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors border border-border"
+                  aria-label="Log out"
+                >
+                  <LogOut className="h-5 w-5" />
+                </NavbarButton>
+              </>
             ) : (
               <>
                 <NavbarButton href="/login" variant="secondary">Login</NavbarButton>
@@ -100,15 +128,28 @@ export function NavbarDemo() {
             ))}
             <div className="flex w-full flex-col gap-4">
               {user ? (
-                <NavbarButton
-                  href="/profile"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  variant="primary"
-                  className="flex h-10 w-10 items-center justify-center rounded-md px-0 py-0"
-                  aria-label="Open profile"
-                >
-                  <User className="h-5 w-5" />
-                </NavbarButton>
+                <div className="flex items-center gap-4">
+                  <NavbarButton
+                    href={profileHref}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    variant="primary"
+                    className="flex flex-1 h-10 items-center justify-center rounded-md px-4 py-2"
+                    aria-label="Open dashboard"
+                  >
+                    <User className="h-5 w-5 mr-2" /> Dashboard
+                  </NavbarButton>
+                  <NavbarButton
+                    onClick={() => {
+                      setIsMobileMenuOpen(false)
+                      setLogoutOpen(true)
+                    }}
+                    variant="secondary"
+                    className="flex h-10 items-center justify-center rounded-md px-4 py-2 text-destructive border-border"
+                    aria-label="Log out"
+                  >
+                    <LogOut className="h-5 w-5" />
+                  </NavbarButton>
+                </div>
               ) : (
                 <>
                   <NavbarButton
@@ -134,7 +175,18 @@ export function NavbarDemo() {
         </MobileNav>
       </Navbar>
  
-      {/* Navbar */}
+      {/* Navbar Logout Confirm */}
+      <ConfirmDialog
+        open={logoutOpen}
+        onOpenChange={setLogoutOpen}
+        title={"Log out?"}
+        description={"You will need to sign in to your Futura account again."}
+        confirmText="Log out"
+        cancelText="Stay signed in"
+        variant="destructive"
+        isLoading={isLoggingOut}
+        onConfirm={handleLogout}
+      />
     </div>
   );
 }

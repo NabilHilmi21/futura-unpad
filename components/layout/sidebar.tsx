@@ -2,52 +2,36 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { LayoutDashboard, Users, Trophy, Cpu, LogOut, ArrowLeft } from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useSidebarStore } from "./use-sidebar-store"
+import ConfirmDialog from "@/components/confirm-dialog"
 
-export function Sidebar({ isMobileOpen, setIsMobileOpen, width, setWidth }: { isMobileOpen: boolean, setIsMobileOpen: (open: boolean) => void, width: number, setWidth: (width: number) => void }) {
-    const { user, isAdmin, signOut } = useAuth()
+export function Sidebar() {
+    const { isMobileOpen, setIsMobileOpen } = useSidebarStore()
+    const { user, isAdmin, isLoading, signOut } = useAuth()
     const pathname = usePathname()
-    const [isResizing, setIsResizing] = useState(false)
+    const router = useRouter()
     const sidebarRef = useRef<HTMLDivElement>(null)
+    const [logoutOpen, setLogoutOpen] = useState(false)
+    const [isLoggingOut, setIsLoggingOut] = useState(false)
 
     const handleLogout = async () => {
+        setIsLoggingOut(true)
         const { error } = await signOut()
 
         if (error) {
             console.error(error)
+            setIsLoggingOut(false)
             return
         }
+        setIsLoggingOut(false)
+        setLogoutOpen(false)
     }
-
-    const startResizing = useCallback(() => {
-        setIsResizing(true)
-    }, [])
-
-    const stopResizing = useCallback(() => {
-        setIsResizing(false)
-    }, [])
-
-    const resize = useCallback((mouseMoveEvent: MouseEvent) => {
-        if (isResizing) {
-            const newWidth = mouseMoveEvent.clientX
-            if (newWidth > 200 && newWidth < 400) {
-                setWidth(newWidth)
-            }
-        }
-    }, [isResizing, setWidth])
-
-    useEffect(() => {
-        window.addEventListener("mousemove", resize)
-        window.addEventListener("mouseup", stopResizing)
-        return () => {
-            window.removeEventListener("mousemove", resize)
-            window.removeEventListener("mouseup", stopResizing)
-        }
-    }, [resize, stopResizing])
 
     const getInitials = (name?: string | null, email?: string | null) => {
         const str = name || email?.split("@")[0] || "U"
@@ -61,7 +45,9 @@ export function Sidebar({ isMobileOpen, setIsMobileOpen, width, setWidth }: { is
             { href: "/admin/lomba-essay", label: "Lomba Essay", icon: Trophy },
             { href: "/admin/mechatura", label: "Mechatura", icon: Cpu },
         ] : []),
-        { href: "/profile", label: "Your Profile", icon: Users },
+        ...(!isAdmin ? [
+            { href: "/profile", label: "Your Profile", icon: Users },
+        ] : []),
     ]
 
     const sidebarContent = (
@@ -75,29 +61,60 @@ export function Sidebar({ isMobileOpen, setIsMobileOpen, width, setWidth }: { is
             
             <div className="flex-1 overflow-auto py-4">
                 <nav className="grid items-start px-2 text-sm font-medium gap-1">
-                    {navItems.map((item) => {
-                        const Icon = item.icon
-                        const isActive = pathname === item.href || (item.href !== "/admin" && item.href !== "/profile" && pathname.startsWith(item.href))
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                prefetch={false}
-                                onClick={() => setIsMobileOpen(false)}
-                                className={cn(
-                                    "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:text-primary",
-                                    isActive ? "bg-muted text-primary" : "text-muted-foreground"
-                                )}
-                            >
-                                <Icon className="h-4 w-4" />
-                                {item.label}
-                            </Link>
-                        )
-                    })}
+                    {isLoading ? (
+                        <>
+                            <div className="flex items-center gap-3 rounded-lg px-3 py-2.5">
+                                <Skeleton className="h-4 w-4" />
+                                <Skeleton className="h-4 w-24" />
+                            </div>
+                            <div className="flex items-center gap-3 rounded-lg px-3 py-2.5">
+                                <Skeleton className="h-4 w-4" />
+                                <Skeleton className="h-4 w-20" />
+                            </div>
+                            <div className="flex items-center gap-3 rounded-lg px-3 py-2.5">
+                                <Skeleton className="h-4 w-4" />
+                                <Skeleton className="h-4 w-28" />
+                            </div>
+                        </>
+                    ) : (
+                        navItems.map((item) => {
+                            const Icon = item.icon
+                            const isActive = pathname === item.href || (item.href !== "/admin" && item.href !== "/profile" && pathname.startsWith(item.href))
+                            return (
+                                <a
+                                    key={item.href}
+                                    href={item.href}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setIsMobileOpen(false);
+                                        router.push(item.href);
+                                    }}
+                                    className={cn(
+                                        "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:text-primary cursor-pointer",
+                                        isActive ? "bg-muted text-primary" : "text-muted-foreground"
+                                    )}
+                                >
+                                    <Icon className="h-4 w-4" />
+                                    {item.label}
+                                </a>
+                            )
+                        })
+                    )}
                 </nav>
             </div>
 
-            {user && (
+            {isLoading ? (
+                <div className="border-t border-border p-4">
+                    <div className="flex items-center gap-3 mb-4 rounded-lg p-2">
+                        <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+                        <div className="flex flex-col gap-2 overflow-hidden flex-1">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-3 w-32" />
+                        </div>
+                    </div>
+                    <Skeleton className="h-9 w-full rounded-md" />
+                </div>
+            ) : user ? (
                 <div className="border-t border-border p-4">
                     <Link 
                         href="/profile/account" 
@@ -117,12 +134,27 @@ export function Sidebar({ isMobileOpen, setIsMobileOpen, width, setWidth }: { is
                             </span>
                         </div>
                     </Link>
-                    <Button variant="outline" className="w-full justify-start gap-2 h-9" onClick={handleLogout}>
+                    <Button variant="outline" className="w-full justify-start gap-2 h-9" onClick={() => setLogoutOpen(true)}>
                         <LogOut className="h-4 w-4" />
                         Log out
                     </Button>
+                    <ConfirmDialog
+                        open={logoutOpen}
+                        onOpenChange={setLogoutOpen}
+                        title={isAdmin ? "Log out of admin?" : "Log out?"}
+                        description={
+                            isAdmin
+                                ? "You will need to sign in again to manage registrations and view the admin dashboard."
+                                : "You will need to sign in to your Futura account again."
+                        }
+                        confirmText="Log out"
+                        cancelText="Stay signed in"
+                        variant="destructive"
+                        isLoading={isLoggingOut}
+                        onConfirm={handleLogout}
+                    />
                 </div>
-            )}
+            ) : null}
         </div>
     )
 
@@ -131,15 +163,9 @@ export function Sidebar({ isMobileOpen, setIsMobileOpen, width, setWidth }: { is
             {/* Desktop Sidebar */}
             <aside 
                 ref={sidebarRef}
-                className="hidden md:block fixed inset-y-0 left-0 z-10"
-                style={{ width }}
+                className="hidden md:flex flex-col md:w-64 fixed inset-y-0 left-0 z-10"
             >
                 {sidebarContent}
-                {/* Resizer Handle */}
-                <div
-                    className="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-primary/20 transition-colors"
-                    onMouseDown={startResizing}
-                />
             </aside>
 
             {/* Mobile Overlay */}

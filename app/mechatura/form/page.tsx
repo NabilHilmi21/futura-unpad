@@ -15,7 +15,7 @@ export default async function MechaturaPage() {
     const { user } = await getCachedAuth();
 
     if (!user) {
-        redirect("/login?next=/registration/mechatura");
+        redirect("/login?next=/mechatura/form");
     }
 
     const adminSupabase = createAdminClient();

@@ -99,7 +99,7 @@ export default function RegisterForm() {
                     !next.startsWith("/register") &&
                     !next.startsWith("/auth/callback")
                     ? next
-                    : "/admin";
+                    : "/profile";
 
             await refreshAuth();
             router.replace(safeNext);

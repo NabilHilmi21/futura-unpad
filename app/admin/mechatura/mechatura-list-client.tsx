@@ -11,10 +11,8 @@ import {
 import { mechaturaCompetitionLabels, paymentStatusLabels } from "@/lib/payment";
 import { ChevronLeft, ChevronRight, Download, Scan, Search, X } from "lucide-react";
 import Link from "next/link";
-import MechaturaTable, {
-    type AdminMechaturaLeader,
-    type AdminMechaturaRegistration,
-} from "./_components/mechatura-table";
+import { DataTable } from "./data-table";
+import { columns, type AdminMechaturaLeader, type AdminMechaturaRegistration } from "./teams";
 import {
     buildMechaturaPageHref,
     pageSizeOptions,
@@ -81,6 +79,11 @@ export default function MechaturaListClient({
             category: categoryFilter,
             payment: paymentFilter,
         });
+
+    const teamData = registrations.map((reg) => ({
+        ...reg,
+        leader: leaderByRegistrationId.get(reg.id),
+    }));
 
     return (
         <div className="mx-auto w-full max-w-7xl space-y-8">
@@ -196,10 +199,7 @@ export default function MechaturaListClient({
                 </div>
             </form>
 
-            <MechaturaTable
-                registrations={registrations}
-                leaderByRegistrationId={leaderByRegistrationId}
-            />
+            <DataTable columns={columns} data={teamData} />
 
             <div className="flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-muted-foreground">

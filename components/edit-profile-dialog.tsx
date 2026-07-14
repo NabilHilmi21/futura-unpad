@@ -25,6 +25,7 @@ type EditProfileDialogProps = {
   initialDisplayName: string
   initialUsername?: string
   initialEmail: string
+  className?: string
 }
 
 type ProfileUpdates = {
@@ -35,7 +36,7 @@ type ProfileUpdates = {
   }
 }
 
-export function EditProfileDialog({ initialDisplayName, initialUsername = "", initialEmail }: EditProfileDialogProps) {
+export function EditProfileDialog({ initialDisplayName, initialUsername = "", initialEmail, className }: EditProfileDialogProps) {
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -145,8 +146,9 @@ export function EditProfileDialog({ initialDisplayName, initialUsername = "", in
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="absolute top-4 right-4 h-8 gap-2">
+        <Button variant="outline" size="sm" className={className || "absolute top-4 right-4 h-8 gap-2"}>
           <Pencil className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Edit Profile</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">

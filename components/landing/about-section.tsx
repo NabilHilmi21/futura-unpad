@@ -4,8 +4,9 @@ import MediaPartnersSection from "./media-partners-section"
 
 export default function AboutSection() {
     return (
-        <section id="about" className="relative bg-background px-5 sm:px-8">
-            <div className="mx-auto max-w-[82rem] gap-16">
+        <section id="about" className="relative overflow-hidden bg-background px-5 sm:px-8">
+
+            <div className="relative z-10 mx-auto max-w-[82rem] gap-16">
                 <div className="mx-auto max-w-4xl text-center">
                     <div className="flex items-center justify-center gap-4 sm:gap-12 mb-8">
                         <Image src="/hmte-unpad.png" width={170} height={170} alt="hmte-unpad.png" className="w-28 sm:w-[170px] h-auto" />

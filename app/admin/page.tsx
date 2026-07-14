@@ -9,57 +9,50 @@ import {
 import { createAdminClient } from "@/lib/supabase-admin"
 import { requireAdminOrRedirect } from "@/lib/auth"
 import { isCompletedPaymentStatus } from "@/lib/payment"
+import { Suspense } from "react"
+import AdminLoading from "./admin-loading"
 
-type SeminarDashboardRow = {
-    status_akademika: string | null
-}
-
-type MechaturaDashboardRow = {
-    payment_status: string | null
-    competition_type: string | null
-}
-
-const countBy = <TRow,>(
-    rows: TRow[],
-    predicate: (row: TRow) => boolean
-) => rows.reduce((count, row) => count + (predicate(row) ? 1 : 0), 0)
-
-export default async function AdminPage() {
+async function AdminDashboardData() {
     const { user } = await requireAdminOrRedirect()
-
     const adminSupabase = createAdminClient()
-    const [
-        { data: seminarRows, error: seminarError },
-        { data: mechaturaRows, error: mechaturaError },
-    ] = await Promise.all([
-        adminSupabase
-            .from("seminar_registrations")
-            .select("status_akademika")
-            .returns<SeminarDashboardRow[]>(),
-        adminSupabase
-            .from("mechatura_registrations")
-            .select("payment_status,competition_type")
-            .returns<MechaturaDashboardRow[]>(),
-    ])
 
-    if (seminarError || mechaturaError) {
-        throw new Error(seminarError?.message ?? mechaturaError?.message)
+    const getCount = async (table: string, filters: Record<string, string> = {}, inFilter?: { column: string; values: string[] }) => {
+        let query = adminSupabase.from(table).select("*", { count: 'exact', head: true })
+        for (const [key, value] of Object.entries(filters)) {
+            query = query.eq(key, value)
+        }
+        if (inFilter) {
+            query = query.in(inFilter.column, inFilter.values)
+        }
+        const { count, error } = await query;
+        if (error) throw new Error(error.message);
+        return count ?? 0;
     }
 
-    const seminarRegistrations = seminarRows ?? []
-    const mechaturaRegistrations = mechaturaRows ?? []
-    const totalRegistrations = seminarRegistrations.length
-    const mahasiswaCount = countBy(seminarRegistrations, (row) => row.status_akademika === "mahasiswa")
-    const siswaCount = countBy(seminarRegistrations, (row) => row.status_akademika === "siswa")
-    const dosenCount = countBy(seminarRegistrations, (row) => row.status_akademika === "dosen")
-    const umumCount = countBy(seminarRegistrations, (row) => row.status_akademika === "umum")
-    const totalMechaturaCount = mechaturaRegistrations.length
-    const mechaturaPaidCount = countBy(mechaturaRegistrations, (row) => isCompletedPaymentStatus(row.payment_status))
-    const sumoCount = countBy(mechaturaRegistrations, (row) => row.competition_type === "sumo")
-    const transporterCount = countBy(mechaturaRegistrations, (row) => row.competition_type === "transporter")
+    const [
+        totalRegistrations,
+        mahasiswaCount,
+        siswaCount,
+        dosenCount,
+        umumCount,
+        totalMechaturaCount,
+        mechaturaPaidCount,
+        sumoCount,
+        transporterCount
+    ] = await Promise.all([
+        getCount("seminar_registrations"),
+        getCount("seminar_registrations", { status_akademika: "mahasiswa" }),
+        getCount("seminar_registrations", { status_akademika: "siswa" }),
+        getCount("seminar_registrations", { status_akademika: "dosen" }),
+        getCount("seminar_registrations", { status_akademika: "umum" }),
+        getCount("mechatura_registrations"),
+        getCount("mechatura_registrations", {}, { column: "payment_status", values: ["paid", "settled"] }),
+        getCount("mechatura_registrations", { competition_type: "sumo" }),
+        getCount("mechatura_registrations", { competition_type: "transporter" }),
+    ])
 
     return (
-        <div className="mx-auto w-full max-w-6xl space-y-8">
+        <div className="mx-auto w-full max-w-7xl space-y-8">
             <section className="flex flex-col gap-5 border-b border-border pb-8 lg:flex-row lg:items-end lg:justify-between">
                 <div className="space-y-3">
                     <p className="text-sm font-medium text-muted-foreground">
@@ -172,3 +165,4 @@ export default async function AdminPage() {
         </div>
     )
 }
+export default function AdminPage() { return <Suspense fallback={<AdminLoading />}><AdminDashboardData /></Suspense> }

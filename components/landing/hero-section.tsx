@@ -1,8 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
+import { useInView } from "motion/react"
 import { ButtonV2 } from "../ui/button-v2"
 import { BackgroundBeams } from "../ui/background-beams"
+import InfoPill from "../ui/information-pill"
 
 const SCRAMBLE_TARGET = "Future"
 const SCRAMBLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<>/{}[]"
@@ -26,9 +28,11 @@ function getScrambledWord(frame: number) {
 
 function ScrambledFuture() {
   const [word, setWord] = useState(SCRAMBLE_TARGET)
+  const ref = useRef<HTMLSpanElement>(null)
+  const isInView = useInView(ref, { once: false, amount: 0.5 })
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !isInView) {
       return
     }
 
@@ -53,10 +57,10 @@ function ScrambledFuture() {
       window.clearTimeout(timeout)
       window.clearInterval(repeat)
     }
-  }, [])
+  }, [isInView])
 
   return (
-    <span aria-label={SCRAMBLE_TARGET} className="inline-block min-w-[6ch]">
+    <span ref={ref} aria-label={SCRAMBLE_TARGET} className="inline-block min-w-[6ch]">
       {word}
     </span>
   )
@@ -69,12 +73,16 @@ export function HeroSection() {
 
         {/* MAIN TITLE */}
         <div className="flex flex-col items-center text-center space-y-6">
+          <InfoPill
+            title="Registrasi Mechatura telah dibuka"
+            href="/mechatura/"
+          />
           <h1 className="z-10 text-5xl sm:text-6xl lg:text-8xl font-bold tracking-tighter leading-none text-balance uppercase">
             Power on the<ScrambledFuture />
           </h1>
-          <h1 className="-mt-6 text-5xl sm:text-6xl lg:text-8xl font-light tracking-tighter leading-none text-balance text-neutral-500 uppercase">
+          {/* <h1 className="-mt-6 text-5xl sm:text-6xl lg:text-8xl font-light tracking-tighter leading-none text-balance text-neutral-500 uppercase">
             Futura
-          </h1>
+          </h1> */}
           <p className="mx-auto max-w-3xl text-lg leading-relaxed text-neutral-600 dark:text-neutral-400 text-balance">
             Implementasi Energi Cerdas di Era Industri 5.0: Optimalisasi Smart Grid dan Energi Baru Terbarukan
           </p>

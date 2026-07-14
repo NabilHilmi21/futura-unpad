@@ -1,5 +1,6 @@
 import { RegistrationCards } from "./registration-cards"
-import { Calendar, Locate, Sparkles } from "lucide-react"
+import { Calendar, PinIcon, BadgePercent } from "lucide-react"
+
 import { ButtonV2 } from "../ui/button-v2"
 
 const events = [
@@ -16,6 +17,7 @@ const events = [
         speaker: "Linus Torvalds",
         image: "https://avatars.githubusercontent.com/u/1024025?v=4",
         href: "/seminar-nasional",
+        price: "Free!",
         reverse: false
     },
     {
@@ -25,12 +27,13 @@ const events = [
         description: "Kompetisi robotika tingkat nasional yang menantang para inovator muda untuk memecahkan masalah energi melalui teknologi otomasi dan mekatronika. Tunjukkan karya terbaikmu!",
         highlightsTitle: "Kategori Lomba",
         highlights: [
-            "Line Follower Analog",
-            "Smart IoT Innovation",
+            "Robot Sumo",
+            "Robot Transporter",
         ],
         speaker: "Mechatura Event",
         image: "/green-renewable-1.webp",
         href: "/mechatura",
+        price: "Rp. 250.000",
         reverse: true
     },
     {
@@ -46,13 +49,15 @@ const events = [
         speaker: "Lomba Essay",
         image: "https://images.unsplash.com/photo-1455390582262-044cdead27d8?q=80&w=800&auto=format&fit=crop",
         href: "/lomba-essay",
+        price: "Rp. 175.000",
         reverse: false
     }
 ]
 
 export default function RegistrationsSection() {
     return (
-        <section id="registrations" className="py-24 px-6 lg:px-12 max-w-7xl mx-auto flex flex-col justify-center items-center gap-24">
+        <section id="registrations" className="px-6 lg:px-12 max-w-7xl mx-auto flex flex-col justify-center items-center gap-24">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">Acara Futura</h1>
             {events.map((event, index) => (
                 <div key={index} className={`flex flex-col lg:items-center gap-10 lg:gap-16 w-full ${event.reverse ? "lg:flex-row-reverse" : "lg:flex-row"}`}>
 
@@ -65,38 +70,41 @@ export default function RegistrationsSection() {
                         <div className="flex flex-col gap-4">
                             <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight">{event.title}</h1>
 
-                            <div className="space-y-2 text-neutral-700 dark:text-neutral-300">
+                            <div className="space-y-3 text-neutral-600 dark:text-neutral-400">
                                 <div className="flex gap-3 items-center">
-                                    <Calendar className="w-5 h-5 text-blue-500" />
-                                    <h2 className="text-md md:text-lg font-medium">{event.date}</h2>
+                                    <Calendar className="w-5 h-5 text-neutral-400" />
+                                    <span className="text-md font-medium">{event.date}</span>
                                 </div>
                                 <div className="flex gap-3 items-center">
-                                    <Locate className="w-5 h-5 text-blue-500" />
-                                    <h2 className="text-md md:text-lg font-medium">{event.location}</h2>
+                                    <PinIcon className="w-5 h-5 text-neutral-400" />
+                                    <span className="text-md font-medium">{event.location}</span>
+                                </div>
+                                <div className="flex gap-3 items-center">
+                                    <BadgePercent className="w-5 h-5 text-neutral-400" />
+                                    <span className="text-md font-medium">{event.price}</span>
                                 </div>
                             </div>
 
-                            <p className="text-lg leading-relaxed text-neutral-600 dark:text-neutral-400">
+                            <p className="mt-2 text-lg leading-relaxed text-neutral-600 dark:text-neutral-400">
                                 {event.description}
                             </p>
                         </div>
 
-                        {/* <div className="bg-neutral-50 dark:bg-neutral-900/40 p-6 rounded-2xl border border-neutral-200 dark:border-neutral-800/60 my-2">
-                            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                                <Sparkles className="w-5 h-5 text-blue-500" />
+                        <div className="mt-8 space-y-3">
+                            <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 uppercase tracking-wider">
                                 {event.highlightsTitle}
                             </h3>
-                            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <ul className="flex flex-wrap gap-x-6 gap-y-2">
                                 {event.highlights.map((highlight, idx) => (
-                                    <li key={idx} className="flex items-center gap-3 text-neutral-700 dark:text-neutral-300 font-medium">
-                                        <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
+                                    <li key={idx} className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400 font-medium">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-neutral-300 dark:bg-neutral-600" />
                                         {highlight}
                                     </li>
                                 ))}
                             </ul>
-                        </div> */}
+                        </div>
 
-                        <div className="mt-18">
+                        <div className="mt-10">
                             <ButtonV2
                                 text="Daftar Sekarang"
                                 href={event.href}

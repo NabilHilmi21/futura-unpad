@@ -18,7 +18,7 @@ import {
 
 const footerLayout = {
   giantTitle: "relative z-10 hidden h-[30rem] -my-10 lg:flex",
-  content: "relative z-40 max-w-7xl mx-auto p-14",
+  content: "relative z-40 max-w-7xl mx-auto p-4 md:p-8",
 };
 
 const footerEntryAnimation = {
@@ -57,9 +57,9 @@ export default function HoverFooter() {
       title: "Helpful Links",
       links: [
         { label: "FAQs", href: "#" },
-        { label: "Guidelines", href: "#",},
+        { label: "Guidelines", href: "#", },
         { label: "Support", href: "#" },
-        { label: "Account Recovery", href: "#",},
+        { label: "Account Recovery", href: "#", },
       ],
     },
   ];
@@ -159,11 +159,11 @@ export default function HoverFooter() {
             </ul>
           </div>
         </div>
-        
+
         {/* Text hover effect */}
-      <div className={footerLayout.giantTitle}>
-        <TextHoverEffect text="Futura" className="z-50" />
-      </div>
+        <div className={footerLayout.giantTitle}>
+          <TextHoverEffect text="Futura" className="z-50" />
+        </div>
 
         {/* Footer bottom */}
         <div className="flex flex-col md:flex-row justify-between items-center text-sm space-y-4 md:space-y-0">

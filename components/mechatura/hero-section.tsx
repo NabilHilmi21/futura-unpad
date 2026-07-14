@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Button } from "../ui/button"
 import Countdown from "@/components/countdown"
 import { Spotlight } from "../ui/spotlight"
+import { ButtonV2 } from "../ui/button-v2"
 
 export function HeroSection() {
     return (
@@ -18,9 +19,16 @@ export function HeroSection() {
                     </p>
                 </div>
 
-                <div className="mx-auto flex flex-col items-center">
-                    <h1 className="text-lg sm:text-xl font-semibold mb-4">Pendaftaran akan dibuka dalam</h1>
-                    <Countdown targetDate={new Date("2026-09-21T00:00:00+07:00").getTime()} />
+                <div className="mx-auto flex flex-col md:flex-row items-center gap-2">
+                    <ButtonV2
+                        text="Daftar Sekarang"
+                        href="/mechatura/form"
+                        requireAuth={true}
+                    />
+
+                    <Button variant="link" asChild>
+                        <Link href="/docs/mechatura_guidebook.pdf">Lihat Guidebook</Link>
+                    </Button>
                 </div>
 
                 {/* <Link href="/registration/seminar" className="mx-auto bg-white text-black py-2 px-4 w-fit rounded-full">Daftar Sekarang</Link> */}

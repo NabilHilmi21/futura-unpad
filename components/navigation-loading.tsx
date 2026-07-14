@@ -75,11 +75,11 @@ export default function NavigationLoading() {
     };
 
     window.addEventListener("beforeunload", startLoading);
-    document.addEventListener("click", handleClick, true);
+    document.addEventListener("click", handleClick, false);
 
     return () => {
       window.removeEventListener("beforeunload", startLoading);
-      document.removeEventListener("click", handleClick, true);
+      document.removeEventListener("click", handleClick, false);
     };
   }, []);
 

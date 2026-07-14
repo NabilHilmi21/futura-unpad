@@ -52,49 +52,69 @@ export default async function AccountPage() {
         </div>
       </section>
 
-      <div className="relative rounded-xl border border-border bg-card p-6 sm:p-10">
-        <EditProfileDialog
-          initialDisplayName={user.user_metadata?.display_name || ""}
-          initialUsername={user.user_metadata?.username || ""}
-          initialEmail={user.email || ""}
-        />
-        <div className="flex flex-col items-center text-center space-y-4 mb-10">
-          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted border border-border text-3xl font-semibold text-foreground">
-            {initials}
-          </div>
-          <div>
-            <h2 className="font-semibold text-xl text-foreground">Profile Details</h2>
-            <p className="text-sm text-muted-foreground mt-1 truncate">{user.email}</p>
+      <div className="rounded-xl border border-border bg-card overflow-hidden max-w-4xl shadow-sm">
+        {/* Banner Area */}
+        <div className="h-32 w-full bg-gradient-to-r from-neutral-200 to-neutral-100 dark:from-neutral-800 dark:to-neutral-900 relative">
+          <div className="absolute right-4 top-4">
+            <EditProfileDialog
+              initialDisplayName={user.user_metadata?.display_name || ""}
+              initialUsername={user.user_metadata?.username || ""}
+              initialEmail={user.email || ""}
+              className="bg-background/80 backdrop-blur-sm hover:bg-background border-border shadow-sm"
+            />
           </div>
         </div>
 
-        <div className="space-y-6 text-sm max-w-sm mx-auto">
-          <div className="flex items-center gap-4">
-            <Mail className="h-5 w-5 shrink-0 text-muted-foreground" />
-            <div className="overflow-hidden">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Email</p>
-              <p className="font-medium truncate mt-0.5 text-base">{user.email ?? "-"}</p>
+        {/* Profile Info Area */}
+        <div className="px-6 sm:px-10 pb-10">
+          <div className="relative flex justify-between items-end -mt-12 mb-6">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-background border-4 border-card text-3xl font-semibold text-foreground shadow-sm">
+              {initials}
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <UserRound className="h-5 w-5 shrink-0 text-muted-foreground" />
-            <div className="overflow-hidden">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Display Name</p>
-              <p className="font-medium truncate mt-0.5 text-base">{user.user_metadata?.display_name || user.user_metadata?.username || user.email?.split("@")[0] || "-"}</p>
-            </div>
+
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-foreground">
+              {user.user_metadata?.display_name || user.user_metadata?.username || user.email?.split("@")[0] || "User"}
+            </h2>
+            <p className="text-muted-foreground">{user.email}</p>
           </div>
-          <div className="flex items-center gap-4">
-            <AtSign className="h-5 w-5 shrink-0 text-muted-foreground" />
-            <div className="overflow-hidden">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Username</p>
-              <p className="font-medium truncate mt-0.5 text-base">{user.user_metadata?.username ? `@${user.user_metadata.username}` : "-"}</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+                <Mail className="h-4 w-4" />
+                Email Address
+              </div>
+              <p className="text-base text-foreground font-medium">{user.email ?? "-"}</p>
             </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <CalendarDays className="h-5 w-5 shrink-0 text-muted-foreground" />
-            <div className="overflow-hidden">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Joined</p>
-              <p className="font-medium truncate mt-0.5 text-base">{formatDate(user.created_at)}</p>
+            
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+                <UserRound className="h-4 w-4" />
+                Display Name
+              </div>
+              <p className="text-base text-foreground font-medium">
+                {user.user_metadata?.display_name || "-"}
+              </p>
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+                <AtSign className="h-4 w-4" />
+                Username
+              </div>
+              <p className="text-base text-foreground font-medium">
+                {user.user_metadata?.username ? `@${user.user_metadata.username}` : "-"}
+              </p>
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
+                <CalendarDays className="h-4 w-4" />
+                Member Since
+              </div>
+              <p className="text-base text-foreground font-medium">{formatDate(user.created_at)}</p>
             </div>
           </div>
         </div>

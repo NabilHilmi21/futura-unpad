@@ -11,6 +11,8 @@ import { WhoCanJoinSection } from "@/components/landing/who-can-join-section"
 import { CountdownPrizeSection } from "@/components/landing/countdown-prize-section"
 import OurLocation from "@/components/landing/our-location"
 
+import { ScrollReveal } from "@/components/ui/scroll-reveal"
+
 export const metadata: Metadata = {
   title: "Coming Soon!",
   description:
@@ -19,13 +21,28 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <main className="space-y-56">
+    <main className="space-y-36">
       <HeroSection />
-      <AboutSection />
-      <RegistrationTimeline />
-      <RegistrationsSection />
-      <OurLocation />
-      <FAQSection />
+      <hr className="border-border w-1/2 mx-auto" />
+      <ScrollReveal>
+        <AboutSection />
+      </ScrollReveal>
+      <hr className="border-border w-1/2 mx-auto" />
+      <ScrollReveal>
+        <RegistrationTimeline />
+      </ScrollReveal>
+      <hr className="border-border w-1/2 mx-auto" />
+      <ScrollReveal>
+        <RegistrationsSection />
+      </ScrollReveal>
+      <hr className="border-border w-1/2 mx-auto" />
+      <ScrollReveal>
+        <OurLocation />
+      </ScrollReveal>
+      <hr className="border-border w-1/2 mx-auto" />
+      <ScrollReveal>
+        <FAQSection />
+      </ScrollReveal>
     </main>
   )
 }

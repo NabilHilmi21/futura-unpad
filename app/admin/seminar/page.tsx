@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
 
 import { createAdminClient } from "@/lib/supabase-admin"
+import { requireAdminOrRedirect } from "@/lib/auth"
 import SeminarListClient from "./seminar-list-client"
 import type { Participants } from "./participants"
 
@@ -25,12 +26,15 @@ import {
     getSeminarStats,
     attachGroupMembers,
 } from "./_lib/seminar-utils"
+import { Suspense } from "react"
+import AdminLoading from "../admin-loading"
 
-export default async function SeminarList({
+async function SeminarListData({
     searchParams,
 }: {
     searchParams: AdminSearchParams
 }) {
+    await requireAdminOrRedirect()
     const params = await searchParams
     const categoryParam = firstParam(params.category)
     const typeParam = firstParam(params.type)
@@ -386,3 +390,4 @@ export default async function SeminarList({
         />
     )
 }
+export default function SeminarList({ searchParams }: { searchParams: AdminSearchParams }) { return <Suspense fallback={<AdminLoading />}><SeminarListData searchParams={searchParams} /></Suspense> }
