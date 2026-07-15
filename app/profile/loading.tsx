@@ -1,15 +1,7 @@
 export default function ProfileLoading() {
     return (
-        <div className="mx-auto w-full max-w-6xl animate-pulse">
-            <section className="flex flex-col gap-4 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between mb-8">
-                <div className="space-y-2 w-full">
-                    <div className="h-8 w-48 bg-muted rounded"></div>
-                    <div className="h-4 w-96 max-w-full bg-muted rounded"></div>
-                </div>
-            </section>
-
-            <div className="space-y-6 max-w-3xl">
-                {/* Skeleton Card 1 */}
+        <div className="space-y-6 animate-pulse">
+            {/* Skeleton Card 1 */}
                 <div className="rounded-xl border border-border bg-card overflow-hidden">
                     <div className="border-b border-border bg-muted/30 px-6 py-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -60,7 +52,6 @@ export default function ProfileLoading() {
                         </div>
                     </div>
                 </div>
-            </div>
         </div>
     );
 }

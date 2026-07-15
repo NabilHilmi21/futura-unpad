@@ -31,26 +31,20 @@ const formatDate = (value?: string | null) => {
 }
 
 export default async function AccountPage() {
-  const { user } = await getCachedAuth()
+  const { user, isAdmin } = await getCachedAuth()
 
   if (!user) {
     redirect("/login?next=/profile/account")
   }
 
+  if (isAdmin) {
+    redirect("/admin/profile")
+  }
+
   const initials = getInitials(user.user_metadata?.display_name || user.user_metadata?.username, user.email)
 
   return (
-    <div className="mx-auto w-full max-w-3xl">
-      <section className="flex flex-col gap-4 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between mb-8">
-        <div className="space-y-2">
-          <h1 className="text-3xl sm:text-3xl sm:text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
-            Account Details
-          </h1>
-          <p className="max-w-xl text-sm font-medium leading-relaxed text-neutral-500">
-            Manage your personal profile information and settings.
-          </p>
-        </div>
-      </section>
+    <div className="mx-auto w-full max-w-4xl">
 
       <div className="rounded-xl border border-border bg-card overflow-hidden max-w-4xl shadow-sm">
         {/* Banner Area */}

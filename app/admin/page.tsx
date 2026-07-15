@@ -60,48 +60,48 @@ async function AdminDashboardData() {
             </section>
 
             <section>
-                <RevenueChart data={revenueData ?? []} />
+                <RevenueChart data={(revenueData as RevenueData[]) ?? []} />
             </section>
 
             <section>
-                <h2 className="text-xl font-semibold mb-5">Seminar</h2>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="rounded-xl border border-border p-5">
+                <h2 className="text-xl font-semibold mb-5 text-foreground">Seminar</h2>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="rounded-xl border border-border bg-card p-5">
                         <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm text-muted-foreground">Registrations</p>
+                            <p className="text-sm font-medium text-muted-foreground">Registrations</p>
                             <Users className="h-4 w-4 text-muted-foreground" />
                         </div>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight">
+                        <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
                             {totalRegistrations}
                         </p>
                     </div>
 
-                    <div className="rounded-xl border border-border p-5">
+                    <div className="rounded-xl border border-border bg-card p-5">
                         <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm text-muted-foreground">Mahasiswa</p>
+                            <p className="text-sm font-medium text-muted-foreground">Mahasiswa</p>
                             <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                         </div>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight">
+                        <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
                             {mahasiswaCount}
                         </p>
                     </div>
 
-                    <div className="rounded-xl border border-border p-5">
+                    <div className="rounded-xl border border-border bg-card p-5">
                         <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm text-muted-foreground">Siswa</p>
+                            <p className="text-sm font-medium text-muted-foreground">Siswa</p>
                             <Clock3 className="h-4 w-4 text-amber-600" />
                         </div>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight">
+                        <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
                             {siswaCount}
                         </p>
                     </div>
 
-                    <div className="rounded-xl border border-border p-5">
+                    <div className="rounded-xl border border-border bg-card p-5">
                         <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm text-muted-foreground">Dosen / Umum</p>
+                            <p className="text-sm font-medium text-muted-foreground">Dosen / Umum</p>
                             <Users className="h-4 w-4 text-muted-foreground" />
                         </div>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight">
+                        <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
                             {dosenCount} / {umumCount}
                         </p>
                     </div>
@@ -109,29 +109,29 @@ async function AdminDashboardData() {
             </section>
 
             <section>
-                <h2 className="text-xl font-semibold mb-5">Mechatura</h2>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="rounded-xl border border-border p-5">
-                        <p className="text-sm text-muted-foreground">Total Teams</p>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight">
+                <h2 className="text-xl font-semibold mb-5 text-foreground">Mechatura</h2>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="rounded-xl border border-border bg-card p-5">
+                        <p className="text-sm font-medium text-muted-foreground">Total Teams</p>
+                        <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
                             {totalMechaturaCount}
                         </p>
                     </div>
-                    <div className="rounded-xl border border-border p-5">
-                        <p className="text-sm text-muted-foreground">Paid Teams</p>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight">
+                    <div className="rounded-xl border border-border bg-card p-5">
+                        <p className="text-sm font-medium text-muted-foreground">Paid Teams</p>
+                        <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
                             {mechaturaPaidCount}
                         </p>
                     </div>
-                    <div className="rounded-xl border border-border p-5">
-                        <p className="text-sm text-muted-foreground">Robot Sumo</p>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight">
+                    <div className="rounded-xl border border-border bg-card p-5">
+                        <p className="text-sm font-medium text-muted-foreground">Robot Sumo</p>
+                        <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
                             {sumoCount}
                         </p>
                     </div>
-                    <div className="rounded-xl border border-border p-5">
-                        <p className="text-sm text-muted-foreground">Robot Transporter</p>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight">
+                    <div className="rounded-xl border border-border bg-card p-5">
+                        <p className="text-sm font-medium text-muted-foreground">Robot Transporter</p>
+                        <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
                             {transporterCount}
                         </p>
                     </div>
@@ -139,16 +139,16 @@ async function AdminDashboardData() {
             </section>
 
             <section>
-                <h2 className="text-xl font-semibold mb-5">Lomba Karya Tulis Ilmiah</h2>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="rounded-xl border border-border p-5">
-                        <p className="text-sm text-muted-foreground">Total Teams</p>
+                <h2 className="text-xl font-semibold mb-5 text-foreground">Lomba Karya Tulis Ilmiah</h2>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="rounded-xl border border-border bg-card p-5">
+                        <p className="text-sm font-medium text-muted-foreground">Total Teams</p>
                         <p className="mt-4 text-3xl font-semibold tracking-tight text-muted-foreground">
                             -
                         </p>
                     </div>
-                    <div className="rounded-xl border border-border p-5">
-                        <p className="text-sm text-muted-foreground">Paid Teams</p>
+                    <div className="rounded-xl border border-border bg-card p-5">
+                        <p className="text-sm font-medium text-muted-foreground">Paid Teams</p>
                         <p className="mt-4 text-3xl font-semibold tracking-tight text-muted-foreground">
                             -
                         </p>

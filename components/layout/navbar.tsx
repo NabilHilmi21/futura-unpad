@@ -60,7 +60,7 @@ export function NavbarDemo() {
       setLogoutOpen(false)
   }
  
-  if (pathname === "/admin" || pathname.startsWith("/admin/") || pathname === "/profile" || pathname.startsWith("/profile/")) {
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     return null;
   }
 

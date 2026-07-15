@@ -208,11 +208,11 @@ export function TicketDownloadButton({
     }
 
     return (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
             <Button
                 type="button"
                 variant="outline"
-                className="w-full shrink-0"
+                className="w-full sm:flex-1 shrink-0"
                 onClick={handleViewTickets}
                 disabled={isGenerating || isDownloading}
             >
@@ -221,7 +221,7 @@ export function TicketDownloadButton({
             </Button>
             <Button
                 type="button"
-                className="w-full shrink-0 bg-black text-white hover:bg-zinc-800"
+                className="w-full sm:flex-1 shrink-0"
                 onClick={downloadTicket}
                 disabled={isDownloading || isGenerating}
             >

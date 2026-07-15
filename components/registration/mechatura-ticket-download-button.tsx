@@ -61,7 +61,7 @@ export function MechaturaTicketDownloadButton({
             <Button
                 type="button"
                 variant={variant}
-                className={className || (variant === "default" ? "w-full shrink-0 bg-black text-white hover:bg-zinc-800" : "w-full")}
+                className={className || "w-full shrink-0"}
                 onClick={handleDownload}
                 disabled={isDownloading}
             >

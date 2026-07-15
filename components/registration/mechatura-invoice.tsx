@@ -70,8 +70,8 @@ function drawText(
 
 function downloadInvoice(receipt: ReceiptData) {
   const canvas = document.createElement("canvas");
-  const width = 2480; // A4 width at 300 DPI
-  const height = 3508; // A4 height at 300 DPI
+  const width = 2480;
+  const height = 3508;
   canvas.width = width;
   canvas.height = height;
 
@@ -82,206 +82,256 @@ function downloadInvoice(receipt: ReceiptData) {
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, width, height);
 
-  // Top Accent Bar
-  ctx.fillStyle = "#111111";
-  ctx.fillRect(0, 0, width, 40);
+  // Brand Colors
+  const brandPrimary = "#2563eb"; // Blue 600
+  const textMain = "#111827"; // Gray 900
+  const textMuted = "#6b7280"; // Gray 500
+  const borderLight = "#e5e7eb"; // Gray 200
 
-  // --- Header ---
-  ctx.fillStyle = "#111111";
-  ctx.font = "800 120px Inter, Arial, sans-serif";
-  ctx.fillText("FUTURA", 160, 240);
+  // 1. Top Accent & Header Background
+  ctx.fillStyle = "#f8fafc"; // Slate 50
+  ctx.fillRect(0, 0, width, 550);
+  ctx.fillStyle = brandPrimary;
+  ctx.fillRect(0, 0, width, 24);
+
+  // Logo / Company Name
+  ctx.fillStyle = brandPrimary;
+  ctx.font = "900 110px Inter, Arial, sans-serif";
+  ctx.fillText("FUTURA.", 160, 200);
+
+  ctx.fillStyle = textMuted;
+  ctx.font = "500 36px Inter, Arial, sans-serif";
+  ctx.fillText("Universitas Padjadjaran", 165, 260);
+
+  // Billed By
+  ctx.font = "400 32px Inter, Arial, sans-serif";
+  ctx.fillText("Jl. Raya Bandung Sumedang KM. 21", 165, 340);
+  ctx.fillText("Jatinangor, Sumedang 45363", 165, 390);
+  ctx.fillText("Jawa Barat, Indonesia", 165, 440);
+  ctx.fillText("futura@unpad.ac.id", 165, 490);
+
+  // Right Side Header (INVOICE text)
+  ctx.fillStyle = brandPrimary;
+  ctx.font = "800 130px Inter, Arial, sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText("INVOICE", width - 160, 200);
+
+  // Invoice Meta
+  ctx.fillStyle = textMain;
+  ctx.font = "600 36px Inter, Arial, sans-serif";
+  ctx.fillText(`INV-${receipt.invoiceId?.slice(0, 8).toUpperCase() || "0000"}`, width - 160, 260);
   
-  ctx.fillStyle = "#666666";
-  ctx.font = "600 44px Inter, Arial, sans-serif";
-  ctx.fillText("UNIVERSITAS PADJADJARAN", 160, 310);
+  ctx.font = "400 32px Inter, Arial, sans-serif";
+  ctx.fillStyle = textMuted;
+  ctx.fillText("Reference:", width - 420, 340);
+  ctx.fillText("Date Paid:", width - 420, 390);
+  ctx.fillText("Status:", width - 420, 440);
 
-  ctx.fillStyle = "#e5e7eb";
-  ctx.font = "800 140px Inter, Arial, sans-serif";
-  ctx.textAlign = "right";
-  ctx.fillText("INVOICE", width - 160, 240);
-  ctx.textAlign = "left"; 
-
-  ctx.fillStyle = "#4b5563";
-  ctx.font = "500 40px Inter, Arial, sans-serif";
-  ctx.textAlign = "right";
-  ctx.fillText(`Invoice ID: ${receipt.invoiceId || "-"}`, width - 160, 310);
+  ctx.fillStyle = textMain;
+  ctx.font = "600 32px Inter, Arial, sans-serif";
+  ctx.fillText(receipt.referenceId || "-", width - 160, 340);
+  ctx.fillText(receipt.paidAt || "-", width - 160, 390);
+  
+  ctx.fillStyle = "#059669"; // Green 600
+  ctx.fillText("COMPLETED", width - 160, 440);
   ctx.textAlign = "left";
 
-  // --- Separator ---
-  ctx.strokeStyle = "#e5e7eb";
-  ctx.lineWidth = 4;
+  // 2. Bill To Section
+  let currentY = 720;
+  ctx.fillStyle = textMuted;
+  ctx.font = "700 32px Inter, Arial, sans-serif";
+  ctx.fillText("BILLED TO", 160, currentY);
+
+  currentY += 70;
+  ctx.fillStyle = textMain;
+  ctx.font = "700 48px Inter, Arial, sans-serif";
+  ctx.fillText(receipt.name || "-", 160, currentY);
+  
+  currentY += 60;
+  ctx.fillStyle = textMuted;
+  ctx.font = "400 36px Inter, Arial, sans-serif";
+  ctx.fillText(receipt.institution || "-", 160, currentY);
+  currentY += 50;
+  ctx.fillText(receipt.email || "-", 160, currentY);
+  currentY += 50;
+  ctx.fillText(receipt.phone || "-", 160, currentY);
+
+  // Watermark / Stamp "PAID"
+  ctx.save();
+  ctx.translate(width - 450, 800);
+  ctx.rotate(-15 * Math.PI / 180);
   ctx.beginPath();
-  ctx.moveTo(160, 420);
-  ctx.lineTo(width - 160, 420);
+  if (typeof ctx.roundRect === "function") {
+    ctx.roundRect(-200, -80, 400, 160, 20);
+  } else {
+    ctx.rect(-200, -80, 400, 160);
+  }
+  ctx.lineWidth = 12;
+  ctx.strokeStyle = "rgba(5, 150, 105, 0.2)"; // Emerald translucent
   ctx.stroke();
+  ctx.fillStyle = "rgba(5, 150, 105, 0.2)";
+  ctx.font = "900 100px Inter, Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("PAID", 0, 0);
+  ctx.restore();
 
-  // --- Bill To & Details ---
-  // Left Side: Bill To
-  ctx.fillStyle = "#9ca3af";
-  ctx.font = "600 36px Inter, Arial, sans-serif";
-  ctx.fillText("BILLED TO:", 160, 520);
+  currentY += 120;
 
-  ctx.fillStyle = "#111111";
-  ctx.font = "700 52px Inter, Arial, sans-serif";
-  ctx.fillText(receipt.name || "-", 160, 590);
-  
-  ctx.fillStyle = "#4b5563";
-  ctx.font = "400 44px Inter, Arial, sans-serif";
-  ctx.fillText(receipt.institution || "-", 160, 650);
-  ctx.fillText(receipt.email || "-", 160, 710);
-  ctx.fillText(receipt.phone || "-", 160, 770);
-
-  // Right Side: Invoice Details
-  ctx.fillStyle = "#9ca3af";
-  ctx.font = "600 36px Inter, Arial, sans-serif";
-  ctx.fillText("PAYMENT DETAILS:", 1400, 520);
-
-  ctx.fillStyle = "#4b5563";
-  ctx.font = "400 44px Inter, Arial, sans-serif";
-  ctx.fillText("Date Paid:", 1400, 590);
-  ctx.fillText("Reference:", 1400, 650);
-  ctx.fillText("Status:", 1400, 710);
-
-  ctx.fillStyle = "#111111";
-  ctx.font = "600 44px Inter, Arial, sans-serif";
-  ctx.fillText(receipt.paidAt || "-", 1650, 590);
-  ctx.fillText(receipt.referenceId || "-", 1650, 650);
-  
-  // Paid Badge
-  ctx.fillStyle = "#059669"; // Emerald 600
-  ctx.font = "700 44px Inter, Arial, sans-serif";
-  ctx.fillText("PAID", 1650, 710);
-
-  // --- Optional Mechatura Details ---
-  let currentY = 880;
+  // 3. Team Details (If present)
   if (receipt.mechaturaDetails) {
-    ctx.strokeStyle = "#e5e7eb";
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(160, currentY);
-    ctx.lineTo(width - 160, currentY);
-    ctx.stroke();
-
-    currentY += 100;
-
-    // Left Side: Team Details
-    ctx.fillStyle = "#9ca3af";
-    ctx.font = "600 36px Inter, Arial, sans-serif";
-    ctx.fillText("TEAM DETAILS:", 160, currentY);
-    
-    ctx.fillStyle = "#4b5563";
-    ctx.font = "400 44px Inter, Arial, sans-serif";
-    ctx.fillText("Team Name:", 160, currentY + 70);
-    ctx.fillText("Robot Name:", 160, currentY + 130);
-    ctx.fillText("Competition:", 160, currentY + 190);
-    if (receipt.mechaturaDetails.coach) {
-      ctx.fillText("Coach:", 160, currentY + 250);
+    const boxY = currentY;
+    const boxHeight = 440;
+    ctx.fillStyle = "#f8fafc";
+    if (typeof ctx.roundRect === "function") {
+      ctx.beginPath();
+      ctx.roundRect(160, boxY, width - 320, boxHeight, 24);
+      ctx.fill();
+      ctx.strokeStyle = borderLight;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    } else {
+      ctx.fillRect(160, boxY, width - 320, boxHeight);
+      ctx.strokeRect(160, boxY, width - 320, boxHeight);
     }
 
-    ctx.fillStyle = "#111111";
-    ctx.font = "600 44px Inter, Arial, sans-serif";
-    ctx.fillText(receipt.mechaturaDetails.teamName || "-", 480, currentY + 70);
-    ctx.fillText(receipt.mechaturaDetails.robotName || "-", 480, currentY + 130);
-    ctx.fillText(receipt.mechaturaDetails.competitionType || "-", 480, currentY + 190);
+    // Left Col: Team Data
+    ctx.fillStyle = brandPrimary;
+    ctx.font = "700 32px Inter, Arial, sans-serif";
+    ctx.fillText("TEAM IDENTIFICATION", 220, boxY + 80);
+
+    ctx.fillStyle = textMuted;
+    ctx.font = "500 32px Inter, Arial, sans-serif";
+    ctx.fillText("Team Name", 220, boxY + 150);
+    ctx.fillText("Robot Name", 220, boxY + 220);
+    ctx.fillText("Category", 220, boxY + 290);
     if (receipt.mechaturaDetails.coach) {
-      ctx.fillText(receipt.mechaturaDetails.coach.name || "-", 480, currentY + 250);
+      ctx.fillText("Coach", 220, boxY + 360);
     }
 
-    // Right Side: Team Members
-    ctx.fillStyle = "#9ca3af";
-    ctx.font = "600 36px Inter, Arial, sans-serif";
-    ctx.fillText("TEAM MEMBERS:", 1400, currentY);
+    ctx.fillStyle = textMain;
+    ctx.font = "600 32px Inter, Arial, sans-serif";
+    ctx.fillText(receipt.mechaturaDetails.teamName || "-", 480, boxY + 150);
+    ctx.fillText(receipt.mechaturaDetails.robotName || "-", 480, boxY + 220);
+    ctx.fillText(receipt.mechaturaDetails.competitionType || "-", 480, boxY + 290);
+    if (receipt.mechaturaDetails.coach) {
+      ctx.fillText(receipt.mechaturaDetails.coach.name || "-", 480, boxY + 360);
+    }
 
-    let memberY = currentY + 70;
-    receipt.mechaturaDetails.members.forEach((member, idx) => {
-      ctx.fillStyle = "#111111";
-      ctx.font = "600 40px Inter, Arial, sans-serif";
-      ctx.fillText(`${idx + 1}. ${member.name}`, 1400, memberY);
+    // Right Col: Members Data
+    ctx.fillStyle = brandPrimary;
+    ctx.font = "700 32px Inter, Arial, sans-serif";
+    ctx.fillText("TEAM MEMBERS", 1300, boxY + 80);
+
+    let memY = boxY + 150;
+    receipt.mechaturaDetails.members.forEach((member, i) => {
+      ctx.fillStyle = textMain;
+      ctx.font = "600 32px Inter, Arial, sans-serif";
+      ctx.fillText(`${i + 1}. ${member.name}`, 1300, memY);
       
-      ctx.fillStyle = "#4b5563";
-      ctx.font = "400 36px Inter, Arial, sans-serif";
-      ctx.fillText(member.email, 1450, memberY + 50);
-      
-      memberY += 120;
+      ctx.fillStyle = textMuted;
+      ctx.font = "400 28px Inter, Arial, sans-serif";
+      ctx.fillText(member.email, 1340, memY + 40);
+      memY += 100;
     });
 
-    currentY = Math.max(memberY + 40, currentY + 360);
+    currentY += boxHeight + 120;
   }
 
-  // --- Table Header ---
-  const tableTop = currentY + 80;
-  ctx.fillStyle = "#f3f4f6";
-  ctx.fillRect(160, tableTop, width - 320, 120);
-  
-  ctx.fillStyle = "#4b5563";
-  ctx.font = "600 36px Inter, Arial, sans-serif";
-  ctx.fillText("DESCRIPTION", 220, tableTop + 75);
-  ctx.fillText("PROGRAM", 1100, tableTop + 75);
-  ctx.fillText("TICKET", 1550, tableTop + 75);
+  // 4. Items Table
+  // Table Header
+  ctx.fillStyle = "#f1f5f9"; // Slate 100
+  if (typeof ctx.roundRect === "function") {
+    ctx.beginPath();
+    ctx.roundRect(160, currentY, width - 320, 80, 12);
+    ctx.fill();
+  } else {
+    ctx.fillRect(160, currentY, width - 320, 80);
+  }
+
+  ctx.fillStyle = textMuted;
+  ctx.font = "700 28px Inter, Arial, sans-serif";
+  ctx.fillText("DESCRIPTION", 200, currentY + 50);
+  ctx.fillText("PROGRAM", 1200, currentY + 50);
+  ctx.textAlign = "center";
+  ctx.fillText("QTY", 1650, currentY + 50);
   ctx.textAlign = "right";
-  ctx.fillText("AMOUNT", width - 220, tableTop + 75);
+  ctx.fillText("AMOUNT", width - 200, currentY + 50);
   ctx.textAlign = "left";
 
-  // --- Table Row ---
-  const rowTop = tableTop + 200;
-  ctx.fillStyle = "#111111";
-  ctx.font = "600 48px Inter, Arial, sans-serif";
+  currentY += 160;
+
+  // Table Row
+  ctx.fillStyle = textMain;
+  ctx.font = "600 40px Inter, Arial, sans-serif";
   
   // Use drawText for multiline description support
-  const nextY = drawText(ctx, receipt.title || "Event Registration", 220, rowTop, 800, 60);
+  const descNextY = drawText(ctx, receipt.title || "Event Registration", 200, currentY, 900, 50);
   
-  ctx.font = "400 44px Inter, Arial, sans-serif";
-  ctx.fillText(receipt.program || "-", 1100, rowTop);
-  ctx.fillText(receipt.ticket || "-", 1550, rowTop);
+  ctx.font = "400 36px Inter, Arial, sans-serif";
+  ctx.fillText(receipt.program || "-", 1200, currentY);
   
+  ctx.textAlign = "center";
+  ctx.fillText("1", 1650, currentY);
+
   ctx.textAlign = "right";
-  ctx.font = "600 48px Inter, Arial, sans-serif";
-  ctx.fillText(receipt.amount || "-", width - 220, rowTop);
+  ctx.font = "600 40px Inter, Arial, sans-serif";
+  ctx.fillText(receipt.amount || "-", width - 200, currentY);
   ctx.textAlign = "left";
 
-  const rowBottom = Math.max(nextY + 100, rowTop + 100);
+  currentY = Math.max(descNextY + 80, currentY + 80);
 
-  // Table Bottom Line
-  ctx.beginPath();
-  ctx.moveTo(160, rowBottom);
-  ctx.lineTo(width - 160, rowBottom);
-  ctx.stroke();
-
-  // --- Total Section ---
-  ctx.fillStyle = "#111111";
-  ctx.textAlign = "right";
-  ctx.font = "600 48px Inter, Arial, sans-serif";
-  ctx.fillText("TOTAL PAID", width - 700, rowBottom + 160);
-  
-  ctx.font = "800 80px Inter, Arial, sans-serif";
-  ctx.fillText(receipt.amount || "-", width - 160, rowBottom + 170);
-  ctx.textAlign = "left";
-
-  // --- Footer ---
-  const footerY = height - 250;
-  ctx.fillStyle = "#f9fafb";
-  ctx.fillRect(0, height - 400, width, 400);
-
-  ctx.strokeStyle = "#e5e7eb";
+  // Bottom Border of table
+  ctx.strokeStyle = borderLight;
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(0, height - 400);
-  ctx.lineTo(width, height - 400);
+  ctx.moveTo(160, currentY);
+  ctx.lineTo(width - 160, currentY);
   ctx.stroke();
 
-  ctx.fillStyle = "#6b7280";
-  ctx.font = "400 40px Inter, Arial, sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText("Thank you for your registration.", width / 2, footerY);
-  ctx.fillText("For any inquiries, please contact us at futura@unpad.ac.id", width / 2, footerY + 60);
-  
+  // 5. Totals Section
+  currentY += 80;
+  ctx.fillStyle = textMuted;
+  ctx.font = "500 36px Inter, Arial, sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText("Subtotal", width - 550, currentY);
+  ctx.fillText("Tax (0%)", width - 550, currentY + 60);
+
+  ctx.fillStyle = textMain;
   ctx.font = "600 36px Inter, Arial, sans-serif";
-  ctx.fillText("FUTURA UNPAD 2026", width / 2, footerY + 140);
+  ctx.fillText(receipt.amount || "-", width - 200, currentY);
+  ctx.fillText("Rp 0", width - 200, currentY + 60);
+
+  currentY += 140;
+  ctx.fillStyle = brandPrimary;
+  ctx.font = "800 44px Inter, Arial, sans-serif";
+  ctx.fillText("TOTAL PAID", width - 550, currentY);
+  
+  ctx.font = "800 64px Inter, Arial, sans-serif";
+  ctx.fillText(receipt.amount || "-", width - 200, currentY + 10);
   ctx.textAlign = "left";
+
+  // 6. Footer Notes
+  const footerY = height - 200;
+  
+  ctx.fillStyle = brandPrimary;
+  ctx.fillRect(0, height - 40, width, 40);
+
+  ctx.fillStyle = textMuted;
+  ctx.font = "600 36px Inter, Arial, sans-serif";
+  ctx.fillText("Notes & Terms:", 160, footerY - 140);
+  
+  ctx.font = "400 32px Inter, Arial, sans-serif";
+  ctx.fillText("1. This is a computer-generated invoice and does not require a physical signature.", 160, footerY - 80);
+  ctx.fillText("2. Please present this invoice and your ticket QR code during the event check-in.", 160, footerY - 30);
+  
+  ctx.fillStyle = textMain;
+  ctx.font = "700 40px Inter, Arial, sans-serif";
+  ctx.fillText("Thank you for your business!", 160, footerY + 80);
 
   // Trigger Download
   const link = document.createElement("a");
-  link.download = `futura-invoice-${receipt.referenceId || "download"}.png`;
+  link.download = `Futura_Invoice_${receipt.invoiceId || receipt.referenceId || "download"}.png`;
   link.href = canvas.toDataURL("image/png");
   link.click();
 }

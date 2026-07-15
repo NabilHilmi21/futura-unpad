@@ -117,7 +117,7 @@ export function Sidebar() {
             ) : user ? (
                 <div className="border-t border-border p-4">
                     <Link 
-                        href="/profile/account" 
+                        href={isAdmin ? "/admin/profile" : "/profile/account"} 
                         prefetch={false}
                         onClick={() => setIsMobileOpen(false)}
                         className="flex items-center gap-3 mb-4 overflow-hidden rounded-lg p-2 transition-colors hover:bg-muted"

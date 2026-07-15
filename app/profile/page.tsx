@@ -69,10 +69,14 @@ const isProfileGroupRegistration = (registration: ProfileRegistration | null | u
   registration?.registration_type === "group" || registration?.registration_type === "grup"
 
 export default async function ProfilePage() {
-  const { user } = await getCachedAuth()
+  const { user, isAdmin } = await getCachedAuth()
 
   if (!user) {
     redirect("/login?next=/profile")
+  }
+
+  if (isAdmin) {
+    redirect("/admin/profile")
   }
 
   const adminSupabase = createAdminClient()
@@ -190,29 +194,18 @@ export default async function ProfilePage() {
       : null
 
   return (
-    <div className="mx-auto w-full max-w-7xl">
-      <section className="flex flex-col gap-4 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between mb-8">
-        <div className="space-y-2">
-          <h1 className="text-3xl sm:text-3xl sm:text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
-            Your Dashboard
-          </h1>
-          <p className="max-w-xl text-sm font-medium leading-relaxed text-neutral-500">
-            Manage your profile and track your Futura event registrations.
-          </p>
-        </div>
-      </section>
-
-      <div className="space-y-6 max-w-3xl">
+    <div className="mx-auto w-full max-w-4xl">
+      <div className="space-y-6">
 
         {/* SEMINAR CARD */}
         <div className="rounded-xl border border-border bg-card overflow-hidden">
-          <div className="border-b border-border bg-muted/30 px-6 py-4 flex items-center justify-between">
+          <div className="border-b border-border bg-card px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3 pr-6">
               <div className="bg-background border border-border p-2 rounded-lg">
                 <Ticket className="h-4 w-4 text-foreground" />
               </div>
               <div>
-                <h2 className="font-semibold">National Seminar</h2>
+                <h2 className="font-semibold text-foreground">National Seminar</h2>
                 <p className="text-xs text-muted-foreground">
                   {latestRegistration ? `Registered on ${formatDate(latestRegistration.created_at)}` : "No active registration"}
                 </p>
@@ -221,18 +214,17 @@ export default async function ProfilePage() {
             {latestRegistration && (
               <>
                 <div className="flex lg:hidden gap-2">
-                  <span className={`inline-flex items-center rounded-md border p-2 text-xs font-semibold ${checkedInCount > 0 ? 'border-border bg-background text-foreground' : 'border-border bg-muted text-muted-foreground'}`}>
+                  <span className={`inline-flex items-center rounded-md border border-border p-2 text-xs font-semibold ${checkedInCount > 0 ? 'bg-background text-foreground' : 'bg-muted/30 text-muted-foreground'}`}>
                     {checkedInCount > 0 ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Clock className="w-4 h-4 text-muted-foreground" />}
                   </span>
                 </div>
                 <div className="hidden lg:flex gap-2">
-                  <span className={`inline-flex items-center rounded-md border py-2 px-3 text-xs font-semibold ${checkedInCount > 0 ? 'border-border bg-background text-foreground' : 'border-border bg-muted text-muted-foreground'}`}>
+                  <span className={`inline-flex items-center rounded-md border border-border py-2 px-3 text-xs font-semibold ${checkedInCount > 0 ? 'bg-background text-foreground' : 'bg-muted/30 text-muted-foreground'}`}>
                     {checkedInCount > 0 ? <CheckCircle2 className="w-4 h-4 mr-1.5 text-green-500" /> : <Clock className="w-4 h-4 mr-1.5 text-muted-foreground" />}
                     {latestRegistration.registration_type === "group" ? `${checkedInCount}/${totalParticipants} Checked In` : (latestRegistration.attended ? "Checked In" : "Waiting to Check In")}
                   </span>
                 </div>
               </>
-
             )}
           </div>
 
@@ -243,26 +235,28 @@ export default async function ProfilePage() {
                   <div className="grid gap-5 text-sm sm:grid-cols-2 flex-grow">
                     <div>
                       <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Participant Name</p>
-                      <p className="font-medium">{latestRegistration.nama_lengkap}</p>
+                      <p className="font-medium text-foreground">{latestRegistration.nama_lengkap}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Institution</p>
-                      <p className="font-medium">{latestRegistration.asal_institusi}</p>
+                      <p className="font-medium text-foreground">{latestRegistration.asal_institusi}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Phone Number</p>
-                      <p className="font-medium">{latestRegistration.no_telepon}</p>
+                      <p className="font-medium text-foreground">{latestRegistration.no_telepon}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Status / Fee</p>
-                      <p className="font-medium">
+                      <p className="font-medium text-foreground">
                         {academicStatus ? statusLabels[academicStatus] : "-"} <span className="text-muted-foreground font-normal ml-1">(Free)</span>
                       </p>
                     </div>
                   </div>
                   {latestRegistration.registration_type !== "group" && (
-                    <div className="flex flex-col items-center justify-center self-start shrink-0 p-4 bg-white rounded-xl border border-border">
-                      <QRCodeSVG value={latestRegistration.id} size={120} />
+                    <div className="flex flex-col items-center justify-center self-start shrink-0 p-4 bg-background rounded-xl border border-border">
+                      <div className="rounded-[8px] bg-white border border-border p-2">
+                        <QRCodeSVG value={latestRegistration.id} size={120} />
+                      </div>
                       <p className="text-[10px] text-muted-foreground mt-3 uppercase font-semibold tracking-wider">Ticket QR</p>
                     </div>
                   )}
@@ -275,7 +269,7 @@ export default async function ProfilePage() {
                 </div>
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center py-6 text-center">
+              <div className="flex flex-col items-center justify-center py-8 text-center">
                 <p className="text-sm text-muted-foreground mb-4">You have not registered for the National Seminar yet.</p>
                 <Button asChild className="h-10 rounded-xl">
                   <Link href="/registration/seminar" prefetch={false}>Register for Seminar</Link>
@@ -287,23 +281,32 @@ export default async function ProfilePage() {
 
         {/* MECHATURA CARD */}
         <div className="rounded-xl border border-border bg-card overflow-hidden">
-          <div className="border-b border-border bg-muted/30 px-6 py-4 flex items-center justify-between">
+          <div className="border-b border-border bg-card px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="bg-background border border-border p-2 rounded-lg">
                 <Bot className="h-4 w-4 text-foreground" />
               </div>
               <div>
-                <h2 className="font-semibold">Mechatura Competition</h2>
+                <h2 className="font-semibold text-foreground">Mechatura Competition</h2>
                 <p className="text-xs text-muted-foreground">
                   {latestMechaturaRegistration ? `Registered on ${formatDate(latestMechaturaRegistration.created_at)}` : "No active registration"}
                 </p>
               </div>
             </div>
             {latestMechaturaRegistration && (
-              <span className={`inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-semibold ${isMechaturaPaymentComplete ? 'border-border bg-background text-foreground' : 'border-border bg-muted text-muted-foreground'}`}>
-                {isMechaturaPaymentComplete ? <CheckCircle2 className="w-3 h-3 mr-1.5 text-muted-foreground" /> : <Clock className="w-3 h-3 mr-1.5 text-muted-foreground" />}
-                {paymentStatusLabels[mechaturaPaymentStatus]}
-              </span>
+              <>
+                <div className="flex lg:hidden gap-2">
+                  <span className={`inline-flex items-center rounded-md border border-border p-2 text-xs font-semibold ${isMechaturaPaymentComplete ? 'bg-background text-foreground' : 'bg-muted/30 text-muted-foreground'}`}>
+                    {isMechaturaPaymentComplete ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Clock className="w-4 h-4 text-muted-foreground" />}
+                  </span>
+                </div>
+                <div className="hidden lg:flex gap-2">
+                  <span className={`inline-flex items-center rounded-md border border-border py-2 px-3 text-xs font-semibold ${isMechaturaPaymentComplete ? 'bg-background text-foreground' : 'bg-muted/30 text-muted-foreground'}`}>
+                    {isMechaturaPaymentComplete ? <CheckCircle2 className="w-4 h-4 mr-1.5 text-green-500" /> : <Clock className="w-4 h-4 mr-1.5 text-muted-foreground" />}
+                    {paymentStatusLabels[mechaturaPaymentStatus]}
+                  </span>
+                </div>
+              </>
             )}
           </div>
 
@@ -314,33 +317,50 @@ export default async function ProfilePage() {
                   <div className="grid gap-5 text-sm sm:grid-cols-2 flex-grow">
                     <div>
                       <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Team Name</p>
-                      <p className="font-medium">{latestMechaturaRegistration.team_name}</p>
+                      <p className="font-medium text-foreground">{latestMechaturaRegistration.team_name}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Category</p>
-                      <p className="font-medium">
+                      <p className="font-medium text-foreground">
                         {mechaturaCompetition ? mechaturaCompetitionLabels[mechaturaCompetition] : "-"}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Robot Name</p>
-                      <p className="font-medium">{latestMechaturaRegistration.robot_name}</p>
+                      <p className="font-medium text-foreground">{latestMechaturaRegistration.robot_name}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Team Leader</p>
-                      <p className="font-medium">{mechaturaLeader?.full_name ?? "-"}</p>
+                      <p className="font-medium text-foreground">{mechaturaLeader?.full_name ?? "-"}</p>
                     </div>
                   </div>
 
                   {isMechaturaPaymentComplete && (
-                    <div className="flex flex-col items-center justify-center self-start shrink-0 p-4 bg-white rounded-xl border border-border">
-                      <QRCodeSVG value={`mechatura:${latestMechaturaRegistration.id}`} size={120} />
+                    <div className="flex flex-col items-center justify-center self-start shrink-0 p-4 bg-background rounded-xl border border-border">
+                      <div className="rounded-[8px] bg-white border border-border p-2">
+                        <QRCodeSVG value={`mechatura:${latestMechaturaRegistration.id}`} size={120} />
+                      </div>
                       <p className="text-[10px] text-muted-foreground mt-3 uppercase font-semibold tracking-wider">Ticket QR</p>
                     </div>
                   )}
                 </div>
 
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  {mechaturaReceipt ? (
+                    <ReceiptDownloadButton
+                      receipt={mechaturaReceipt}
+                      variant="outline"
+                      className="w-full sm:flex-1 shrink-0 bg-background hover:bg-muted/50"
+                    >
+                      Save Invoice
+                    </ReceiptDownloadButton>
+                  ) : (
+                    <Button asChild variant="outline" className="w-full sm:w-auto shrink-0 bg-background hover:bg-muted/50">
+                      <Link href={`/payment?order_id=${encodeURIComponent(latestMechaturaRegistration.midtrans_order_id)}`} prefetch={false}>
+                        Open Payment Details <ChevronRight className="w-4 h-4 ml-1" />
+                      </Link>
+                    </Button>
+                  )}
                   {isMechaturaPaymentComplete && (
                     <MechaturaTicketDownloadButton
                       registrationId={latestMechaturaRegistration.id}
@@ -349,28 +369,13 @@ export default async function ProfilePage() {
                       competitionType={mechaturaCompetition}
                       robotName={latestMechaturaRegistration.robot_name}
                       leaderName={mechaturaLeader?.full_name ?? "Leader"}
-                      className="w-full sm:flex-1"
+                      className="w-full sm:flex-1 shrink-0"
                     />
-                  )}
-                  {mechaturaReceipt ? (
-                    <ReceiptDownloadButton
-                      receipt={mechaturaReceipt}
-                      variant="outline"
-                      className="w-full sm:flex-1"
-                    >
-                      Save Invoice
-                    </ReceiptDownloadButton>
-                  ) : (
-                    <Button asChild variant="secondary" className="w-full sm:w-auto">
-                      <Link href={`/payment?order_id=${encodeURIComponent(latestMechaturaRegistration.midtrans_order_id)}`} prefetch={false}>
-                        Open Payment Details <ChevronRight className="w-4 h-4 ml-1" />
-                      </Link>
-                    </Button>
                   )}
                 </div>
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center py-6 text-center">
+              <div className="flex flex-col items-center justify-center py-8 text-center">
                 <p className="text-sm text-muted-foreground mb-4">You have not formed a team for the Mechatura Robotics Competition yet.</p>
                 <Button asChild className="h-10 rounded-xl">
                   <Link href="/registration/mechatura" prefetch={false}>Register Team</Link>
@@ -382,13 +387,13 @@ export default async function ProfilePage() {
 
         {/* LOMBA KTI CARD (UI ONLY) */}
         <div className="rounded-xl border border-border bg-card overflow-hidden">
-          <div className="border-b border-border bg-muted/30 px-6 py-4 flex items-center justify-between">
+          <div className="border-b border-border bg-card px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="bg-background border border-border p-2 rounded-lg">
                 <BookOpen className="h-4 w-4 text-foreground" />
               </div>
               <div>
-                <h2 className="font-semibold">Lomba KTI</h2>
+                <h2 className="font-semibold text-foreground">Lomba KTI</h2>
                 <p className="text-xs text-muted-foreground">
                   Scientific Paper Competition
                 </p>
@@ -397,7 +402,7 @@ export default async function ProfilePage() {
           </div>
 
           <div className="p-6">
-            <div className="flex flex-col items-center justify-center py-6 text-center">
+            <div className="flex flex-col items-center justify-center py-8 text-center">
               <p className="text-sm text-muted-foreground mb-4">No active Lomba KTI registration found for this account.</p>
               <Button asChild className="h-10 rounded-xl">
                 <Link href="/registration/lomba-kti" prefetch={false}>Register for Lomba KTI</Link>

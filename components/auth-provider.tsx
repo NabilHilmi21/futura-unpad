@@ -85,12 +85,21 @@ export function AuthProvider({
         return;
       }
 
+      if (event === 'INITIAL_SESSION') {
+        return;
+      }
+
       if (!nextUser) {
         setCachedSession({ user: null, isAdmin: false });
         return;
       }
 
-      setCachedSession({ user: nextUser, isAdmin: false });
+      const currentSession = queryClient.getQueryData<AuthSession>(queryKeys.auth.session);
+      const isSameUser = currentSession?.user?.id === nextUser.id;
+      const isAdmin = isSameUser ? (currentSession?.isAdmin ?? false) : false;
+
+      setCachedSession({ user: nextUser, isAdmin });
+      
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.session });
     });
 
@@ -104,11 +113,11 @@ export function AuthProvider({
     () => ({
       user,
       isAdmin,
-      isLoading: authSession.isFetching || isMutatingAuth,
+      isLoading: authSession.isLoading || isMutatingAuth,
       refreshAuth,
       signOut,
     }),
-    [authSession.isFetching, isAdmin, isMutatingAuth, refreshAuth, signOut, user]
+    [authSession.isLoading, isAdmin, isMutatingAuth, refreshAuth, signOut, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
