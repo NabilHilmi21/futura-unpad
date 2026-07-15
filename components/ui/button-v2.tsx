@@ -36,7 +36,7 @@ export function ButtonV2({ text, href, requireAuth }: ButtonV2Props) {
 
   return (
     <>
-      <Link href={href} onClick={handleClick} className="cursor-pointer px-6 py-2 w-fit rounded-full bg-gradient-to-b from-blue-500 to-blue-600 text-white focus:ring-2 focus:ring-blue-400 hover:shadow-xl transition duration-200 block text-center">
+      <Link href={href} prefetch={true} onClick={handleClick} className="cursor-pointer px-6 py-2 w-fit rounded-full bg-gradient-to-b from-blue-500 to-blue-600 text-white focus:ring-2 focus:ring-blue-400 hover:shadow-xl transition duration-200 block text-center">
         {text}
       </Link>
 
