@@ -36,6 +36,7 @@ type MidtransStatusResponse = {
   signature_key?: string;
   transaction_status?: string;
   fraud_status?: string;
+  payment_type?: string;
 };
 
 type MidtransEnvironment = "sandbox" | "production";

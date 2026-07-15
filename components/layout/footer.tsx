@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import {
   FooterBackgroundGradient,
   TextHoverEffect,
@@ -56,7 +57,7 @@ export default function HoverFooter() {
     {
       title: "Helpful Links",
       links: [
-        { label: "FAQs", href: "#" },
+        { label: "FAQs", href: "/faq" },
         { label: "Guidelines", href: "#", },
         { label: "Support", href: "#" },
         { label: "Account Recovery", href: "#", },
@@ -121,12 +122,12 @@ export default function HoverFooter() {
               <ul className="space-y-3">
                 {section.links.map((link) => (
                   <li key={link.label} className="relative">
-                    <a
+                    <Link
                       href={link.href}
                       className="hover:text-[#b246ff] transition-colors"
                     >
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

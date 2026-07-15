@@ -60,7 +60,7 @@ async function AdminDashboardData() {
             </section>
 
             <section>
-                <RevenueChart data={(revenueData as RevenueData[]) ?? []} />
+                <RevenueChart data={Array.isArray(revenueData) ? revenueData : []} />
             </section>
 
             <section>

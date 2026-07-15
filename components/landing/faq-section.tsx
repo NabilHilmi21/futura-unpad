@@ -4,6 +4,7 @@ import { useState } from "react"
 import { ChevronDown } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
 import { useLiteMotion } from "@/hooks/use-lite-motion"
+import Link from "next/link"
 
 const faqSettings = {
   defaultOpen: false,
@@ -209,6 +210,7 @@ type FAQSectionProps = {
   title?: string
   groups?: FAQGroup[]
   showAllButton?: boolean
+  limitGroups?: boolean
 }
 
 export function FAQSection({
@@ -216,7 +218,9 @@ export function FAQSection({
   title = "Frequently Asked Questions.",
   groups = faqGroups,
   showAllButton = true,
+  limitGroups = false,
 }: FAQSectionProps) {
+  const displayGroups = limitGroups ? groups.slice(0, 1) : groups;
   return (
     <section
       id={id}
@@ -232,7 +236,7 @@ export function FAQSection({
         </div>
 
         <div className="space-y-12">
-          {groups.map((group) => (
+          {displayGroups.map((group) => (
             <div key={group.title + group.headingPadding}>
               <h3
                 className={`border-b border-border/50 mb-3 text-2xl font-semibold ${group.headingPadding}`}
@@ -249,9 +253,9 @@ export function FAQSection({
 
           {showAllButton && (
             <div className="mt-12 flex justify-center">
-              <button className="group relative inline-flex overflow-hidden rounded-full border-2 px-8 py-4 text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-950 hover:text-white hover:shadow-lg hover:shadow-black/10">
+              <Link href="/faq" className="group relative inline-flex overflow-hidden rounded-full border-2 px-8 py-4 text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-950 hover:text-white hover:shadow-lg hover:shadow-black/10">
                 See all FAQs
-              </button>
+              </Link>
             </div>
           )}
         </div>

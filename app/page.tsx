@@ -41,7 +41,7 @@ export default function Home() {
       </ScrollReveal>
       <hr className="border-border w-1/2 mx-auto" />
       <ScrollReveal>
-        <FAQSection />
+        <FAQSection limitGroups={true} />
       </ScrollReveal>
     </main>
   )
