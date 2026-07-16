@@ -65,6 +65,8 @@ const serializeBrowserCookie = (
 
     if (options.path) {
         cookie += `; Path=${options.path}`;
+    } else {
+        cookie += `; Path=/`;
     }
 
     if (options.expires) {

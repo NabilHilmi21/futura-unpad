@@ -74,10 +74,10 @@ export function AuthProvider({
   }, [setCachedSession, queryClient]);
 
   useEffect(() => {
-    if (!authSession.isLoading && !isMutatingAuth && !user && isAuthRequiredPath(pathname)) {
+    if (!authSession.isPending && !authSession.isFetching && !isMutatingAuth && !user && isAuthRequiredPath(pathname)) {
       router.replace(buildLoginRedirectHref(pathname));
     }
-  }, [authSession.isLoading, isMutatingAuth, user, pathname, router]);
+  }, [authSession.isPending, authSession.isFetching, isMutatingAuth, user, pathname, router]);
 
   useEffect(() => {
     let isMounted = true;
@@ -129,10 +129,10 @@ export function AuthProvider({
     () => ({
       user,
       adminAccess,
-      isLoading: authSession.isLoading || isMutatingAuth,
+      isLoading: authSession.isPending || authSession.isFetching || isMutatingAuth,
       signOut,
     }),
-    [authSession.isLoading, adminAccess, isMutatingAuth, signOut, user]
+    [authSession.isPending, authSession.isFetching, adminAccess, isMutatingAuth, signOut, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
