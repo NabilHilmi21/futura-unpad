@@ -2,14 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { mechaturaCompetitionLabels, paymentStatusLabels } from "@/lib/payment";
-import { ChevronLeft, ChevronRight, Download, Scan, Search, X } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Download, Search, X, LayoutGrid, Swords, Truck, CircleDollarSign, Clock, CheckCircle2, BadgeCheck, XCircle, List, Ban } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { DataTable } from "./data-table";
@@ -46,10 +45,19 @@ type MechaturaListClientProps = {
 };
 
 const categoryOptions = [
-    { value: "all", label: "All categories" },
-    { value: "sumo", label: mechaturaCompetitionLabels.sumo },
-    { value: "transporter", label: mechaturaCompetitionLabels.transporter },
-] satisfies Array<{ value: MechaturaCategoryFilter; label: string }>;
+    { value: "all", label: "All categories", icon: LayoutGrid },
+    { value: "sumo", label: mechaturaCompetitionLabels.sumo, icon: Swords },
+    { value: "transporter", label: mechaturaCompetitionLabels.transporter, icon: Truck },
+];
+
+const PaymentIcons: Record<string, React.ElementType> = {
+    pending: Clock,
+    paid: CheckCircle2,
+    settled: BadgeCheck,
+    expired: XCircle,
+    failed: Ban,
+    all: CircleDollarSign
+};
 
 export default function MechaturaListClient({
     registrations,
@@ -123,6 +131,12 @@ export default function MechaturaListClient({
         leader: leaderByRegistrationId.get(reg.id),
     }));
 
+    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        updateFilter("search", formData.get("search") as string);
+    };
+
     return (
         <div className="mx-auto w-full max-w-7xl space-y-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
@@ -163,58 +177,89 @@ export default function MechaturaListClient({
             </div>
 
             <div className="flex flex-col gap-5">
-                <form action="/admin/mechatura" className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between rounded-xl border border-border p-4 bg-card/50">
-                    <div className="relative flex-1 w-full lg:max-w-md">
+                <form onSubmit={onSubmit} className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between rounded-xl border border-border/50 p-2.5 bg-card/40 backdrop-blur-md shadow-sm">
+                    <div className="relative flex-1 w-full md:max-w-md">
                         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <input
+                            key={searchParam ?? "empty"}
                             name="search"
                             defaultValue={searchParam ?? ""}
                             placeholder="Search teams, institutions..."
                             className="h-10 w-full rounded-lg border border-input bg-background px-4 pl-9 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         />
                         {/* Hidden submit button to allow Enter key to submit */}
-                        <button type="submit" className="hidden">Search</button>
+                        <button type="submit" className="sr-only">Search</button>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
-                        <Select name="category" value={categoryFilter} onValueChange={(v) => updateFilter("category", v)}>
-                            <SelectTrigger className="h-10 w-[160px] rounded-lg bg-background">
-                                <SelectValue placeholder="Category" />
-                            </SelectTrigger>
-                            <SelectContent>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button type="button" variant="outline" className="h-10 w-[180px] justify-between rounded-lg bg-background">
+                                    <span className="truncate flex items-center gap-2">
+                                        {(() => {
+                                            const ActiveIcon = categoryOptions.find(o => o.value === categoryFilter)?.icon || LayoutGrid;
+                                            return <ActiveIcon className="h-4 w-4" />;
+                                        })()}
+                                        {categoryOptions.find(o => o.value === categoryFilter)?.label || "All Types"}
+                                    </span>
+                                    <ChevronDown className="h-4 w-4 opacity-50" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-[180px]">
                                 {categoryOptions.map((option) => (
-                                    <SelectItem key={option.value} value={option.value}>
+                                    <DropdownMenuItem key={option.value} onSelect={() => updateFilter("category", option.value)}>
+                                        <option.icon className="mr-2 h-4 w-4" />
                                         {option.label}
-                                    </SelectItem>
+                                    </DropdownMenuItem>
                                 ))}
-                            </SelectContent>
-                        </Select>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
 
-                        <Select name="payment" value={paymentFilter} onValueChange={(v) => updateFilter("payment", v)}>
-                            <SelectTrigger className="h-10 w-[160px] rounded-lg bg-background">
-                                <SelectValue placeholder="Payment" />
-                            </SelectTrigger>
-                            <SelectContent>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button type="button" variant="outline" className="h-10 w-[180px] justify-between rounded-lg bg-background">
+                                    <span className="truncate flex items-center gap-2">
+                                        {(() => {
+                                            const ActiveIcon = PaymentIcons[paymentFilter] || CircleDollarSign;
+                                            return <ActiveIcon className="h-4 w-4" />;
+                                        })()}
+                                        {paymentFilter === "all" ? "All payments" : paymentStatusLabels[paymentFilter as keyof typeof paymentStatusLabels]}
+                                    </span>
+                                    <ChevronDown className="h-4 w-4 opacity-50" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-[180px]">
                                 {paymentFilters.map((status) => (
-                                    <SelectItem key={status} value={status}>
-                                        {status === "all" ? "All payments" : paymentStatusLabels[status]}
-                                    </SelectItem>
+                                    <DropdownMenuItem key={status} onSelect={() => updateFilter("payment", status)}>
+                                        {(() => {
+                                            const OptionIcon = PaymentIcons[status] || CircleDollarSign;
+                                            return <OptionIcon className="mr-2 h-4 w-4" />;
+                                        })()}
+                                        {status === "all" ? "All payments" : paymentStatusLabels[status as keyof typeof paymentStatusLabels]}
+                                    </DropdownMenuItem>
                                 ))}
-                            </SelectContent>
-                        </Select>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
 
-                        <Select name="pageSize" value={String(pageSize)} onValueChange={(v) => updateFilter("pageSize", v)}>
-                            <SelectTrigger className="h-10 w-[140px] rounded-lg bg-background">
-                                <SelectValue placeholder="Rows" />
-                            </SelectTrigger>
-                            <SelectContent>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button type="button" variant="outline" className="h-10 w-[140px] justify-between rounded-lg bg-background">
+                                    <span className="truncate flex items-center gap-2">
+                                        <List className="h-4 w-4" />
+                                        {pageSize} rows
+                                    </span>
+                                    <ChevronDown className="h-4 w-4 opacity-50" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-[140px]">
                                 {pageSizeOptions.map((option) => (
-                                    <SelectItem key={option} value={String(option)}>
+                                    <DropdownMenuItem key={option} onSelect={() => updateFilter("pageSize", String(option))}>
+                                        <List className="mr-2 h-4 w-4" />
                                         {option} rows
-                                    </SelectItem>
+                                    </DropdownMenuItem>
                                 ))}
-                            </SelectContent>
-                        </Select>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </form>
 

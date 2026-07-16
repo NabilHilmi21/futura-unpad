@@ -1,7 +1,7 @@
 /* eslint-disable */
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useRef } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { LayoutDashboard, Users, Trophy, Cpu, LogOut, ArrowLeft } from "lucide-react"
@@ -57,9 +57,9 @@ export function Sidebar() {
     ]
 
     const sidebarContent = (
-        <div className="flex h-full flex-col bg-card border-r border-border">
-            <div className="flex h-14 items-center border-b border-border px-4 py-4">
-                <Link href="/" prefetch={false} className="flex items-center gap-2 font-semibold">
+        <div className="flex h-full flex-col bg-card/40 backdrop-blur-xl border-r border-white/5 shadow-2xl">
+            <div className="flex h-14 items-center border-b border-white/5 px-4 py-4">
+                <Link href="/" prefetch={false} className="flex items-center gap-2 font-semibold hover:text-primary transition-colors">
                     <ArrowLeft className="h-4 w-4" />
                     <span>Back to Site</span>
                 </Link>
@@ -87,22 +87,23 @@ export function Sidebar() {
                             const Icon = item.icon
                             const isActive = pathname === item.href || (item.href !== "/admin" && item.href !== "/profile" && pathname.startsWith(item.href))
                             return (
-                                <a
+                                <Link
                                     key={item.href}
                                     href={item.href}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        setIsMobileOpen(false);
-                                        router.push(item.href);
-                                    }}
+                                    onClick={() => setIsMobileOpen(false)}
                                     className={cn(
-                                        "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:text-primary cursor-pointer",
-                                        isActive ? "bg-muted text-primary" : "text-muted-foreground"
+                                        "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all duration-300 ease-out cursor-pointer overflow-hidden relative group",
+                                        isActive 
+                                            ? "bg-primary/10 text-primary font-medium" 
+                                            : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
                                     )}
                                 >
-                                    <Icon className="h-4 w-4" />
+                                    {isActive && (
+                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-1/2 bg-primary rounded-r-full" />
+                                    )}
+                                    <Icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", isActive && "text-primary")} />
                                     {item.label}
-                                </a>
+                                </Link>
                             )
                         })
                     )}
@@ -121,12 +122,12 @@ export function Sidebar() {
                     <Skeleton className="h-9 w-full rounded-md" />
                 </div>
             ) : user ? (
-                <div className="border-t border-border p-4">
+                <div className="border-t border-white/5 p-4">
                     <Link 
                         href={adminAccess ? "/admin/profile" : "/profile/account"} 
                         prefetch={false}
                         onClick={() => setIsMobileOpen(false)}
-                        className="flex items-center gap-3 mb-4 overflow-hidden rounded-lg p-2 transition-colors hover:bg-muted"
+                        className="flex items-center gap-3 mb-4 overflow-hidden rounded-lg p-2 transition-all hover:bg-white/5"
                     >
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-background border border-border font-semibold">
                             {getInitials(user.user_metadata?.display_name || user.user_metadata?.username, user.email)}
@@ -140,8 +141,8 @@ export function Sidebar() {
                             </span>
                         </div>
                     </Link>
-                    <Button variant="outline" className="w-full justify-start gap-2 h-9" onClick={() => setLogoutOpen(true)}>
-                        <LogOut className="h-4 w-4" />
+                    <Button variant="outline" className="w-full justify-start gap-2 h-9 border-white/10 hover:bg-white/5 hover:text-foreground transition-all" onClick={() => setLogoutOpen(true)}>
+                        <LogOut className="h-4 w-4 text-muted-foreground" />
                         Log out
                     </Button>
                     <ConfirmDialog
@@ -169,7 +170,7 @@ export function Sidebar() {
             {/* Desktop Sidebar */}
             <aside 
                 ref={sidebarRef}
-                className="hidden md:flex flex-col md:w-64 fixed inset-y-0 left-0 z-10"
+                className="hidden md:flex flex-col md:w-64 fixed inset-y-0 left-0 z-20"
             >
                 {sidebarContent}
             </aside>
@@ -189,7 +190,7 @@ export function Sidebar() {
             {/* Mobile Sidebar */}
             <aside
                 className={cn(
-                    "fixed inset-y-0 left-0 z-50 w-3/4 max-w-sm bg-background transition-transform duration-300 ease-in-out md:hidden shadow-xl",
+                    "fixed inset-y-0 left-0 z-50 w-3/4 max-w-sm bg-background/40 backdrop-blur-xl transition-transform duration-300 ease-in-out md:hidden shadow-xl",
                     isMobileOpen ? "translate-x-0" : "-translate-x-full"
                 )}
             >

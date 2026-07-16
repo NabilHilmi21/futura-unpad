@@ -5,6 +5,8 @@ import {
     CheckCircle2,
     Clock3,
     Users,
+    Cpu,
+    Trophy,
 } from "lucide-react"
 import { createAdminClient } from "@/lib/supabase-admin"
 import { requireAdminOrRedirect } from "@/lib/auth"
@@ -42,18 +44,16 @@ async function AdminDashboardData() {
 
     return (
         <div className="mx-auto w-full max-w-7xl space-y-8">
-            <section className="flex flex-col gap-5 border-b border-border pb-8 lg:flex-row lg:items-end lg:justify-between">
-                <div className="space-y-3">
-                    <p className="text-sm font-medium text-muted-foreground">
-                        Admin Dashboard
-                    </p>
+            <section className="flex flex-col gap-5 border-b border-white/10 pb-8 lg:flex-row lg:items-end lg:justify-between relative">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[100px] pointer-events-none -z-10" />
+                <div className="space-y-3 relative z-10">
                     <div className="space-y-2">
-                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-balance">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-balance bg-gradient-to-r from-white via-white/80 to-white/40 bg-clip-text text-transparent">
                             Futura Overview
                         </h1>
-                        <p className="max-w-xl text-sm font-medium leading-relaxed text-neutral-500">
-                            Welcome back, {user.email}. Monitor registration progress and
-                            payment health from one place. Navigate to specific events using the top navigation.
+                        <p className="max-w-xl text-sm md:text-base font-medium leading-relaxed text-muted-foreground/80">
+                            Welcome back, <span className="text-foreground">{user.email}</span>. Monitor registration progress and
+                            payment health from one place.
                         </p>
                     </div>
                 </div>
@@ -63,93 +63,104 @@ async function AdminDashboardData() {
                 <RevenueChart data={Array.isArray(revenueData) ? revenueData : []} />
             </section>
 
-            <section>
-                <h2 className="text-xl font-semibold mb-5 text-foreground">Seminar</h2>
+            <section className="relative z-10">
+                <h2 className="text-xl font-semibold mb-5 flex items-center gap-2">
+                    Seminar
+                </h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="rounded-xl border border-border bg-card p-5">
-                        <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm font-medium text-muted-foreground">Registrations</p>
-                            <Users className="h-4 w-4 text-muted-foreground" />
+                    <div className="group rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-foreground/5 hover:border-foreground/20 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+                            <Users className="w-24 h-24 text-primary" strokeWidth={1} />
                         </div>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
+                        <div className="flex items-center justify-between gap-3 relative z-10">
+                            <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">Registrations</p>
+                        </div>
+                        <p className="mt-4 text-4xl font-semibold tracking-tight text-foreground relative z-10">
                             {totalRegistrations}
                         </p>
                     </div>
 
-                    <div className="rounded-xl border border-border bg-card p-5">
-                        <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm font-medium text-muted-foreground">Mahasiswa</p>
-                            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    <div className="group rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-foreground/5 hover:border-foreground/20 relative overflow-hidden">
+                        <div className="flex items-center justify-between gap-3 relative z-10">
+                            <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">Mahasiswa</p>
                         </div>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
+                        <p className="mt-4 text-4xl font-semibold tracking-tight text-foreground relative z-10">
                             {mahasiswaCount}
                         </p>
                     </div>
 
-                    <div className="rounded-xl border border-border bg-card p-5">
-                        <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm font-medium text-muted-foreground">Siswa</p>
-                            <Clock3 className="h-4 w-4 text-amber-600" />
+                    <div className="group rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-foreground/5 hover:border-foreground/20 relative overflow-hidden">
+                        <div className="flex items-center justify-between gap-3 relative z-10">
+                            <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">Siswa</p>
                         </div>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
+                        <p className="mt-4 text-4xl font-semibold tracking-tight text-foreground relative z-10">
                             {siswaCount}
                         </p>
                     </div>
 
-                    <div className="rounded-xl border border-border bg-card p-5">
-                        <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm font-medium text-muted-foreground">Dosen / Umum</p>
-                            <Users className="h-4 w-4 text-muted-foreground" />
+                    <div className="group rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-foreground/5 hover:border-foreground/20 relative overflow-hidden">
+                        <div className="flex items-center justify-between gap-3 relative z-10">
+                            <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">Dosen / Umum</p>
                         </div>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
+                        <p className="mt-4 text-4xl font-semibold tracking-tight text-foreground relative z-10">
                             {dosenCount} / {umumCount}
                         </p>
                     </div>
                 </div>
             </section>
 
-            <section>
-                <h2 className="text-xl font-semibold mb-5 text-foreground">Mechatura</h2>
+            <section className="relative z-10">
+                <h2 className="text-xl font-semibold mb-5 flex items-center gap-2">
+                    Mechatura
+                </h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="rounded-xl border border-border bg-card p-5">
-                        <p className="text-sm font-medium text-muted-foreground">Total Teams</p>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
+                    <div className="group rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-foreground/5 hover:border-foreground/20 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+                            <Cpu className="w-24 h-24 text-primary" strokeWidth={1} />
+                        </div>
+                        <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors relative z-10">Total Teams</p>
+                        <p className="mt-4 text-4xl font-semibold tracking-tight text-foreground relative z-10">
                             {totalMechaturaCount}
                         </p>
                     </div>
-                    <div className="rounded-xl border border-border bg-card p-5">
-                        <p className="text-sm font-medium text-muted-foreground">Paid Teams</p>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
+                    <div className="group rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-emerald-500/5 hover:border-emerald-500/20 relative overflow-hidden">
+                        <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors relative z-10">Paid Teams</p>
+                        <p className="mt-4 text-4xl font-semibold tracking-tight text-emerald-400 relative z-10 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]">
                             {mechaturaPaidCount}
                         </p>
                     </div>
-                    <div className="rounded-xl border border-border bg-card p-5">
-                        <p className="text-sm font-medium text-muted-foreground">Robot Sumo</p>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
+                    <div className="group rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-foreground/5 hover:border-foreground/20 relative overflow-hidden">
+                        <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors relative z-10">Robot Sumo</p>
+                        <p className="mt-4 text-4xl font-semibold tracking-tight text-foreground relative z-10">
                             {sumoCount}
                         </p>
                     </div>
-                    <div className="rounded-xl border border-border bg-card p-5">
-                        <p className="text-sm font-medium text-muted-foreground">Robot Transporter</p>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
+                    <div className="group rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-foreground/5 hover:border-foreground/20 relative overflow-hidden">
+                        <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors relative z-10">Robot Transporter</p>
+                        <p className="mt-4 text-4xl font-semibold tracking-tight text-foreground relative z-10">
                             {transporterCount}
                         </p>
                     </div>
                 </div>
             </section>
 
-            <section>
-                <h2 className="text-xl font-semibold mb-5 text-foreground">Lomba Karya Tulis Ilmiah</h2>
+            <section className="relative z-10">
+                <h2 className="text-xl font-semibold mb-5 flex items-center gap-2">
+                    Lomba Essay
+                </h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="rounded-xl border border-border bg-card p-5">
-                        <p className="text-sm font-medium text-muted-foreground">Total Teams</p>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight text-muted-foreground">
+                    <div className="group rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-foreground/5 hover:border-foreground/20 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+                            <Trophy className="w-24 h-24 text-primary" strokeWidth={1} />
+                        </div>
+                        <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors relative z-10">Total Teams</p>
+                        <p className="mt-4 text-4xl font-semibold tracking-tight text-muted-foreground relative z-10">
                             -
                         </p>
                     </div>
-                    <div className="rounded-xl border border-border bg-card p-5">
-                        <p className="text-sm font-medium text-muted-foreground">Paid Teams</p>
-                        <p className="mt-4 text-3xl font-semibold tracking-tight text-muted-foreground">
+                    <div className="group rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-emerald-500/5 hover:border-emerald-500/20 relative overflow-hidden">
+                        <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors relative z-10">Paid Teams</p>
+                        <p className="mt-4 text-4xl font-semibold tracking-tight text-muted-foreground relative z-10">
                             -
                         </p>
                     </div>

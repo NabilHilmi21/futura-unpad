@@ -2,17 +2,10 @@ export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
 
 import { AlertCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { requireAdminOrRedirect } from "@/lib/auth"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
 import { Suspense } from "react"
 import TableLoading from "../table-loading"
+import { LombaEssayFilter } from "./lomba-essay-filter"
 
 type AdminSearchParams = Promise<Record<string, string | string[] | undefined>>
 
@@ -40,32 +33,7 @@ async function LKTIAdminData({
                             Search and filter LKTI participants.
                         </p>
                     </div>
-                    <form className="grid gap-3 sm:grid-cols-2 lg:min-w-[400px]" action="/admin/lomba-kti">
-                        <input
-                            name="search"
-                            defaultValue={searchParam ?? ""}
-                            placeholder="Search team, name, paper title"
-                            className="h-10 rounded-xl border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                        />
-                        <div className="flex gap-3">
-                            <Select name="category" defaultValue={categoryParam ?? "all"}>
-                                <SelectTrigger className="w-full h-10 rounded-xl">
-                                    <SelectValue placeholder="All Sub-Themes" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Sub-Themes</SelectItem>
-                                    <SelectItem value="teknologi">Teknologi</SelectItem>
-                                    <SelectItem value="kesehatan">Kesehatan</SelectItem>
-                                    <SelectItem value="ekonomi">Ekonomi</SelectItem>
-                                    <SelectItem value="sosial">Sosial</SelectItem>
-                                    <SelectItem value="pendidikan">Pendidikan</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <Button className="h-10 rounded-xl px-6">
-                                Apply
-                            </Button>
-                        </div>
-                    </form>
+                    <LombaEssayFilter searchParam={searchParam} categoryParam={categoryParam} />
                 </div>
 
                 <div className="grid gap-3 border-y border-border py-6 mt-6 sm:grid-cols-4">

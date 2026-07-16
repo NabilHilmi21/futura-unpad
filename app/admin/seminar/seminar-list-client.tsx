@@ -5,36 +5,35 @@ import { DataTable } from "./data-table"
 import { columns } from "./participants"
 import type { Participants } from "./participants"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, Download, Scan, Search, X } from "lucide-react"
+import { ChevronDown, ChevronLeft, ChevronRight, Download, Search, X, GraduationCap, Users, User, Briefcase, CheckCircle2, XCircle, List, Globe, Clock, Map, UserCheck, UsersRound, BookOpen } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const statusOptions = [
-    { value: "all", label: "All statuses" },
-    { value: "mahasiswa", label: "Mahasiswa" },
-    { value: "siswa", label: "Siswa" },
-    { value: "dosen", label: "Dosen" },
-    { value: "umum", label: "Umum" },
+    { value: "all", label: "All statuses", icon: UsersRound },
+    { value: "mahasiswa", label: "Mahasiswa", icon: GraduationCap },
+    { value: "siswa", label: "Siswa", icon: BookOpen },
+    { value: "dosen", label: "Dosen", icon: Briefcase },
+    { value: "umum", label: "Umum", icon: Globe },
 ]
 
 const typeOptions = [
-    { value: "all", label: "All types" },
-    { value: "individual", label: "Individual" },
-    { value: "group", label: "Group" },
+    { value: "all", label: "All types", icon: Map },
+    { value: "individual", label: "Individual", icon: User },
+    { value: "group", label: "Group", icon: Users },
 ]
 
 const attendanceOptions = [
-    { value: "all", label: "All check-ins" },
-    { value: "checked-in", label: "Checked in" },
-    { value: "pending", label: "Not checked in" },
-    { value: "partial", label: "Partially checked in" },
+    { value: "all", label: "All check-ins", icon: UserCheck },
+    { value: "checked-in", label: "Checked in", icon: CheckCircle2 },
+    { value: "pending", label: "Not checked in", icon: XCircle },
+    { value: "partial", label: "Partially checked in", icon: Clock },
 ]
 
 const pageSizeOptions = [10, 20, 30, 40]
@@ -73,11 +72,6 @@ export default function SeminarListClient({
 }) {
     const router = useRouter()
     const participants = initialData
-    const hasActiveFilters =
-        !!searchParam?.trim() ||
-        (categoryFilter ?? "all") !== "all" ||
-        (typeFilter ?? "all") !== "all" ||
-        (attendanceFilter ?? "all") !== "all"
 
     const metrics = [
         {
@@ -164,6 +158,12 @@ export default function SeminarListClient({
     }
 
 
+    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        const formData = new FormData(e.currentTarget)
+        updateFilter("search", formData.get("search") as string)
+    }
+
     return (
         <div className="mx-auto w-full max-w-7xl space-y-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
@@ -200,70 +200,117 @@ export default function SeminarListClient({
             </div>
 
             <div className="flex flex-col gap-5">
-                <form action="/admin/seminar" className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between rounded-xl border border-border p-4 bg-card/50">
-                    <div className="relative flex-1 w-full lg:max-w-xs">
+                <form onSubmit={onSubmit} className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between rounded-xl border border-border/50 p-2.5 bg-card/40 backdrop-blur-md shadow-sm">
+                    <div className="relative flex-1 w-full md:max-w-md">
                         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <input
+                            key={searchParam ?? "empty"}
                             name="search"
                             defaultValue={searchParam ?? ""}
                             placeholder="Search registrations..."
                             className="h-10 w-full rounded-lg border border-input bg-background px-4 pl-9 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         />
-                        <button type="submit" className="hidden">Search</button>
+                        <button type="submit" className="sr-only">Search</button>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
-                        <Select name="category" value={categoryFilter ?? "all"} onValueChange={(v) => updateFilter("category", v)}>
-                            <SelectTrigger className="h-10 w-[140px] rounded-lg bg-background">
-                                <SelectValue placeholder="Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {statusOptions.map((option) => (
-                                    <SelectItem key={option.value} value={option.value}>
-                                        {option.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button type="button" variant="outline" className="h-10 w-[160px] justify-between rounded-lg bg-background">
+                                    <span className="truncate flex items-center gap-2">
+                                        {(() => {
+                                            const opt = statusOptions.find(o => o.value === (categoryFilter ?? "all"))
+                                            const Icon = opt?.icon || UsersRound
+                                            return <><Icon className="h-4 w-4" />{opt?.label || "Status"}</>
+                                        })()}
+                                    </span>
+                                    <ChevronDown className="h-4 w-4 opacity-50" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-[160px]">
+                                {statusOptions.map((option) => {
+                                    const Icon = option.icon
+                                    return (
+                                        <DropdownMenuItem key={option.value} onSelect={() => updateFilter("category", option.value)}>
+                                            <Icon className="mr-2 h-4 w-4" />
+                                            {option.label}
+                                        </DropdownMenuItem>
+                                    )
+                                })}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
 
-                        <Select name="type" value={typeFilter ?? "all"} onValueChange={(v) => updateFilter("type", v)}>
-                            <SelectTrigger className="h-10 w-[140px] rounded-lg bg-background">
-                                <SelectValue placeholder="Type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {typeOptions.map((option) => (
-                                    <SelectItem key={option.value} value={option.value}>
-                                        {option.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button type="button" variant="outline" className="h-10 w-[160px] justify-between rounded-lg bg-background">
+                                    <span className="truncate flex items-center gap-2">
+                                        {(() => {
+                                            const opt = typeOptions.find(o => o.value === (typeFilter ?? "all"))
+                                            const Icon = opt?.icon || Map
+                                            return <><Icon className="h-4 w-4" />{opt?.label || "Type"}</>
+                                        })()}
+                                    </span>
+                                    <ChevronDown className="h-4 w-4 opacity-50" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-[160px]">
+                                {typeOptions.map((option) => {
+                                    const Icon = option.icon
+                                    return (
+                                        <DropdownMenuItem key={option.value} onSelect={() => updateFilter("type", option.value)}>
+                                            <Icon className="mr-2 h-4 w-4" />
+                                            {option.label}
+                                        </DropdownMenuItem>
+                                    )
+                                })}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
 
-                        <Select name="attendance" value={attendanceFilter ?? "all"} onValueChange={(v) => updateFilter("attendance", v)}>
-                            <SelectTrigger className="h-10 w-[150px] rounded-lg bg-background">
-                                <SelectValue placeholder="Check-ins" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {attendanceOptions.map((option) => (
-                                    <SelectItem key={option.value} value={option.value}>
-                                        {option.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button type="button" variant="outline" className="h-10 w-[190px] justify-between rounded-lg bg-background">
+                                    <span className="truncate flex items-center gap-2">
+                                        {(() => {
+                                            const opt = attendanceOptions.find(o => o.value === (attendanceFilter ?? "all"))
+                                            const Icon = opt?.icon || UserCheck
+                                            return <><Icon className="h-4 w-4" />{opt?.label || "Check-ins"}</>
+                                        })()}
+                                    </span>
+                                    <ChevronDown className="h-4 w-4 opacity-50" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-[190px]">
+                                {attendanceOptions.map((option) => {
+                                    const Icon = option.icon
+                                    return (
+                                        <DropdownMenuItem key={option.value} onSelect={() => updateFilter("attendance", option.value)}>
+                                            <Icon className="mr-2 h-4 w-4" />
+                                            {option.label}
+                                        </DropdownMenuItem>
+                                    )
+                                })}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
 
-                        <Select name="pageSize" value={String(pageSize)} onValueChange={(v) => updateFilter("pageSize", v)}>
-                            <SelectTrigger className="h-10 w-[110px] rounded-lg bg-background">
-                                <SelectValue placeholder="Rows" />
-                            </SelectTrigger>
-                            <SelectContent>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button type="button" variant="outline" className="h-10 w-[120px] justify-between rounded-lg bg-background">
+                                    <span className="truncate flex items-center gap-2">
+                                        <List className="h-4 w-4" />
+                                        {pageSize} rows
+                                    </span>
+                                    <ChevronDown className="h-4 w-4 opacity-50" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-[120px]">
                                 {pageSizeOptions.map((option) => (
-                                    <SelectItem key={option} value={String(option)}>
+                                    <DropdownMenuItem key={option} onSelect={() => updateFilter("pageSize", String(option))}>
+                                        <List className="mr-2 h-4 w-4" />
                                         {option} rows
-                                    </SelectItem>
+                                    </DropdownMenuItem>
                                 ))}
-                            </SelectContent>
-                        </Select>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </form>
 
@@ -285,7 +332,7 @@ export default function SeminarListClient({
                         ))}
                         <button 
                             type="button"
-                            onClick={() => router.push("/admin/seminar")}
+                            onClick={() => router.push(pageSize !== defaultPageSize ? `/admin/seminar?pageSize=${pageSize}` : "/admin/seminar")}
                             className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 ml-2 transition-colors"
                         >
                             Clear all
