@@ -1,4 +1,6 @@
 import { ProfileTabs } from "@/components/layout/profile-tabs"
+import { VerificationToast } from "./verification-toast"
+import { Suspense } from "react"
 
 export default function ProfileLayout({ children }: { children: React.ReactNode }) {
     return (
@@ -13,6 +15,9 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
             </div>
             <ProfileTabs />
             {children}
+            <Suspense fallback={null}>
+                <VerificationToast />
+            </Suspense>
         </div>
     )
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import GoogleLoginButton from "./google-login";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";;
 import { FormProvider, useForm } from "react-hook-form";
@@ -34,6 +34,7 @@ export default function LoginForm() {
     const searchParams = useSearchParams();
     const login = useLoginMutation();
     const [submitError, setSubmitError] = useState("");
+    const isErrorHandled = useRef(false);
 
     const form = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
@@ -43,6 +44,23 @@ export default function LoginForm() {
             keepSignedIn: true,
         },
     });
+
+    useEffect(() => {
+        if (isErrorHandled.current) return;
+        
+        const errorParam = searchParams.get("error");
+        if (errorParam === "oauth_failed") {
+            setSubmitError("Authentication failed or link expired. Please try again.");
+            toast.error("Authentication failed", {
+                description: "Your verification link may have expired or is invalid.",
+            });
+            isErrorHandled.current = true;
+        } else if (errorParam === "missing_code") {
+            setSubmitError("Invalid verification link.");
+            isErrorHandled.current = true;
+        }
+    }, [searchParams]);
+
     const keepSignedIn = form.watch("keepSignedIn");
     const setKeepSignedIn = (value: boolean) => form.setValue("keepSignedIn", value);
     const { handleSubmit } = form;

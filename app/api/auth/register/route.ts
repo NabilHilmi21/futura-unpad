@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 
   const requestUrl = new URL(request.url);
   const redirectUrl = new URL("/auth/callback", requestUrl.origin);
-  redirectUrl.searchParams.set("next", "/login?verified=1");
+  redirectUrl.searchParams.set("next", "/profile?verified=1");
 
   const supabase = await createClient();
   
@@ -76,20 +76,16 @@ export async function POST(request: Request) {
 
   if (error) {
     if (isExistingAccountError(error)) {
-      return NextResponse.json(
-        { error: "This email is already registered. Please log in instead." },
-        { status: 409 }
-      );
+      // Prevent user enumeration by returning a generic success response
+      return NextResponse.json({ ok: true, authenticated: false });
     }
 
     return NextResponse.json({ error: error.message || "Registration failed" }, { status: 400 });
   }
 
   if (isExistingAccountResponse(data)) {
-    return NextResponse.json(
-      { error: "This email is already registered. Please log in instead." },
-      { status: 409 }
-    );
+    // Prevent user enumeration by returning a generic success response
+    return NextResponse.json({ ok: true, authenticated: false });
   }
 
   return NextResponse.json({ ok: true, authenticated: !!data.session });
