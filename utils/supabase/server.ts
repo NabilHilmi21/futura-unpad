@@ -2,14 +2,16 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { AuthCookiePersistence } from "@/utils/supabase/auth-cookies";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+// Environment variables read dynamically inside the function
 
 type CreateClientOptions = {
   authCookiePersistence?: AuthCookiePersistence;
 };
 
 export const createClient = async (options: CreateClientOptions = {}) => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
   const cookieStore = await cookies();
   const sessionOnly = options.authCookiePersistence === "session";
 
@@ -41,6 +43,7 @@ export const createClient = async (options: CreateClientOptions = {}) => {
 };
 
 export const createAdminClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   return createServerClient(supabaseUrl!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
     cookies: {
       getAll() {

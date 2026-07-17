@@ -4,8 +4,7 @@ import {
     isSessionAuthPersistence,
 } from "@/utils/supabase/auth-cookies";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+// Environment variables read dynamically inside the function
 
 type BrowserCookieOptions = {
     domain?: string;
@@ -92,8 +91,11 @@ const serializeBrowserCookie = (
     return cookie;
 };
 
-export const createClient = () =>
-    createBrowserClient(
+export const createClient = () => {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    return createBrowserClient(
         supabaseUrl!,
         supabaseKey!,
         {
@@ -141,3 +143,4 @@ export const createClient = () =>
             },
         }
     );
+};
