@@ -19,6 +19,7 @@ const safeRedirectPath = (value: string | null) => {
         !value ||
         !value.startsWith("/") ||
         value.startsWith("//") ||
+        value.startsWith("/\\") ||
         value.startsWith("/auth/callback")
     ) {
         return "/"

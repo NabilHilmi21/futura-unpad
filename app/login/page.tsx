@@ -4,8 +4,9 @@ import { redirect } from "next/navigation"
 import LoginForm from "./form"
 import { getCachedAuth } from "@/lib/auth"
 import { Metadata } from "next"
-import { CheckCircle2 } from "lucide-react"
+import { CheckCircle2, ShieldAlert } from "lucide-react"
 import { cookies } from "next/headers"
+import { ErrorState } from "@/components/ui/error-state"
 
 type LoginSearchParams = Promise<Record<string, string | string[] | undefined>>
 
@@ -16,6 +17,7 @@ const getSafeRedirectPath = (value: string | string[] | undefined) => {
         !next ||
         !next.startsWith("/") ||
         next.startsWith("//") ||
+        next.startsWith("/\\") ||
         next.startsWith("/login") ||
         next === "/register" ||
         next.startsWith("/register?") ||
@@ -41,6 +43,20 @@ export default async function LoginPage({
 
     if (user) {
         redirect(getSafeRedirectPath(params.next))
+    }
+
+    if (params.error === "oauth_failed" || params.error === "missing_code") {
+        return (
+            <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center px-6 pb-16 pt-32 sm:px-8">
+                <ErrorState 
+                    icon={ShieldAlert}
+                    title="Verification link invalid or already used"
+                    description="This link has expired or you have already verified your email using the OTP code. Please log in to continue."
+                    actionHref="/login"
+                    actionLabel="Go to Login"
+                />
+            </main>
+        )
     }
 
     const cookieStore = await cookies();
