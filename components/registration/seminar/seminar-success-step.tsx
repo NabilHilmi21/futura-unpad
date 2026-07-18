@@ -20,21 +20,21 @@ export default function SeminarSuccessStep({
   return (
     <FieldGroup className="gap-6">
       <section className="overflow-hidden rounded-xl border border-border bg-card">
-        <div className="flex items-start gap-4 p-5 sm:p-6 border-b">
+        <div className="flex items-start gap-4 p-4 sm:p-6 border-b">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-muted">
             <CheckCircle2 className="h-5 w-5 text-foreground" />
           </span>
           <div>
             <h2 className="text-lg font-semibold">
-              Your registration is complete
+              Pendaftaran Anda telah selesai
             </h2>
             <p className="mt-2 text-sm font-medium leading-relaxed text-neutral-500">
-              Your Futura seminar registration is saved. You can view your registration details below.
+              Pendaftaran seminar Futura Anda telah tersimpan. Anda dapat melihat detail pendaftaran Anda di bawah ini.
             </p>
           </div>
         </div>
 
-        <div className="p-5 sm:p-6">
+        <div className="p-4 sm:p-6">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h3 className="mt-3 text-2xl font-semibold tracking-tight">
@@ -55,7 +55,7 @@ export default function SeminarSuccessStep({
               <dd className="mt-1 font-medium">{values.telp}</dd>
             </div>
             <div>
-              <dt className="text-muted-foreground">Registration ID</dt>
+              <dt className="text-muted-foreground">ID Pendaftaran</dt>
               <dd className="mt-1 font-mono text-sm font-semibold">
                 {registrationId}
               </dd>
@@ -72,7 +72,7 @@ export default function SeminarSuccessStep({
 
           {values.registration_type === "grup" && registrations.length > 0 && (
             <div className="mt-5 border-t border-border pt-4">
-              <h3 className="text-sm font-medium mb-3">Group Members</h3>
+              <h3 className="text-sm font-medium mb-3">Anggota Grup</h3>
               <div className="grid gap-4 sm:grid-cols-2">
                 {registrations.map((registration) => (
                   <div
@@ -100,10 +100,10 @@ export default function SeminarSuccessStep({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Button type="button" variant="outline" className="h-11 rounded-[8px]" asChild>
-          <Link href="/">Go to Home Page</Link>
+          <Link href="/">Ke Beranda</Link>
         </Button>
         <Button type="button" className="h-11 rounded-[8px]" asChild>
-          <Link href="/profile">Go to Profile</Link>
+          <Link href="/profile">Ke Profil</Link>
         </Button>
       </div>
     </FieldGroup>

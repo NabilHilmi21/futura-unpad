@@ -5,33 +5,33 @@ const normalizeEmail = (email: string) => email.trim().toLowerCase();
 export const emailSchema = z
   .string()
   .trim()
-  .min(1, "Please enter your email.")
-  .email("Please enter a valid email address.")
-  .max(254, "Email is too long.")
+  .min(1, "Silakan masukkan email Anda.")
+  .email("Silakan masukkan alamat email yang valid.")
+  .max(254, "Email terlalu panjang.")
   .transform((email) => normalizeEmail(email));
 
 export const passwordSchema = z
   .string()
-  .min(8, "Must be at least 8 characters long.")
-  .max(128, "Password is too long.");
+  .min(8, "Kata sandi minimal 8 karakter.")
+  .max(128, "Kata sandi terlalu panjang.");
 
 export const usernameSchema = z
   .string()
   .trim()
-  .min(3, "Username must be at least 3 characters.")
-  .max(20, "Username is too long.")
-  .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores.");
+  .min(3, "Nama pengguna minimal 3 karakter.")
+  .max(20, "Nama pengguna terlalu panjang.")
+  .regex(/^[a-zA-Z0-9_]+$/, "Nama pengguna hanya boleh berisi huruf, angka, dan garis bawah.");
 
 export const loginSchema = z.object({
-  identifier: z.string().trim().min(1, "Please enter your email or username."),
-  password: z.string().min(1, "Please enter your password."),
+  identifier: z.string().trim().min(1, "Silakan masukkan email atau nama pengguna Anda."),
+  password: z.string().min(1, "Silakan masukkan kata sandi Anda."),
   keepSignedIn: z.boolean().optional(),
 });
 export type LoginFormValues = z.infer<typeof loginSchema>;
 
 export const editProfileSchema = z.object({
   username: z.union([usernameSchema, z.literal("")]).optional(),
-  display_name: z.string().trim().min(1, "Display name is required.").max(100, "Display name is too long."),
+  display_name: z.string().trim().min(1, "Nama tampilan wajib diisi.").max(100, "Nama tampilan terlalu panjang."),
   email: emailSchema,
 });
 export type EditProfileFormValues = z.infer<typeof editProfileSchema>;
@@ -43,11 +43,11 @@ export const signupSchema = z
     password: passwordSchema,
     confirmPassword: passwordSchema,
     termsAccepted: z.boolean().refine((value) => value === true, {
-      message: "Please agree to the Terms and Privacy Policy.",
+      message: "Harap setujui Syarat dan Kebijakan Privasi.",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match.",
+    message: "Kata sandi tidak cocok.",
     path: ["confirmPassword"],
   });
 export type RegisterFormValues = z.infer<typeof signupSchema>;
@@ -63,6 +63,6 @@ export const resetPasswordSchema = z
     confirmPassword: passwordSchema,
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match.",
+    message: "Kata sandi tidak cocok.",
     path: ["confirmPassword"],
   });

@@ -80,7 +80,7 @@ export default function SeminarRegistrationOptionStep({
           ) : null}
         </Field>
         <Button type="submit" className="h-11 rounded-[8px] mt-4">
-          Continue
+          Lanjut
         </Button>
       </FieldGroup>
     </form>

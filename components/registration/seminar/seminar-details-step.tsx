@@ -26,8 +26,8 @@ export default function SeminarDetailsStep({
 
   return (
     <form onSubmit={onSubmit} noValidate>
-      <section className="sm:overflow-hidden sm:rounded-xl sm:border sm:border-border sm:bg-card">
-        <div className="border-b border-border pb-4 pt-0 sm:py-6 sm:px-6">
+      <section className="overflow-hidden rounded-xl border border-border bg-card">
+        <div className="border-b border-border p-4 sm:p-6">
           <h2 className="text-lg font-semibold">
             Detail Informasi
           </h2>
@@ -36,7 +36,7 @@ export default function SeminarDetailsStep({
           </p>
         </div>
 
-        <div className="space-y-6 pt-5 pb-0 sm:p-6">
+        <div className="space-y-6 p-4 sm:p-6">
           {watchedValues.registration_type === "grup" && (
             <FormTextField<ClientSeminarFormValues>
               name="group_name"
@@ -101,10 +101,10 @@ export default function SeminarDetailsStep({
               onClick={onBack}
               disabled={isSubmitting}
             >
-              Back
+              Kembali
             </Button>
             <Button type="submit" className="h-11 rounded-[8px]">
-              Continue to identity check
+              Lanjut ke pemeriksaan identitas
             </Button>
           </Field>
         </div>

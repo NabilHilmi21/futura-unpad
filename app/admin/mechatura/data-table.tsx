@@ -72,7 +72,7 @@ export function DataTable<TData, TValue>({
                             <TableCell colSpan={columns.length} className="h-32 text-center text-muted-foreground">
                                 <div className="flex flex-col items-center justify-center gap-2">
                                     <Users className="h-5 w-5" />
-                                    <span>No Mechatura teams match the current filters.</span>
+                                    <span>Tidak ada tim Mechatura yang cocok dengan filter saat ini.</span>
                                 </div>
                             </TableCell>
                         </TableRow>

@@ -12,13 +12,13 @@ import { ErrorState } from "@/components/ui/error-state"
 
 function ExpiredResetLink() {
     return (
-        <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center px-6 pb-16 pt-32 sm:px-8">
+        <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center px-4 pb-16 pt-32 sm:px-8">
             <ErrorState 
                 icon={KeyRound}
-                title="Reset link expired or invalid"
-                description="Please request a new password reset link and open it from your email."
+                title="Tautan reset kedaluwarsa atau tidak valid"
+                description="Silakan minta tautan reset kata sandi baru dan buka dari email Anda."
                 actionHref="/forgot-password"
-                actionLabel="Request new link"
+                actionLabel="Minta tautan baru"
             />
         </main>
     )

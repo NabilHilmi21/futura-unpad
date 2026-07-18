@@ -17,16 +17,16 @@ export default function Error({
   }, [error]);
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col items-center justify-center px-6 pb-16 pt-32 sm:px-8">
+    <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col items-center justify-center px-4 pb-16 pt-32 sm:px-8">
       <div className="mb-4 text-7xl font-bold tracking-tighter text-muted/30 select-none pointer-events-none">
         500
       </div>
       <ErrorState 
         icon={ServerCrash}
-        title="Something went wrong"
-        description="We're sorry, but an unexpected error occurred while processing your request. Please try again."
+        title="Terjadi kesalahan"
+        description="Mohon maaf, terjadi kesalahan yang tidak terduga saat memproses permintaan Anda. Silakan coba lagi."
         onAction={reset}
-        actionLabel="Try again"
+        actionLabel="Coba lagi"
         className="-mt-12"
       />
     </main>

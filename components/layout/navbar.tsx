@@ -28,19 +28,19 @@ export function NavbarDemo() {
   const pathname = usePathname();
   const navItems: NavbarItem[] = [
     {
-      name: "Home",
+      name: "Beranda",
       link: "/",
     },
     {
-      name: "About",
+      name: "Tentang",
       link: "/#about",
     },
     {
-      name: "Timeline",
+      name: "Jadwal",
       link: "/#timeline",
     },
     {
-      name: "Registrations",
+      name: "Pendaftaran",
       link: "/#registrations",
     },
   ];
@@ -55,13 +55,13 @@ export function NavbarDemo() {
 
       if (error) {
           console.error(error)
-          toast.error("Failed to log out", { description: "Please try again." })
+          toast.error("Gagal keluar", { description: "Silakan coba lagi." })
           setIsLoggingOut(false)
           return
       }
       setIsLoggingOut(false)
       setLogoutOpen(false)
-      toast.success("Successfully logged out")
+      toast.success("Berhasil keluar")
   }
  
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
@@ -89,7 +89,7 @@ export function NavbarDemo() {
                   href={profileHref}
                   variant="secondary"
                   className="flex h-10 w-10 items-center justify-center rounded-full px-0 py-0"
-                  aria-label="Open dashboard"
+                  aria-label="Buka dasbor"
                 >
                   <User className="h-5 w-5" />
                 </NavbarButton>
@@ -97,15 +97,15 @@ export function NavbarDemo() {
                   onClick={() => setLogoutOpen(true)}
                   variant="secondary"
                   className="flex h-10 w-10 items-center justify-center rounded-full px-0 py-0 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors border border-border"
-                  aria-label="Log out"
+                  aria-label="Keluar"
                 >
                   <LogOut className="h-5 w-5" />
                 </NavbarButton>
               </>
             ) : (
               <>
-                <NavbarButton href="/login" variant="secondary">Login</NavbarButton>
-                <NavbarButton href="/register" variant="primary">Register</NavbarButton>
+                <NavbarButton href="/login" variant="secondary">Masuk</NavbarButton>
+                <NavbarButton href="/register" variant="primary">Daftar</NavbarButton>
               </>
             )}
           </div>
@@ -148,9 +148,9 @@ export function NavbarDemo() {
                     onClick={() => setIsMobileMenuOpen(false)}
                     variant="primary"
                     className="flex flex-1 h-10 items-center justify-center rounded-md px-4 py-2"
-                    aria-label="Open dashboard"
+                    aria-label="Buka dasbor"
                   >
-                    <User className="h-5 w-5 mr-2" /> Dashboard
+                    <User className="h-5 w-5 mr-2" /> Dasbor
                   </NavbarButton>
                   <NavbarButton
                     onClick={() => {
@@ -159,7 +159,7 @@ export function NavbarDemo() {
                     }}
                     variant="secondary"
                     className="flex h-10 items-center justify-center rounded-md px-4 py-2 text-destructive border-border"
-                    aria-label="Log out"
+                    aria-label="Keluar"
                   >
                     <LogOut className="h-5 w-5" />
                   </NavbarButton>
@@ -172,7 +172,7 @@ export function NavbarDemo() {
                     variant="primary"
                     className="w-full"
                   >
-                    Login
+                    Masuk
                   </NavbarButton>
                   <NavbarButton
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -180,7 +180,7 @@ export function NavbarDemo() {
                     href="/register"
                     className="w-full"
                   >
-                    Register
+                    Daftar
                   </NavbarButton>
                 </>
               )}
@@ -193,10 +193,10 @@ export function NavbarDemo() {
       <ConfirmDialog
         open={logoutOpen}
         onOpenChange={setLogoutOpen}
-        title={"Log out?"}
-        description={"You will need to sign in to your Futura account again."}
-        confirmText="Log out"
-        cancelText="Stay signed in"
+        title={"Keluar akun?"}
+        description={"Anda harus masuk kembali untuk mengakses akun Futura Anda."}
+        confirmText="Keluar"
+        cancelText="Batal"
         variant="destructive"
         isLoading={isLoggingOut}
         onConfirm={handleLogout}

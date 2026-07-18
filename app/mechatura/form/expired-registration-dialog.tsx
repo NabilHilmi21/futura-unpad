@@ -37,17 +37,15 @@ export default function ExpiredRegistrationDialog({
     <AlertDialog open={open} onOpenChange={isPending ? undefined : setOpen}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Payment window expired</AlertDialogTitle>
+          <AlertDialogTitle>Batas waktu pembayaran telah berakhir</AlertDialogTitle>
           <AlertDialogDescription>
-            The payment window for {teamName} has ended. Your previous
-            Mechatura team registration has been reset, so you can submit a new
-            registration from the beginning.
+            Batas waktu pembayaran untuk {teamName} telah berakhir. Pendaftaran tim Mechatura Anda sebelumnya telah diatur ulang, sehingga Anda dapat mengirimkan pendaftaran baru dari awal.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogAction onClick={handleConfirm} disabled={isPending}>
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Start new registration
+            Mulai pendaftaran baru
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

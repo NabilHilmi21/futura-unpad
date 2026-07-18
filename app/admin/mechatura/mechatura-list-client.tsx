@@ -48,7 +48,7 @@ type MechaturaListClientProps = {
 };
 
 const categoryOptions = [
-    { value: "all", label: "All categories", icon: LayoutGrid },
+    { value: "all", label: "Semua Kategori", icon: LayoutGrid },
     { value: "sumo", label: mechaturaCompetitionLabels.sumo, icon: Swords },
     { value: "transporter", label: mechaturaCompetitionLabels.transporter, icon: Truck },
 ];
@@ -80,8 +80,8 @@ export default function MechaturaListClient({
         leaders.map((leader) => [leader.registration_id, leader])
     );
     const metrics = [
-        { label: "Total teams", value: stats.totalTeams },
-        { label: "Paid teams", value: stats.paidTeams },
+        { label: "Total tim", value: stats.totalTeams },
+        { label: "Tim lunas", value: stats.paidTeams },
         { label: "Robot Sumo", value: stats.sumoTeams },
         { label: "Robot Transporter", value: stats.transporterTeams },
     ];
@@ -132,7 +132,10 @@ export default function MechaturaListClient({
         });
     }
     if (statusFilter !== "all") {
-        const label = statusFilter === "waiting_payment" ? "Waiting Payment" : 
+        const label = statusFilter === "waiting_payment" ? "Menunggu Pembayaran" : 
+                      statusFilter === "approved" ? "Disetujui" :
+                      statusFilter === "rejected" ? "Ditolak" :
+                      statusFilter === "registered" ? "Terdaftar" :
                       statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1);
         activeFilterPills.push({
             key: "status",
@@ -156,16 +159,16 @@ export default function MechaturaListClient({
         <div className="mx-auto w-full max-w-7xl space-y-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                    <h2 className="font-semibold text-2xl tracking-tight">Mechatura Teams</h2>
+                    <h2 className="font-semibold text-2xl tracking-tight">Tim Mechatura</h2>
                     <p className="mt-1 text-sm text-muted-foreground">
-                        Manage robotics competition teams, leaders, and payment status.
+                        Kelola tim kompetisi robotik, ketua, dan status pembayaran.
                     </p>
                 </div>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                     <Button variant="outline" className="h-11 rounded-[8px] px-5" asChild>
                         <a href="/api/admin/mechatura-registrations/export" download>
                             <Download className="h-4 w-4 mr-2" />
-                            Export CSV
+                            Ekspor CSV
                         </a>
                     </Button>
                 </div>
@@ -199,11 +202,11 @@ export default function MechaturaListClient({
                             key={searchParam ?? "empty"}
                             name="search"
                             defaultValue={searchParam ?? ""}
-                            placeholder="Search teams, institutions..."
+                            placeholder="Cari tim, institusi..."
                             className="h-10 w-full rounded-lg border border-input bg-background px-4 pl-9 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         />
                         {/* Hidden submit button to allow Enter key to submit */}
-                        <button type="submit" className="sr-only">Search</button>
+                        <button type="submit" className="sr-only">Cari</button>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
@@ -215,7 +218,7 @@ export default function MechaturaListClient({
                                             const ActiveIcon = categoryOptions.find(o => o.value === categoryFilter)?.icon || LayoutGrid;
                                             return <ActiveIcon className="h-4 w-4" />;
                                         })()}
-                                        {categoryOptions.find(o => o.value === categoryFilter)?.label || "All Types"}
+                                        {categoryOptions.find(o => o.value === categoryFilter)?.label || "Semua Tipe"}
                                     </span>
                                     <ChevronDown className="h-4 w-4 opacity-50" />
                                 </Button>
@@ -238,7 +241,7 @@ export default function MechaturaListClient({
                                             const ActiveIcon = PaymentIcons[paymentFilter] || CircleDollarSign;
                                             return <ActiveIcon className="h-4 w-4" />;
                                         })()}
-                                        {paymentFilter === "all" ? "All payments" : paymentStatusLabels[paymentFilter as keyof typeof paymentStatusLabels]}
+                                        {paymentFilter === "all" ? "Semua Pembayaran" : paymentStatusLabels[paymentFilter as keyof typeof paymentStatusLabels]}
                                     </span>
                                     <ChevronDown className="h-4 w-4 opacity-50" />
                                 </Button>
@@ -250,7 +253,7 @@ export default function MechaturaListClient({
                                             const OptionIcon = PaymentIcons[status] || CircleDollarSign;
                                             return <OptionIcon className="mr-2 h-4 w-4" />;
                                         })()}
-                                        {status === "all" ? "All payments" : paymentStatusLabels[status as keyof typeof paymentStatusLabels]}
+                                        {status === "all" ? "Semua Pembayaran" : paymentStatusLabels[status as keyof typeof paymentStatusLabels]}
                                     </DropdownMenuItem>
                                 ))}
                             </DropdownMenuContent>
@@ -261,8 +264,11 @@ export default function MechaturaListClient({
                                 <Button type="button" variant="outline" className="h-10 w-[180px] justify-between rounded-lg bg-background">
                                     <span className="truncate flex items-center gap-2">
                                         <FileText className="h-4 w-4" />
-                                        {statusFilter === "all" ? "All Statuses" : 
-                                         statusFilter === "waiting_payment" ? "Waiting Payment" : 
+                                        {statusFilter === "all" ? "Semua Status" : 
+                                         statusFilter === "waiting_payment" ? "Menunggu Pembayaran" : 
+                                         statusFilter === "approved" ? "Disetujui" :
+                                         statusFilter === "rejected" ? "Ditolak" :
+                                         statusFilter === "registered" ? "Terdaftar" :
                                          statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
                                     </span>
                                     <ChevronDown className="h-4 w-4 opacity-50" />
@@ -272,8 +278,11 @@ export default function MechaturaListClient({
                                 {statusFilters.map((status) => (
                                     <DropdownMenuItem key={status} onSelect={() => updateFilter("status", status)}>
                                         <FileText className="mr-2 h-4 w-4" />
-                                        {status === "all" ? "All Statuses" : 
-                                         status === "waiting_payment" ? "Waiting Payment" : 
+                                        {status === "all" ? "Semua Status" : 
+                                         status === "waiting_payment" ? "Menunggu Pembayaran" : 
+                                         status === "approved" ? "Disetujui" :
+                                         status === "rejected" ? "Ditolak" :
+                                         status === "registered" ? "Terdaftar" :
                                          status.charAt(0).toUpperCase() + status.slice(1)}
                                     </DropdownMenuItem>
                                 ))}
@@ -286,7 +295,7 @@ export default function MechaturaListClient({
 
                 {activeFilterPills.length > 0 && (
                     <div className="flex items-center gap-2 flex-wrap px-1">
-                        <span className="text-sm text-muted-foreground font-medium mr-1">Active filters:</span>
+                        <span className="text-sm text-muted-foreground font-medium mr-1">Filter aktif:</span>
                         {activeFilterPills.map(pill => (
                             <div key={pill.key} className="flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-foreground shadow-sm">
                                 {pill.label}
@@ -305,7 +314,7 @@ export default function MechaturaListClient({
                             onClick={() => router.push(buildMechaturaPageHref({ page: 1, pageSize, search: undefined, category: "all", payment: "all", status: "all" }))}
                             className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 ml-2 transition-colors"
                         >
-                            Clear all
+                            Hapus semua
                         </button>
                     </div>
                 )}
@@ -315,8 +324,8 @@ export default function MechaturaListClient({
 
             <div className="flex flex-col gap-4 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <p className="font-medium text-foreground hidden sm:block">Rows per page</p>
-                    <p className="font-medium text-foreground sm:hidden">Rows</p>
+                    <p className="font-medium text-foreground hidden sm:block">Baris per halaman</p>
+                    <p className="font-medium text-foreground sm:hidden">Baris</p>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm" className="h-8 w-[70px] justify-between px-2">
@@ -336,12 +345,12 @@ export default function MechaturaListClient({
                 
                 <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 lg:gap-8">
                     <div className="text-sm text-muted-foreground font-medium">
-                        Showing {pagination.startItem}-{pagination.endItem} of {pagination.totalItems}
+                        Menampilkan {pagination.startItem}-{pagination.endItem} dari {pagination.totalItems}
                     </div>
                     
                     <div className="flex items-center gap-2">
                         <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-                            Page {pagination.page} of {pagination.totalPages}
+                            Halaman {pagination.page} dari {pagination.totalPages}
                         </div>
                         <div className="flex items-center gap-2">
                             <Button

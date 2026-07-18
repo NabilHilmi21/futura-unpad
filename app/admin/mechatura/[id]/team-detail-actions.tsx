@@ -25,10 +25,10 @@ export function TeamDetailActions({ teamId, registrationStatus }: TeamDetailActi
     const handleStatusUpdate = async (status: "approved" | "rejected") => {
         try {
             await updateMechaturaRegistrationStatus(teamId, status);
-            toast.success(`Application ${status} successfully`);
+            toast.success(status === "approved" ? "Pendaftaran berhasil disetujui" : "Pendaftaran berhasil ditolak");
             router.refresh();
         } catch (error) {
-            toast.error(`Failed to update application status`);
+            toast.error("Gagal memperbarui status pendaftaran");
             throw error;
         }
     };
@@ -36,10 +36,10 @@ export function TeamDetailActions({ teamId, registrationStatus }: TeamDetailActi
     const handleDelete = async () => {
         try {
             await deleteTeam.mutateAsync(teamId);
-            toast.success("Team deleted successfully");
+            toast.success("Tim berhasil dihapus");
             router.push("/admin/mechatura");
         } catch (e) {
-            toast.error("Failed to delete team");
+            toast.error("Gagal menghapus tim");
             throw e;
         }
     };
@@ -54,7 +54,7 @@ export function TeamDetailActions({ teamId, registrationStatus }: TeamDetailActi
                     disabled={isPending}
                 >
                     <CheckCircle className="mr-2 h-4 w-4" />
-                    Approve
+                    Setujui
                 </Button>
             )}
             {registrationStatus !== "rejected" && (
@@ -65,7 +65,7 @@ export function TeamDetailActions({ teamId, registrationStatus }: TeamDetailActi
                     disabled={isPending}
                 >
                     <XCircle className="mr-2 h-4 w-4" />
-                    Reject
+                    Tolak
                 </Button>
             )}
             <Button 
@@ -74,35 +74,35 @@ export function TeamDetailActions({ teamId, registrationStatus }: TeamDetailActi
                 disabled={isPending || deleteTeam.isPending}
             >
                 <Trash className="mr-2 h-4 w-4" />
-                Delete
+                Hapus
             </Button>
             <ConfirmDialog
                 open={deleteOpen}
                 onOpenChange={setDeleteOpen}
-                title="Delete team?"
-                description="This will permanently remove this Mechatura team, its registered people, and uploaded documents. This action cannot be undone."
-                confirmText="Delete team"
-                cancelText="Cancel"
+                title="Hapus tim?"
+                description="Tindakan ini akan menghapus permanen tim Mechatura ini, anggota terdaftar, dan dokumen yang diunggah. Tindakan ini tidak dapat dibatalkan."
+                confirmText="Hapus tim"
+                cancelText="Batal"
                 variant="destructive"
                 onConfirm={handleDelete}
             />
             <ConfirmDialog
                 open={approveOpen}
                 onOpenChange={setApproveOpen}
-                title="Approve Team Application?"
-                description="This will mark the team's application as approved."
-                confirmText="Approve Application"
-                cancelText="Cancel"
+                title="Setujui Pendaftaran Tim?"
+                description="Tindakan ini akan menandai pendaftaran tim sebagai disetujui."
+                confirmText="Setujui Pendaftaran"
+                cancelText="Batal"
                 variant="default"
                 onConfirm={() => handleStatusUpdate("approved")}
             />
             <ConfirmDialog
                 open={rejectOpen}
                 onOpenChange={setRejectOpen}
-                title="Reject Team Application?"
-                description="This will mark the team's application as rejected. Please make sure you have a valid reason."
-                confirmText="Reject Application"
-                cancelText="Cancel"
+                title="Tolak Pendaftaran Tim?"
+                description="Tindakan ini akan menandai pendaftaran tim sebagai ditolak. Pastikan Anda memiliki alasan yang sah."
+                confirmText="Tolak Pendaftaran"
+                cancelText="Batal"
                 variant="destructive"
                 onConfirm={() => handleStatusUpdate("rejected")}
             />

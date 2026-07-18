@@ -32,8 +32,8 @@ export default function SeminarVerificationStep({
   return (
     <FieldGroup className="gap-6">
       <VerificationStepCard
-        title="Verify certificate identity"
-        description="Your name and institution will be used for seminar records and certificate preparation. Check spelling and capitalization carefully."
+        title="Verifikasi identitas sertifikat"
+        description="Nama dan institusi Anda akan digunakan untuk catatan seminar dan persiapan sertifikat. Periksa ejaan dan kapitalisasi dengan teliti."
         isEditing={isEditing}
         onEdit={() => {
           setIsEditing(true);
@@ -52,8 +52,8 @@ export default function SeminarVerificationStep({
 
       <FormCheckboxField<ClientSeminarFormValues>
         name="identity_confirmed"
-        label="I confirm these details are correct for certificate records."
-        description="If the name or institution is misspelled here, the certificate may use the same spelling."
+        label="Saya mengonfirmasi bahwa detail ini benar untuk catatan sertifikat."
+        description="Jika nama atau institusi salah eja di sini, sertifikat mungkin akan menggunakan ejaan yang sama."
       />
 
       {submitError && (
@@ -76,7 +76,7 @@ export default function SeminarVerificationStep({
           }}
           disabled={isSubmitting}
         >
-          Back
+          Kembali
         </Button>
         <Button
           type="button"
@@ -84,7 +84,7 @@ export default function SeminarVerificationStep({
           onClick={submitRegistration}
           disabled={isSubmitting || isEditing}
         >
-          {isSubmitting ? "Saving..." : "Confirm and get ticket"}
+          {isSubmitting ? "Menyimpan..." : "Konfirmasi dan dapatkan tiket"}
         </Button>
       </div>
     </FieldGroup>

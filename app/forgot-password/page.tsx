@@ -63,24 +63,24 @@ export default function ForgotPasswordPage() {
             await forgotPassword.mutateAsync(values)
         } catch (error) {
             if (error instanceof Error && error.message !== "User with this email not found") {
-                setErrorMessage("Please try again later.")
+                setErrorMessage("Silakan coba lagi nanti.")
                 return
             }
             // If the error is 'User with this email not found', we swallow it to prevent email enumeration.
         }
 
         setVerifyEmail(values.email)
-        setSuccessMessage(`If an account with ${values.email} exists, a secure reset link has been sent.`)
+        setSuccessMessage(`Jika akun dengan ${values.email} terdaftar, tautan reset yang aman telah dikirim.`)
     }
 
     return (
-        <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center space-y-10 px-6 pb-16 pt-32 sm:px-8">
+        <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center space-y-10 px-4 pb-16 pt-32 sm:px-8">
             <section className="space-y-2">
                 <h1 className="text-3xl sm:text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-balance">
-                    Reset your password
+                    Reset kata sandi Anda
                 </h1>
                 <p className="text-sm font-medium leading-relaxed text-neutral-500">
-                    Enter your account email and we will send a secure reset link.
+                    Masukkan email akun Anda dan kami akan mengirimkan kode reset yang aman.
                 </p>
             </section>
 
@@ -121,10 +121,10 @@ export default function ForgotPasswordPage() {
                             className="h-11 rounded-[8px]"
                             disabled={forgotPassword.isPending}
                         >
-                            {forgotPassword.isPending ? "Sending link..." : "Send reset link"}
+                            {forgotPassword.isPending ? "Mengirim kode..." : "Kirim kode reset"}
                         </Button>
                         <Button asChild variant="outline" className="h-11 rounded-[8px]">
-                            <Link href="/login" prefetch={false}>Back to login</Link>
+                            <Link href="/login" prefetch={false}>Kembali ke halaman masuk</Link>
                         </Button>
                     </Field>
                 </FieldGroup>
@@ -148,18 +148,18 @@ export default function ForgotPasswordPage() {
                             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/20">
                                 <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-500" />
                             </div>
-                            <h2 className="text-xl font-semibold">Verified Successfully</h2>
+                            <h2 className="text-xl font-semibold">Berhasil Diverifikasi</h2>
                             <p className="text-sm text-muted-foreground max-w-sm">
-                                Your email has been verified in another tab. You can safely close this window and continue resetting your password there.
+                                Email Anda telah diverifikasi di tab lain. Anda dapat menutup jendela ini dan melanjutkan reset kata sandi Anda di tab tersebut.
                             </p>
                         </div>
                     ) : (
                         <>
                             <DialogHeader>
-                                <DialogTitle className="text-2xl font-semibold tracking-tight">Check your email</DialogTitle>
+                                <DialogTitle className="text-2xl font-semibold tracking-tight">Periksa email Anda</DialogTitle>
                                 <DialogDescription className="text-base text-muted-foreground pt-2">
-                                    We&apos;ve sent a password reset code to <span className="font-medium text-foreground">{verifyEmail}</span>.
-                                    Please enter it below to securely reset your password. The code expires in 1 hour.
+                                    Kami telah mengirimkan kode reset kata sandi ke <span className="font-medium text-foreground">{verifyEmail}</span>.
+                                    Silakan masukkan di bawah ini untuk mereset kata sandi Anda. Kode kedaluwarsa dalam 1 jam.
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="flex flex-col space-y-6 py-4">
@@ -188,9 +188,9 @@ export default function ForgotPasswordPage() {
                                                 body: JSON.stringify({ email: verifyEmail, token: otp, type: "recovery" }),
                                             });
                                             const data = await res.json();
-                                            if (!res.ok) throw new Error(data.error || "Verification failed");
+                                            if (!res.ok) throw new Error(data.error || "Verifikasi gagal");
                                             
-                                            toast.success("Identity verified successfully!");
+                                            toast.success("Identitas berhasil diverifikasi!");
                                             router.push("/reset-password");
                                         } catch (err: any) {
                                             toast.error(err.message);
@@ -199,7 +199,7 @@ export default function ForgotPasswordPage() {
                                         }
                                     }}
                                 >
-                                    {isVerifying ? "Verifying..." : "Verify & Reset"}
+                                    {isVerifying ? "Memverifikasi..." : "Verifikasi & Reset"}
                                 </Button>
                             </DialogFooter>
                         </>

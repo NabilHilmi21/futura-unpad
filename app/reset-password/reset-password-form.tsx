@@ -53,18 +53,18 @@ export default function ResetPasswordForm() {
             await resetPassword.mutateAsync(values)
             window.location.href = "/login?reset=success";
         } catch (error) {
-            setSubmitError(error instanceof Error ? error.message : "Password update failed. Please request a new reset link.")
+            setSubmitError(error instanceof Error ? error.message : "Pembaruan kata sandi gagal. Silakan minta tautan reset baru.")
         }
     }
 
     return (
-        <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center space-y-10 px-6 pb-16 pt-32 sm:px-8">
+        <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center space-y-10 px-4 pb-16 pt-32 sm:px-8">
             <section className="space-y-2">
                 <h1 className="text-3xl sm:text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-balance">
-                    Create a new password
+                    Buat kata sandi baru
                 </h1>
                 <p className="text-sm font-medium leading-relaxed text-neutral-500">
-                    Use at least 8 characters. After updating, you will sign in again.
+                    Gunakan setidaknya 8 karakter. Setelah diperbarui, Anda akan masuk kembali.
                 </p>
             </section>
 
@@ -74,9 +74,9 @@ export default function ResetPasswordForm() {
                         <Field className="gap-2">
                             <FormTextField<ResetPasswordFormValues>
                                 name="password"
-                                label="New password"
+                                label="Kata sandi baru"
                                 type="password"
-                                placeholder="Enter a new password"
+                                placeholder="Masukkan kata sandi baru"
                                 autoComplete="new-password"
                             />
 
@@ -108,16 +108,16 @@ export default function ResetPasswordForm() {
                                             passwordStrength === 3 ? "text-yellow-500" :
                                                 "text-emerald-500"
                                 )}>
-                                    {passwordStrength === 1 ? "Very Weak" : passwordStrength === 2 ? "Weak" : passwordStrength === 3 ? "Strong" : "Very Strong"}
+                                    {passwordStrength === 1 ? "Sangat Lemah" : passwordStrength === 2 ? "Lemah" : passwordStrength === 3 ? "Kuat" : "Sangat Kuat"}
                                 </p>
                             )}
                         </Field>
 
                         <FormTextField<ResetPasswordFormValues>
                             name="confirmPassword"
-                            label="Confirm password"
+                            label="Konfirmasi kata sandi"
                             type="password"
-                            placeholder="Confirm your new password"
+                            placeholder="Konfirmasi kata sandi baru Anda"
                             autoComplete="new-password"
                         />
 
@@ -133,7 +133,7 @@ export default function ResetPasswordForm() {
                                 className="h-11 rounded-[8px]"
                                 disabled={resetPassword.isPending}
                             >
-                                {resetPassword.isPending ? "Updating password..." : "Update password"}
+                                {resetPassword.isPending ? "Memperbarui kata sandi..." : "Perbarui kata sandi"}
                             </Button>
                         </Field>
                     </FieldGroup>

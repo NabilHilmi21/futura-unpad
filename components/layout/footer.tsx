@@ -48,20 +48,20 @@ export default function HoverFooter() {
   // Footer link data
   const footerLinks = [
     {
-      title: "Registrations",
+      title: "Pendaftaran",
       links: [
-        { label: "National Seminar", href: "#" },
-        { label: "Mechatura", href: "#" },
-        { label: "Essay Competition", href: "#" },
+        { label: "Seminar Nasional", href: "/seminar-nasional" },
+        { label: "Mechatura", href: "/mechatura" },
+        { label: "Lomba Esai", href: "/lomba-essay" },
       ],
     },
     {
-      title: "Helpful Links",
+      title: "Tautan Bantuan",
       links: [
-        { label: "FAQs", href: "/faq" },
-        { label: "Guidelines", href: "#", },
-        { label: "Support", href: "#" },
-        { label: "Account Recovery", href: "#", },
+        { label: "Tanya Jawab (FAQ)", href: "/faq" },
+        { label: "Syarat & Ketentuan", href: "/terms" },
+        { label: "Kebijakan Privasi", href: "/privacy" },
+        { label: "Pemulihan Akun", href: "/forgot-password" },
       ],
     },
   ];
@@ -69,28 +69,25 @@ export default function HoverFooter() {
   // Contact info data
   const contactInfo = [
     {
-      icon: <Mail size={18} className="text-[#b246ff]" />,
+      icon: <Mail size={18} className="text-[#307FE2]" />,
       text: "unpad.futura@gmail.com",
       href: "mailto:unpad.futura@gmail.com",
     },
     {
-      icon: <Phone size={18} className="text-[#b246ff]" />,
+      icon: <Phone size={18} className="text-[#307FE2]" />,
       text: "+62 HUMAS",
       href: "tel:",
     },
     {
-      icon: <MapPin size={18} className="text-[#b246ff]" />,
+      icon: <MapPin size={18} className="text-[#307FE2]" />,
       text: "Universitas Padjadjaran, Dipatiukur",
     },
   ];
 
   // Social media icons
   const socialLinks = [
-    { icon: <Book size={20} />, label: "Facebook", href: "#" },
-    { icon: <Camera size={20} />, label: "Instagram", href: "#" },
-    { icon: <BirdIcon size={20} />, label: "Twitter", href: "#" },
-    { icon: <Balloon size={20} />, label: "Dribbble", href: "#" },
-    { icon: <EarthIcon size={20} />, label: "Globe", href: "#" },
+    { icon: <Camera size={20} />, label: "Instagram", href: "https://instagram.com/futuraunpad.hmte" },
+    { icon: <EarthIcon size={20} />, label: "Website", href: "/" },
   ];
 
   return (
@@ -109,8 +106,8 @@ export default function HoverFooter() {
             <div className="flex items-center space-x-2">
               <span className="text-3xl font-bold">Futura</span>
             </div>
-            <p className="text-sm leading-relaxed">
-              Futura is Something something sokething
+            <p className="text-sm leading-relaxed text-balance">
+              Futura adalah acara teknologi universitas yang menampilkan seminar, kompetisi robotik, dan diseminasi riset.
             </p>
           </div>
 
@@ -125,7 +122,7 @@ export default function HoverFooter() {
                   <li key={link.label} className="relative">
                     <Link
                       href={link.href}
-                      className="hover:text-[#b246ff] transition-colors"
+                      className="hover:text-[#307FE2] transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -138,7 +135,7 @@ export default function HoverFooter() {
           {/* Contact section */}
           <div>
             <h4 className="text-lg font-semibold mb-6">
-              Contact Us
+              Hubungi Kami
             </h4>
             <ul className="space-y-4">
               {contactInfo.map((item, i) => (
@@ -147,12 +144,12 @@ export default function HoverFooter() {
                   {item.href ? (
                     <a
                       href={item.href}
-                      className="hover:text-[#b246ff] transition-colors"
+                      className="hover:text-[#307FE2] transition-colors"
                     >
                       {item.text}
                     </a>
                   ) : (
-                    <span className="hover:text-[#b246ff] transition-colors">
+                    <span className="hover:text-[#307FE2] transition-colors">
                       {item.text}
                     </span>
                   )}
@@ -176,7 +173,7 @@ export default function HoverFooter() {
                 key={label}
                 href={href}
                 aria-label={label}
-                className="hover:text-[#b246ff] transition-colors"
+                className="hover:text-[#307FE2] transition-colors"
               >
                 {icon}
               </a>
@@ -185,7 +182,7 @@ export default function HoverFooter() {
 
           {/* Copyright */}
           <p className="text-center md:text-left">
-            &copy; {new Date().getFullYear()} Futura. All rights reserved.
+            &copy; {new Date().getFullYear()} Futura. Hak cipta dilindungi undang-undang.
           </p>
         </div>
       </div>

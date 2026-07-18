@@ -51,27 +51,27 @@ export type FAQGroup = {
 
 const generalFaqs = [
   {
-    question: "Is this beginner-friendly?",
+    question: "Apakah acara ini cocok untuk pemula?",
     answer:
-      "Yes, especially the seminar. The competition and research tracks are better if you already have a team, project, or question to bring.",
+      "Ya, terutama seminar. Namun untuk kompetisi, lebih baik jika Anda sudah memiliki tim dan ide/konsep yang akan dilombakan.",
   },
   {
-    question: "How do I register?",
+    question: "Bagaimana cara mendaftarnya?",
     answer:
-      "Choose a program, complete the form, and follow the confirmation steps from the committee.",
+      "Pilih program yang diinginkan, lengkapi formulir pendaftaran, dan ikuti petunjuk konfirmasi dari panitia.",
   },
 ]
 
 export const nationalSeminarFaqs: FAQ[] = [
   {
-    question: "Can I participate online?",
+    question: "Apakah saya bisa berpartisipasi secara online (daring)?",
     answer:
-      "Selected seminar sessions may support online participation. Competition and research formats depend on the technical guide.",
+      "Beberapa sesi seminar mungkin mendukung partisipasi daring. Untuk kompetisi, format pelaksanaannya mengacu pada petunjuk teknis (Juklak).",
   },
   {
-    question: "Will participants receive certificates?",
+    question: "Apakah peserta akan mendapatkan sertifikat?",
     answer:
-      "Yes. Eligible participants who complete the event requirements will receive an official Futura certificate.",
+      "Ya. Peserta yang memenuhi syarat dan menyelesaikan rangkaian acara akan menerima sertifikat resmi Futura.",
   },
 ]
 
@@ -106,25 +106,25 @@ export const mechaturaFaqs: FAQ[] = [
 
 const essayFaqs = [
   {
-    question: "Can I participate online?",
+    question: "Apakah saya bisa berpartisipasi secara online (daring)?",
     answer:
-      "Selected seminar sessions may support online participation. Competition and research formats depend on the technical guide.",
+      "Ya, Lomba Esai dapat diikuti secara daring. Pengumpulan naskah dilakukan secara online melalui website ini.",
   },
   {
-    question: "Will participants receive certificates?",
+    question: "Apakah peserta akan mendapatkan sertifikat?",
     answer:
-      "Yes. Eligible participants who complete the event requirements will receive an official Futura certificate.",
+      "Ya. Peserta yang mengumpulkan naskah sesuai syarat dan ketentuan akan mendapatkan e-sertifikat.",
   },
 ]
 
 const faqGroups = [
   {
-    title: "General Questions",
+    title: "Pertanyaan Umum",
     headingPadding: "pb-6",
     faqs: generalFaqs,
   },
   {
-    title: "National Seminar",
+    title: "Seminar Nasional",
     headingPadding: "pb-6",
     faqs: nationalSeminarFaqs,
   },
@@ -134,7 +134,7 @@ const faqGroups = [
     faqs: mechaturaFaqs,
   },
   {
-    title: "Essay Competition",
+    title: "Lomba Esai",
     headingPadding: "pb-6",
     faqs: essayFaqs,
   },
@@ -216,7 +216,7 @@ type FAQSectionProps = {
 
 export function FAQSection({
   id = "faq",
-  title = "Frequently Asked Questions.",
+  title = "Pertanyaan Umum.",
   groups = faqGroups,
   showAllButton = true,
   limitGroups = false,
@@ -255,7 +255,7 @@ export function FAQSection({
           {showAllButton && (
             <div className="mt-12 flex justify-center">
               <Link href="/faq" className="group relative inline-flex overflow-hidden rounded-full border-2 px-8 py-4 text-sm font-semibold transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-950 hover:text-white hover:shadow-lg hover:shadow-black/10">
-                See all FAQs
+                Lihat Semua FAQ
               </Link>
             </div>
           )}

@@ -94,7 +94,7 @@ export default function SeminarVerificationEditForm({
           )}
           onClick={handleDone}
         >
-          Done Editing
+          Selesai Mengedit
         </Button>
       </div>
     </div>

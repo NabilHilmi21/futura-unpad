@@ -134,23 +134,23 @@ export async function POST(request: Request) {
     switch (email_data.email_action_type) {
       case "signup":
         from = `Futura Accounts <auth@${EMAIL_DOMAIN}>`;
-        subject = "Complete your Futura registration";
+        subject = "Selesaikan pendaftaran Futura Anda";
         html = emailWrapper(`
-          <h2 class="content-title">Welcome to Futura!</h2>
-          <p class="content-text">We're thrilled to have you here. Please verify your email address to complete your registration and unlock full access.</p>
-          <div class="btn-container"><a href="${magicLink}" class="btn">Verify Email Address</a></div>
-          <p class="content-text">Or enter this code manually:</p>
+          <h2 class="content-title">Selamat datang di Futura!</h2>
+          <p class="content-text">Kami sangat senang menyambut Anda. Silakan verifikasi alamat email Anda untuk menyelesaikan pendaftaran dan mendapatkan akses penuh.</p>
+          <div class="btn-container"><a href="${magicLink}" class="btn">Verifikasi Alamat Email</a></div>
+          <p class="content-text">Atau masukkan kode ini secara manual:</p>
           <div class="code">${email_data.token}</div>
         `);
         break;
       case "recovery":
         from = `Futura Support <support@${EMAIL_DOMAIN}>`;
-        subject = "Reset your Futura password";
+        subject = "Atur ulang kata sandi Futura Anda";
         html = emailWrapper(`
-          <h2 class="content-title">Password Reset Request</h2>
-          <p class="content-text">We received a request to reset the password for your Futura account. Click the button below to securely set a new password.</p>
-          <div class="btn-container"><a href="${magicLink}" class="btn">Reset Password</a></div>
-          <p class="content-text" style="font-size: 13px;">If you didn't request this, you can safely ignore this email. Your password will remain unchanged.</p>
+          <h2 class="content-title">Permintaan Atur Ulang Kata Sandi</h2>
+          <p class="content-text">Kami menerima permintaan untuk mengatur ulang kata sandi akun Futura Anda. Klik tombol di bawah untuk mengatur kata sandi baru dengan aman.</p>
+          <div class="btn-container"><a href="${magicLink}" class="btn">Atur Ulang Kata Sandi</a></div>
+          <p class="content-text" style="font-size: 13px;">Jika Anda tidak merasa melakukan permintaan ini, Anda dapat mengabaikan email ini dengan aman. Kata sandi Anda tidak akan berubah.</p>
         `);
         break;
       case "email_change":
@@ -162,14 +162,14 @@ export async function POST(request: Request) {
             resend.emails.send({
               from: `Futura Security <security@${EMAIL_DOMAIN}>`,
               to: [user.email],
-              subject: "Confirm Email Address Change",
+              subject: "Konfirmasi Perubahan Alamat Email",
               html: emailWrapper(`
-                <h2 class="content-title">Confirm Email Change</h2>
-                <p class="content-text">We received a request to change the email address associated with your Futura account.</p>
-                <p class="content-text">To authorize this change, please confirm by clicking the button below:</p>
-                <div class="btn-container"><a href="${oldMagicLink}" class="btn">Confirm Change</a></div>
+                <h2 class="content-title">Konfirmasi Perubahan Email</h2>
+                <p class="content-text">Kami menerima permintaan untuk mengubah alamat email yang terhubung dengan akun Futura Anda.</p>
+                <p class="content-text">Untuk mengizinkan perubahan ini, silakan konfirmasi dengan mengklik tombol di bawah:</p>
+                <div class="btn-container"><a href="${oldMagicLink}" class="btn">Konfirmasi Perubahan</a></div>
                 <div class="warning-box">
-                  <p class="warning-text"><strong>Security Alert:</strong> If you did not request this change, your account may be compromised. Please ignore this email and immediately secure your account.</p>
+                  <p class="warning-text"><strong>Peringatan Keamanan:</strong> Jika Anda tidak melakukan permintaan ini, akun Anda mungkin disusupi. Harap abaikan email ini dan segera amankan akun Anda.</p>
                 </div>
               `),
             })
@@ -182,14 +182,14 @@ export async function POST(request: Request) {
             resend.emails.send({
               from: `Futura Security <security@${EMAIL_DOMAIN}>`,
               to: [user.new_email],
-              subject: "Verify Your New Email Address",
+              subject: "Verifikasi Alamat Email Baru Anda",
               html: emailWrapper(`
-                <h2 class="content-title">Verify New Email Address</h2>
-                <p class="content-text">Someone requested to use this email address for their Futura account.</p>
-                <p class="content-text">If this was you, please verify your email address to complete the transition:</p>
-                <div class="btn-container"><a href="${newMagicLink}" class="btn">Verify Email</a></div>
+                <h2 class="content-title">Verifikasi Alamat Email Baru</h2>
+                <p class="content-text">Seseorang meminta untuk menggunakan alamat email ini untuk akun Futura mereka.</p>
+                <p class="content-text">Jika ini adalah Anda, silakan verifikasi alamat email Anda untuk menyelesaikan transisi:</p>
+                <div class="btn-container"><a href="${newMagicLink}" class="btn">Verifikasi Email</a></div>
                 <div class="warning-box">
-                  <p class="warning-text"><strong>Warning:</strong> If you did not request this, do not click the link above. Someone may be trying to hijack your email.</p>
+                  <p class="warning-text"><strong>Peringatan:</strong> Jika Anda tidak melakukan permintaan ini, jangan klik tautan di atas. Seseorang mungkin mencoba membajak email Anda.</p>
                 </div>
               `),
             })
@@ -207,10 +207,10 @@ export async function POST(request: Request) {
         return NextResponse.json({ ok: true });
       default:
         from = `Futura Updates <hello@${EMAIL_DOMAIN}>`;
-        subject = "Your magic link to sign in to Futura";
+        subject = "Tautan masuk ajaib Futura Anda";
         html = emailWrapper(`
-          <h2 style="margin-top: 0;">Sign in to Futura</h2>
-          <div style="text-align: center;"><a href="${magicLink}" class="btn" style="color: #fff;">Secure Log In</a></div>
+          <h2 style="margin-top: 0;">Masuk ke Futura</h2>
+          <div style="text-align: center;"><a href="${magicLink}" class="btn" style="color: #fff;">Masuk dengan Aman</a></div>
         `);
     }
 

@@ -159,7 +159,7 @@ const AdminSidebarContent = ({
         {/* Documents */}
         <section className="flex flex-col gap-4">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground pl-1">
-                Attached Documents
+                Dokumen Lampiran
             </h3>
             {[memberDocument, robotDocument].map((document) => (
                 <div key={document.label} className="rounded-xl border border-border bg-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -175,7 +175,7 @@ const AdminSidebarContent = ({
                         {document.href ? (
                             <Button variant="secondary" size="sm" className="rounded-full shadow-sm h-8 w-full sm:w-auto" asChild>
                                 <a href={document.href} target="_blank" rel="noreferrer">
-                                    Open
+                                    Buka
                                     <ExternalLink className="ml-1.5 h-3 w-3" />
                                 </a>
                             </Button>
@@ -191,11 +191,11 @@ const AdminSidebarContent = ({
         <section className="rounded-xl border border-border bg-card p-5 flex flex-col">
             <div className="flex items-center gap-2 border-b border-border pb-3 mb-2">
                 <Info className="h-4 w-4 text-muted-foreground" />
-                <h3 className="font-semibold tracking-tight text-sm">Status Overview</h3>
+                <h3 className="font-semibold tracking-tight text-sm">Ringkasan Status</h3>
             </div>
             <dl className="flex-1 divide-y divide-border/50">
                 <DetailItem label="Team ID" value={registrationData.team_id ?? "-"} />
-                <DetailItem label="Application" value={
+                <DetailItem label="Pendaftaran" value={
                     <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
                         registrationData.registration_status === 'approved' ? 'bg-emerald-100 text-emerald-800' :
                         registrationData.registration_status === 'rejected' ? 'bg-red-100 text-red-800' :
@@ -203,15 +203,15 @@ const AdminSidebarContent = ({
                     }`}>
                         {registrationData.registration_status ? 
                             registrationData.registration_status.charAt(0).toUpperCase() + registrationData.registration_status.slice(1) 
-                            : "Registered"}
+                            : "Terdaftar"}
                     </span>
                 } />
                 <DetailItem
-                    label="Submitted"
+                    label="Dikirim"
                     value={formatMechaturaDateTime(registrationData.created_at)}
                 />
                 <DetailItem
-                    label="Checked In"
+                    label="Check In"
                     value={formatMechaturaDateTime(registrationData.check_in_time)}
                 />
             </dl>
@@ -221,22 +221,22 @@ const AdminSidebarContent = ({
         <section className="rounded-xl border border-border bg-card p-5 flex flex-col">
             <div className="flex items-center gap-2 border-b border-border pb-3 mb-2">
                 <Building2 className="h-4 w-4 text-muted-foreground" />
-                <h3 className="font-semibold tracking-tight text-sm">Identity & Robot</h3>
+                <h3 className="font-semibold tracking-tight text-sm">Identitas & Robot</h3>
             </div>
             <dl className="flex-1 divide-y divide-border/50">
-                <DetailItem label="Team Name" value={registrationData.team_name ?? "-"} />
+                <DetailItem label="Nama Tim" value={registrationData.team_name ?? "-"} />
                 <DetailItem
-                    label="Institution"
+                    label="Institusi"
                     value={registrationData.institution ?? "-"}
                 />
-                <DetailItem label="Location" value={
+                <DetailItem label="Lokasi" value={
                     <span className="flex items-center gap-1.5 justify-end">
                         <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
                         {registrationData.province ?? "-"}
                     </span>
                 } />
-                <DetailItem label="Robot Cat." value={competition} />
-                <DetailItem label="Robot Name" value={registrationData.robot_name ?? "-"} />
+                <DetailItem label="Kat. Robot" value={competition} />
+                <DetailItem label="Nama Robot" value={registrationData.robot_name ?? "-"} />
             </dl>
         </section>
 
@@ -244,7 +244,7 @@ const AdminSidebarContent = ({
         <section className="rounded-xl border border-border bg-card p-5 flex flex-col">
             <div className="flex items-center gap-2 border-b border-border pb-3 mb-2">
                 <Receipt className="h-4 w-4 text-muted-foreground" />
-                <h3 className="font-semibold tracking-tight text-sm">Payment</h3>
+                <h3 className="font-semibold tracking-tight text-sm">Pembayaran</h3>
             </div>
             <dl className="flex-1 divide-y divide-border/50">
                 <DetailItem
@@ -257,9 +257,9 @@ const AdminSidebarContent = ({
                         </span>
                     }
                 />
-                <DetailItem label="Method" value={formatPaymentType(registrationData.payment_type)} />
+                <DetailItem label="Metode" value={formatPaymentType(registrationData.payment_type)} />
                 <DetailItem
-                    label="Paid At"
+                    label="Dibayar Pada"
                     value={formatMechaturaDateTime(registrationData.paid_at)}
                 />
             </dl>
@@ -330,15 +330,15 @@ export default async function MechaturaRegistrationDetails({
                     <Button variant="outline" size="icon" className="h-9 w-9 rounded-full shrink-0 mt-1 sm:mt-0" asChild>
                         <Link href="/admin/mechatura" prefetch={false}>
                             <ChevronLeft className="h-4 w-4" />
-                            <span className="sr-only">Back to Mechatura Teams</span>
+                            <span className="sr-only">Kembali ke Tim Mechatura</span>
                         </Link>
                     </Button>
                     <div>
                         <h2 className="font-semibold text-xl sm:text-2xl tracking-tight line-clamp-1">
-                            Mechatura Team Details
+                            Detail Tim Mechatura
                         </h2>
                         <p className="mt-1 text-sm text-muted-foreground">
-                            Viewing complete details for one Mechatura registration.
+                            Melihat detail lengkap untuk satu pendaftaran Mechatura.
                         </p>
                     </div>
                 </div>
@@ -347,13 +347,13 @@ export default async function MechaturaRegistrationDetails({
                         <SheetTrigger asChild>
                             <Button variant="outline" className="xl:hidden">
                                 <FileText className="h-4 w-4 mr-2 text-muted-foreground" />
-                                Team Info & Docs
+                                Info Tim & Dokumen
                             </Button>
                         </SheetTrigger>
                         <SheetContent side="right" className="w-full sm:max-w-[480px] p-0 gap-0 flex flex-col border-l shadow-2xl bg-zinc-50 dark:bg-zinc-950">
                             <div className="flex-none p-4 sm:p-6 border-b border-border bg-background">
                                 <SheetHeader className="p-0 text-left">
-                                    <SheetTitle className="text-xl font-sans font-semibold">Team Metadata</SheetTitle>
+                                    <SheetTitle className="text-xl font-sans font-semibold">Metadata Tim</SheetTitle>
                                 </SheetHeader>
                             </div>
                             <div className="flex-1 overflow-y-auto p-4 sm:p-6">
@@ -378,7 +378,7 @@ export default async function MechaturaRegistrationDetails({
                     <section className="overflow-hidden rounded-xl border border-border bg-card/90">
                         <div className="border-b border-border bg-card p-6">
                             <h3 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
-                                Team People ({members?.length ?? 0})
+                                Anggota Tim ({members?.length ?? 0})
                             </h3>
                         </div>
                         <Table>
@@ -388,16 +388,16 @@ export default async function MechaturaRegistrationDetails({
                                         #
                                     </TableHead>
                                     <TableHead className="h-12 px-4 whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                        Name
+                                        Nama
                                     </TableHead>
                                     <TableHead className="h-12 px-4 whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                        Role
+                                        Peran
                                     </TableHead>
                                     <TableHead className="h-12 px-4 whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                                         Email
                                     </TableHead>
                                     <TableHead className="h-12 px-4 whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                        Phone
+                                        Telepon
                                     </TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -418,7 +418,7 @@ export default async function MechaturaRegistrationDetails({
                                                         : "bg-zinc-100 text-zinc-700"
                                                         }`}
                                                 >
-                                                    {member.is_leader ? "Leader" : "Member"}
+                                                    {member.is_leader ? "Ketua" : "Anggota"}
                                                 </span>
                                             </TableCell>
                                             <TableCell className="px-4 py-3 text-muted-foreground whitespace-nowrap">
@@ -435,7 +435,7 @@ export default async function MechaturaRegistrationDetails({
                                             colSpan={5}
                                             className="h-24 px-4 text-center text-muted-foreground"
                                         >
-                                            No people are attached to this team.
+                                            Tidak ada orang yang terhubung ke tim ini.
                                         </TableCell>
                                     </TableRow>
                                 )}

@@ -79,7 +79,7 @@ export default function MechaturaVerificationStep({
           onClick={requestBack}
           disabled={isSubmitting}
         >
-          Back
+          Kembali
         </Button>
         <Button
           type="button"
@@ -87,7 +87,7 @@ export default function MechaturaVerificationStep({
           onClick={onSubmit}
           disabled={isSubmitting || isEditing}
         >
-          {isSubmitting ? "Saving..." : "Confirm and continue"}
+          {isSubmitting ? "Menyimpan..." : "Konfirmasi dan lanjutkan"}
         </Button>
       </div>
     </FieldGroup>

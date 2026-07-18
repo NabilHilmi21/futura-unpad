@@ -34,10 +34,10 @@ export default function MechaturaIdentityStep({
             onClick={onBack}
             disabled={isSubmitting}
           >
-            Back
+            Kembali
           </Button>
           <Button type="submit" className="h-11 rounded-[8px]">
-            Continue to identity check
+            Lanjutkan ke lampiran dokumen
           </Button>
         </Field>
       </FieldGroup>

@@ -13,10 +13,10 @@ export default function AboutSection() {
                         <Image src="/futura-logo-2025.png" alt="futura-logo-2025.png" width={250} height={250} className="w-42 sm:w-[250px] h-auto" />
                     </div>
                     <h1 className="text-center text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-balance">
-                        FUTURA by Himpunan Mahasiswa Teknik Elektro UNPAD
+                        FUTURA oleh Himpunan Mahasiswa Teknik Elektro UNPAD
                     </h1>
                     <p className="mx-auto mt-4 max-w-2xl text-base leading-8">
-                        FUTURA is an annual event organized by Himpunan Mahasiswa Teknik Elektro UNPAD which aims to <span className="font-serif italic">bring together students, researchers, and professionals to share their knowledge, ideas, and innovations in the field of electrical engineering</span>
+                        FUTURA adalah acara tahunan yang diselenggarakan oleh Himpunan Mahasiswa Teknik Elektro UNPAD yang bertujuan untuk <span className="font-serif italic">mempertemukan mahasiswa, peneliti, dan profesional guna berbagi pengetahuan, ide, dan inovasi di bidang teknik elektro.</span>
                     </p>
 
                     {/* <div className="mt-8 w-full text-sm font-medium">

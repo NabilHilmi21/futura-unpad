@@ -147,7 +147,7 @@ export default function MechaturaVerificationEditForm({
         )}
         onClick={handleDone}
       >
-        Done Editing
+        Selesai Mengedit
       </Button>
     </div>
   );

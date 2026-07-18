@@ -38,7 +38,7 @@ export default function GlobalError({
 
   return (
     <html
-      lang="en"
+      lang="id"
       className={cn(
         "h-full",
         "antialiased",
@@ -49,16 +49,16 @@ export default function GlobalError({
       )}
     >
       <body className="dark">
-        <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col items-center justify-center px-6 pb-16 pt-32 sm:px-8">
+        <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col items-center justify-center px-4 pb-16 pt-32 sm:px-8">
           <div className="mb-4 text-7xl font-bold tracking-tighter text-muted/30 select-none pointer-events-none">
             500
           </div>
           <ErrorState 
             icon={ServerCrash}
-            title="Fatal Error"
-            description="A critical error occurred preventing the application from loading. Please refresh the page or try again."
+            title="Kesalahan Fatal"
+            description="Terjadi kesalahan fatal yang mencegah aplikasi dimuat. Silakan muat ulang halaman atau coba lagi."
             onAction={reset}
-            actionLabel="Try again"
+            actionLabel="Coba lagi"
             className="-mt-12"
           />
         </main>

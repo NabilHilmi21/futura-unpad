@@ -55,7 +55,7 @@ const grandTimelineMotion = {
 } as const;
 
 const grandTimelineCopy = {
-  titleSuffix: "Timeline",
+  titleSuffix: "Jadwal",
 } as const;
 
 const timelineTabs = [
@@ -63,7 +63,7 @@ const timelineTabs = [
     id: "seminar",
     label: "Seminar Nasional",
     description:
-      "Timeline Seminar Nasional Futura, mulai dari pembukaan registrasi sampai hari pelaksanaan seminar.",
+      "Jadwal Seminar Nasional Futura, mulai dari pembukaan registrasi sampai hari pelaksanaan seminar.",
     items: [
       {
         category: "Seminar Nasional",
@@ -95,7 +95,7 @@ const timelineTabs = [
     id: "mechatura",
     label: "Mechatura",
     description:
-      "Timeline Mechatura Futura, mulai dari registrasi tim, pengarahan teknis, sampai hari pelaksanaan lomba robot.",
+      "Jadwal Mechatura Futura, mulai dari registrasi tim, pengarahan teknis, sampai hari pelaksanaan lomba robot.",
     items: [
       {
         category: "Mechatura",
@@ -117,7 +117,7 @@ const timelineTabs = [
         date: "Akan diumumkan",
         description:
           "Sesi pengarahan teknis untuk peserta sebelum pelaksanaan lomba.",
-        status: "TBA",
+        status: "Akan Diumumkan",
       },
       {
         category: "Mechatura",
@@ -131,7 +131,7 @@ const timelineTabs = [
     id: "essay",
     label: "Lomba Essay",
     description:
-      "Timeline Lomba Essay Futura, mulai dari pengumpulan esai, seleksi finalis, final judging, sampai awarding.",
+      "Jadwal Lomba Essay Futura, mulai dari pengumpulan esai, seleksi finalis, final judging, sampai awarding.",
     items: [
       {
         category: "Lomba Essay",

@@ -9,7 +9,7 @@ const events = [
         date: "Sabtu, 7 November 2026",
         location: "Auditorium Unpad",
         description: "Bergabunglah dalam diskusi mendalam mengenai Implementasi Energi Cerdas di Era Industri 5.0. Kami mengundang para ahli untuk membahas optimalisasi Smart Grid dan Energi Baru Terbarukan demi masa depan yang lebih hijau.",
-        highlightsTitle: "Key Speakers",
+        highlightsTitle: "Pembicara Utama",
         highlights: [
             "Aditya Cakti C.",
             "Farras Faqih",
@@ -17,7 +17,7 @@ const events = [
         speaker: "Linus Torvalds",
         image: "https://avatars.githubusercontent.com/u/1024025?v=4",
         href: "/seminar-nasional",
-        price: "Free!",
+        price: "Gratis!",
         reverse: false
     },
     {

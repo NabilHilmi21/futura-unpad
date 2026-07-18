@@ -65,11 +65,11 @@ export default function LoginForm({ isVerified }: { isVerified?: boolean }) {
         let result;
         try {
             result = await login.mutateAsync({ ...values, keepSignedIn });
-            toast.success("Successfully logged in");
+            toast.success("Berhasil masuk");
         } catch (error) {
-            setSubmitError(error instanceof Error ? error.message : "Login failed.");
-            toast.error("Login failed", { 
-                description: error instanceof Error ? error.message : "Please check your credentials and try again." 
+            setSubmitError(error instanceof Error ? error.message : "Gagal masuk.");
+            toast.error("Gagal masuk", { 
+                description: error instanceof Error ? error.message : "Silakan periksa kredensial Anda dan coba lagi." 
             });
             return;
         }
@@ -87,8 +87,8 @@ export default function LoginForm({ isVerified }: { isVerified?: boolean }) {
                 <FieldGroup className="gap-6">
                     <FormTextField<LoginFormValues>
                         name="identifier"
-                        label="Email or Username"
-                        placeholder="e.g. johndoe@gmail.com or johndoe"
+                        label="Email atau Username"
+                        placeholder="contoh: johndoe@gmail.com atau johndoe"
                         autoComplete="username"
                     />
 
@@ -97,12 +97,12 @@ export default function LoginForm({ isVerified }: { isVerified?: boolean }) {
                             name="password"
                             label={
                                 <div className="flex justify-between w-full">
-                                    <span>Password</span>
-                                    <Link href="/forgot-password" prefetch={false} className="text-right text-sm text-muted-foreground hover:text-white transition">Forgot password?</Link>
+                                    <span>Kata Sandi</span>
+                                    <Link href="/forgot-password" prefetch={false} className="text-right text-sm text-muted-foreground hover:text-white transition">Lupa kata sandi?</Link>
                                 </div>
                             }
                             type="password"
-                            placeholder="Enter your password"
+                            placeholder="Masukkan kata sandi Anda"
                             autoComplete="current-password"
                             fieldClassName="gap-2 w-full"
                         />
@@ -118,7 +118,7 @@ export default function LoginForm({ isVerified }: { isVerified?: boolean }) {
                                 htmlFor="keepSignedIn"
                                 className="cursor-pointer text-sm font-normal text-muted-foreground"
                             >
-                                Keep me signed in
+                                Biarkan saya tetap masuk
                             </FieldLabel>
                         </Field>
                     </Field>
@@ -131,7 +131,7 @@ export default function LoginForm({ isVerified }: { isVerified?: boolean }) {
                             className="h-11 rounded-[8px]"
                             disabled={login.isPending}
                         >
-                            {login.isPending ? "Signing in..." : "Log in"}
+                            {login.isPending ? "Sedang masuk..." : "Masuk"}
                         </Button>
 
                         <div className="relative my-0.5">
@@ -140,7 +140,7 @@ export default function LoginForm({ isVerified }: { isVerified?: boolean }) {
                             </div>
                             <div className="relative flex justify-center text-sm lowercase">
                                 <span className="bg-background px-2 text-muted-foreground">
-                                    Or
+                                    Atau
                                 </span>
                             </div>
                         </div>
@@ -148,7 +148,7 @@ export default function LoginForm({ isVerified }: { isVerified?: boolean }) {
                         <GoogleLoginButton keepSignedIn={keepSignedIn} />
                     </Field>
                     <p className="text-center text-sm text-muted-foreground">
-                        Do not have an account?{" "}
+                        Belum punya akun?{" "}
                         <Link
                             href={
                                 safeNext
@@ -158,7 +158,7 @@ export default function LoginForm({ isVerified }: { isVerified?: boolean }) {
                             prefetch={false}
                             className="text-blue-600"
                         >
-                            Register
+                            Daftar
                         </Link>
                     </p>
                 </FieldGroup>

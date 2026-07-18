@@ -35,7 +35,7 @@ export default function AuthPageSkeleton({ variant }: AuthPageSkeletonProps) {
   const config = authSkeletonConfig[variant];
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center space-y-12 px-6 pb-16 pt-32 sm:px-8">
+    <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center space-y-12 px-4 pb-16 pt-32 sm:px-8">
       <span className="sr-only">Loading authentication form...</span>
 
       <section className="space-y-2">

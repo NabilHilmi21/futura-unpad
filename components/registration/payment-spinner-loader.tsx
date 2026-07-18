@@ -13,7 +13,7 @@ export default function PaymentSpinnerLoader({
   return (
     <main
       className={cn(
-        "mx-auto flex min-h-[60vh] w-full flex-col items-center justify-center px-6 pb-16 pt-32 sm:px-8",
+        "mx-auto flex min-h-[60vh] w-full flex-col items-center justify-center px-4 pb-16 pt-32 sm:px-8",
         className
       )}
     >

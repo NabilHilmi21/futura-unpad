@@ -14,9 +14,9 @@ import OurLocation from "@/components/landing/our-location"
 import { ScrollReveal } from "@/components/ui/scroll-reveal"
 
 export const metadata: Metadata = {
-  title: "Coming Soon!",
+  title: "Segera Hadir!",
   description:
-    "Register for Futura 2026, a university technology event featuring seminars, robotic competition, and research dissemination.",
+    "Daftar Futura 2026, acara teknologi universitas yang menghadirkan seminar, kompetisi robotika, dan diseminasi riset.",
 }
 
 export default function Home() {

@@ -26,7 +26,7 @@ import { getCachedAuth } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase-admin";
 
 export const metadata: Metadata = {
-  title: "Payment Complete | Futura",
+  title: "Pembayaran Selesai | Futura",
 };
 
 type SuccessSearchParams = Promise<
@@ -145,18 +145,18 @@ export default async function PaymentSuccessPage({
   const isInvalid = result.status === "invalid";
   const Icon = isPaid ? CheckCircle2 : Clock;
   const title = isPaid
-    ? "Payment Complete."
+    ? "Pembayaran Selesai."
     : isInvalid
-      ? "Payment Not Found."
-      : "Payment Verification Pending.";
+      ? "Pembayaran Tidak Ditemukan."
+      : "Verifikasi Pembayaran Tertunda.";
   const description = isPaid
-    ? "Your Mechatura registration payment is verified. Keep the receipt below for committee validation."
+    ? "Pembayaran pendaftaran Mechatura Anda telah diverifikasi. Simpan bukti pembayaran di bawah ini untuk validasi panitia."
     : isInvalid
-      ? "We could not find a valid payment order for this link. Please return to your registration flow."
-      : "We received the payment redirect, but the gateway confirmation is not final yet. Please wait a moment, then refresh once.";
+      ? "Kami tidak dapat menemukan pesanan pembayaran yang valid untuk tautan ini. Silakan kembali ke alur pendaftaran Anda."
+      : "Kami menerima pengalihan pembayaran, namun konfirmasi dari gateway belum final. Silakan tunggu sebentar, lalu muat ulang halaman.";
 
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-3xl flex-col justify-center space-y-8 px-6 pb-32 pt-28 sm:px-8">
+    <main className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-3xl flex-col justify-center space-y-8 px-4 pb-32 pt-28 sm:px-8">
       <section>
         <div className="space-y-2">
           <h1 className="max-w-xl text-3xl sm:text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
@@ -175,21 +175,21 @@ export default async function PaymentSuccessPage({
       {isPaid && result.program === "mechatura" && result.order?.rawOrder ? (
         <section className="space-y-8">
           <div className="overflow-hidden rounded-xl border border-border bg-card">
-            <div className="flex items-start gap-4 p-5 sm:p-6 border-b">
+            <div className="flex items-start gap-4 p-4 sm:p-6 border-b">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-muted">
                 <CheckCircle2 className="h-5 w-5 text-foreground" />
               </span>
               <div>
                 <h2 className="text-lg font-semibold">
-                  Payment and Registration Complete
+                  Pembayaran dan Pendaftaran Selesai
                 </h2>
                 <p className="mt-2 text-sm font-medium leading-relaxed text-neutral-500">
-                  Your Mechatura competition registration is verified. Below are your team details.
+                  Pendaftaran kompetisi Mechatura Anda telah diverifikasi. Di bawah ini adalah detail tim Anda.
                 </p>
               </div>
             </div>
 
-            <div className="p-5 sm:p-6">
+            <div className="p-4 sm:p-6">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <h3 className="mt-3 text-2xl font-semibold tracking-tight">
@@ -200,37 +200,37 @@ export default async function PaymentSuccessPage({
                   </p>
                 </div>
                 <div className="text-left sm:text-right">
-                  <p className="text-sm font-medium text-muted-foreground">Amount Paid</p>
+                  <p className="text-sm font-medium text-muted-foreground">Jumlah yang Dibayar</p>
                   <p className="text-xl font-semibold mt-1">{formatCurrency(result.order.rawOrder.paymentAmount)}</p>
                 </div>
               </div>
 
               <dl className="mt-5 grid gap-3 border-t border-border pt-4 text-sm sm:grid-cols-2">
                 <div>
-                  <dt className="text-muted-foreground">Robot Name</dt>
+                  <dt className="text-muted-foreground">Nama Robot</dt>
                   <dd className="mt-1 font-medium">{result.order.rawOrder.robotName}</dd>
                 </div>
                 <div>
-                  <dt className="text-muted-foreground">Registration ID</dt>
+                  <dt className="text-muted-foreground">ID Pendaftaran</dt>
                   <dd className="mt-1 font-mono text-sm font-semibold">{result.order.id}</dd>
                 </div>
                 <div>
-                  <dt className="text-muted-foreground">Team Leader</dt>
+                  <dt className="text-muted-foreground">Ketua Tim</dt>
                   <dd className="mt-1 font-medium">{result.order.rawOrder.leader.name}</dd>
                 </div>
                 <div>
-                  <dt className="text-muted-foreground">Leader Contact</dt>
+                  <dt className="text-muted-foreground">Kontak Ketua</dt>
                   <dd className="mt-1 font-medium">{result.order.rawOrder.leader.email}</dd>
                 </div>
                 <div>
-                  <dt className="text-muted-foreground">Total Members</dt>
+                  <dt className="text-muted-foreground">Total Anggota</dt>
                   <dd className="mt-1 font-medium">{result.order.rawOrder.members.length + 1} orang</dd>
                 </div>
               </dl>
 
               {result.order.rawOrder.members.length > 0 && (
                 <div className="mt-5 border-t border-border pt-4">
-                  <h3 className="text-sm font-medium mb-3">Additional Members</h3>
+                  <h3 className="text-sm font-medium mb-3">Anggota Tambahan</h3>
                   <div className="grid gap-4 sm:grid-cols-2">
                     {result.order.rawOrder.members.map((member, i) => (
                       <div
@@ -242,7 +242,7 @@ export default async function PaymentSuccessPage({
                             {member.name}
                           </p>
                           <p className="text-xs text-muted-foreground truncate">
-                            Member
+                            Anggota
                           </p>
                         </div>
                       </div>
@@ -254,10 +254,10 @@ export default async function PaymentSuccessPage({
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <Button type="button" variant="outline" className="h-11 rounded-[8px]" asChild>
-              <Link href="/">Go to Home Page</Link>
+              <Link href="/">Ke Beranda</Link>
             </Button>
             <Button type="button" className="h-11 rounded-[8px]" asChild>
-              <Link href="/profile">Go to Profile</Link>
+              <Link href="/profile">Ke Profil</Link>
             </Button>
           </div>
         </section>
@@ -265,10 +265,10 @@ export default async function PaymentSuccessPage({
         <section className="space-y-8">
            <div className="grid gap-3 sm:grid-cols-2">
              <Button type="button" variant="outline" className="h-11 rounded-[8px]" asChild>
-               <Link href="/">Go to Home Page</Link>
+               <Link href="/">Ke Beranda</Link>
              </Button>
              <Button type="button" className="h-11 rounded-[8px]" asChild>
-               <Link href={paymentHref}>Back to Payment</Link>
+               <Link href={paymentHref}>Kembali ke Pembayaran</Link>
              </Button>
            </div>
         </section>

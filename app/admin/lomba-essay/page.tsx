@@ -30,7 +30,7 @@ async function LKTIAdminData({
                     <div>
                         <h2 className="font-semibold text-2xl">Lomba Karya Tulis Ilmiah (LKTI)</h2>
                         <p className="mt-1 text-sm text-muted-foreground">
-                            Search and filter LKTI participants.
+                            Cari dan filter peserta LKTI.
                         </p>
                     </div>
                     <LombaEssayFilter searchParam={searchParam} categoryParam={categoryParam} />
@@ -38,11 +38,11 @@ async function LKTIAdminData({
 
                 <div className="grid gap-3 border-y border-border py-6 mt-6 sm:grid-cols-4">
                     <div className="rounded-lg border border-border bg-card/90 p-5 opacity-50">
-                        <p className="text-sm text-muted-foreground">Total Teams</p>
+                        <p className="text-sm text-muted-foreground">Total Tim</p>
                         <p className="mt-3 text-3xl font-semibold tracking-tight">-</p>
                     </div>
                     <div className="rounded-lg border border-border p-5 opacity-50">
-                        <p className="text-sm text-muted-foreground">Paid Teams</p>
+                        <p className="text-sm text-muted-foreground">Tim Lunas</p>
                         <p className="mt-3 text-3xl font-semibold tracking-tight">-</p>
                     </div>
                     <div className="rounded-lg border border-border p-5 opacity-50">
@@ -58,10 +58,10 @@ async function LKTIAdminData({
                 <div className="mt-6 rounded-[8px] border-1 border-amber-300 bg-amber-50 p-6">
                     <p className="text-sm font-medium text-amber-800 flex items-center gap-2">
                         <AlertCircle className="h-5 w-5" />
-                        Backend Not Integrated Yet
+                        Backend Belum Terintegrasi
                     </p>
                     <p className="mt-2 text-sm leading-6 text-amber-700">
-                        There is currently no backend database table for Lomba Karya Tulis Ilmiah registrations. This page will display participant data and real metrics once the integration is complete.
+                        Saat ini belum ada tabel basis data backend untuk pendaftaran Lomba Karya Tulis Ilmiah. Halaman ini akan menampilkan data peserta dan metrik nyata setelah integrasi selesai.
                     </p>
                 </div>
             </section>

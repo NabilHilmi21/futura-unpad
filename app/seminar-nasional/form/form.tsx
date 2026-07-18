@@ -125,9 +125,9 @@ export default function SeminarRegistrationForm() {
           asal_institusi: data.is_same_institution ? data.institusi : m.institusi
         })),
     }).catch((error) => {
-      setSubmitError(error instanceof Error ? error.message : "Registration failed. Please try again.");
-      toast.error("Registration failed", {
-        description: error instanceof Error ? error.message : "An unexpected error occurred."
+      setSubmitError(error instanceof Error ? error.message : "Pendaftaran gagal. Silakan coba lagi.");
+      toast.error("Pendaftaran gagal", {
+        description: error instanceof Error ? error.message : "Terjadi kesalahan tak terduga."
       });
       return null;
     });
@@ -140,7 +140,7 @@ export default function SeminarRegistrationForm() {
     setAllRegistrations(responseData.registrations || []);
     setStep("ticket");
     setShowProfileDialog(true);
-    toast.success("Registration successful!");
+    toast.success("Pendaftaran berhasil!");
   });
 
   return (
@@ -151,18 +151,17 @@ export default function SeminarRegistrationForm() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Register as Anonymous?</AlertDialogTitle>
+            <AlertDialogTitle>Daftar sebagai Anonim?</AlertDialogTitle>
             <AlertDialogDescription>
-              You are not logged in. Do you want to continue registering for the
-              seminar as an anonymous user?
+              Anda belum masuk. Apakah Anda ingin melanjutkan pendaftaran seminar sebagai pengguna anonim?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowAnonDialog(false)}>
-              Continue Anonymous
+              Lanjut Anonim
             </AlertDialogCancel>
             <AlertDialogAction onClick={() => router.push("/login?next=/registration/seminar")}>
-              Log In
+              Masuk
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -171,19 +170,19 @@ export default function SeminarRegistrationForm() {
       <AlertDialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Registration Successful!</AlertDialogTitle>
+            <AlertDialogTitle>Pendaftaran Berhasil!</AlertDialogTitle>
             <AlertDialogDescription>
-              {user ? "You can also view your registration at any time from your Profile page." : "If you create an account with this email later, you can view your registration at any time from your Profile page."}
+              {user ? "Anda juga dapat melihat pendaftaran Anda kapan saja dari halaman Profil Anda." : "Jika Anda membuat akun dengan email ini nanti, Anda dapat melihat pendaftaran Anda kapan saja dari halaman Profil Anda."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             {user && (
               <AlertDialogCancel onClick={() => router.push("/profile")}>
-                Go to Profile
+                Ke Profil
               </AlertDialogCancel>
             )}
             <AlertDialogAction onClick={() => setShowProfileDialog(false)}>
-              Got it
+              Mengerti
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -194,7 +193,7 @@ export default function SeminarRegistrationForm() {
           <StepProgress
             steps={steps}
             currentStep={step}
-            ariaLabel="Seminar registration progress"
+            ariaLabel="Progres pendaftaran seminar"
           />
 
           {step === "registration-option" ? (

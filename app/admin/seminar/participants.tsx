@@ -43,12 +43,12 @@ export type Participants = {
 
 const copyActions = [
     {
-        label: "Name",
+        label: "Nama",
         icon: User,
         getValue: (participant: Participants) => participant.nama_lengkap,
     },
     {
-        label: "Phone",
+        label: "Telepon",
         icon: Phone,
         getValue: (participant: Participants) => participant.no_telepon,
     },
@@ -121,9 +121,9 @@ export function AttendanceCheckbox({ participant }: { participant: Participants 
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-md">
                         <DialogHeader>
-                            <DialogTitle>Group Attendance</DialogTitle>
+                            <DialogTitle>Kehadiran Grup</DialogTitle>
                             <DialogDescription>
-                                Manage individual check-ins for the members of this group.
+                                Kelola check-in individu untuk anggota grup ini.
                             </DialogDescription>
                         </DialogHeader>
 
@@ -139,7 +139,7 @@ export function AttendanceCheckbox({ participant }: { participant: Participants 
                                     htmlFor={`main-${participant.id}`}
                                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-1 cursor-pointer"
                                 >
-                                    {participant.nama_lengkap} <span className="text-xs text-muted-foreground ml-1 uppercase">(Main Contact)</span>
+                                    {participant.nama_lengkap} <span className="text-xs text-muted-foreground ml-1 uppercase">(Kontak Utama)</span>
                                 </label>
                             </div>
 
@@ -175,10 +175,10 @@ export function ParticipantActions({ participant, hideViewDetails }: { participa
     const handleDelete = async () => {
         try {
             await deleteParticipant.mutateAsync(participant.id);
-            toast.success("Participant deleted successfully");
+            toast.success("Peserta berhasil dihapus");
             router.refresh();
         } catch (e) {
-            toast.error("Failed to delete participant");
+            toast.error("Gagal menghapus peserta");
             throw e; // Let ConfirmDialog handle UI error state
         }
     };
@@ -193,7 +193,7 @@ export function ParticipantActions({ participant, hideViewDetails }: { participa
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                     <DropdownMenuSeparator />
 
                     {!hideViewDetails && (
@@ -201,7 +201,7 @@ export function ParticipantActions({ participant, hideViewDetails }: { participa
                             <DropdownMenuItem asChild>
                                 <Link href={`/admin/seminar/${participant.id}`} prefetch={false}>
                                     <Eye className="h-4 w-4" />
-                                    View Details
+                                    Lihat Detail
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
@@ -209,7 +209,7 @@ export function ParticipantActions({ participant, hideViewDetails }: { participa
                     )}
 
                     <DropdownMenuGroup>
-                        <DropdownMenuLabel>Copy</DropdownMenuLabel>
+                        <DropdownMenuLabel>Salin</DropdownMenuLabel>
                         {copyActions.map((action) => {
                             const Icon = action.icon;
 
@@ -219,11 +219,11 @@ export function ParticipantActions({ participant, hideViewDetails }: { participa
                                     onClick={async () => {
                                         const val = action.getValue(participant);
                                         if (!val) {
-                                            toast.error(`No ${action.label.toLowerCase()} available to copy`);
+                                            toast.error(`Tidak ada ${action.label} untuk disalin`);
                                             return;
                                         }
                                         await navigator.clipboard.writeText(val);
-                                        toast.success(`Copied ${action.label.toLowerCase()} to clipboard`);
+                                        toast.success(`Berhasil menyalin ${action.label} ke papan klip`);
                                     }}
                                 >
                                     <Icon className="h-4 w-4" />
@@ -240,17 +240,17 @@ export function ParticipantActions({ participant, hideViewDetails }: { participa
                         onClick={() => setDeleteOpen(true)}
                     >
                         <Trash className="h-4 w-4" />
-                        Delete
+                        Hapus
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
             <ConfirmDialog
                 open={deleteOpen}
                 onOpenChange={setDeleteOpen}
-                title="Delete registration?"
-                description="This will permanently remove this participant registration. This action cannot be undone."
-                confirmText="Delete registration"
-                cancelText="Cancel"
+                title="Hapus pendaftaran?"
+                description="Tindakan ini akan menghapus permanen pendaftaran peserta ini. Tindakan ini tidak dapat dibatalkan."
+                confirmText="Hapus pendaftaran"
+                cancelText="Batal"
                 variant="destructive"
                 onConfirm={handleDelete}
             />
@@ -268,7 +268,7 @@ export const columns: ColumnDef<Participants>[] = [
     },
     {
         accessorKey: "attended",
-        header: () => <div className="text-center">Checked In</div>,
+        header: () => <div className="text-center">Check In</div>,
         cell: ({ row }) => (
             <div className="flex items-center justify-center">
                 <AttendanceCheckbox participant={row.original} />
@@ -277,7 +277,7 @@ export const columns: ColumnDef<Participants>[] = [
     },
     {
         accessorKey: "nama_lengkap",
-        header: "Name",
+        header: "Nama",
         cell: ({ row }) => {
             const participant = row.original;
             const isGroup = participant.registration_type === "group" || participant.registration_type === "grup";
@@ -294,21 +294,21 @@ export const columns: ColumnDef<Participants>[] = [
     },
     {
         accessorKey: "no_telepon",
-        header: "Phone",
+        header: "Telepon",
     },
     {
         accessorKey: "asal_institusi",
-        header: "Institution",
+        header: "Institusi",
     },
     {
         accessorKey: "registration_type",
-        header: "Type",
+        header: "Tipe",
         cell: ({ row }) => {
             const type = row.original.registration_type;
             const isGroup = type === "group" || type === "grup";
             return (
                 <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium capitalize ${isGroup ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"}`}>
-                    {isGroup ? "Group" : "Individual"}
+                    {isGroup ? "Grup" : "Individu"}
                 </span>
             )
         }

@@ -43,10 +43,10 @@ export function LombaEssayFilter({ searchParam, categoryParam }: LombaEssayFilte
                     key={searchParam ?? "empty"}
                     name="search"
                     defaultValue={searchParam ?? ""}
-                    placeholder="Search team, name, paper title"
+                    placeholder="Cari tim, nama, judul paper"
                     className="h-10 w-full rounded-lg border border-input bg-background px-4 pl-9 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 />
-                <button type="submit" className="sr-only">Search</button>
+                <button type="submit" className="sr-only">Cari</button>
             </div>
             <div className="flex gap-3">
                 <DropdownMenu>
@@ -54,7 +54,7 @@ export function LombaEssayFilter({ searchParam, categoryParam }: LombaEssayFilte
                         <Button type="button" variant="outline" className="h-10 w-full sm:w-[200px] justify-between rounded-lg bg-background">
                             <span className="truncate flex items-center gap-2">
                                 {categoryParam === "teknologi" ? <MonitorSmartphone className="h-4 w-4" /> : categoryParam === "kesehatan" ? <HeartPulse className="h-4 w-4" /> : categoryParam === "ekonomi" ? <Landmark className="h-4 w-4" /> : categoryParam === "sosial" ? <Users2 className="h-4 w-4" /> : categoryParam === "pendidikan" ? <BookOpen className="h-4 w-4" /> : <LayoutGrid className="h-4 w-4" />}
-                                {categoryParam && categoryParam !== "all" ? categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1) : "All Sub-Themes"}
+                                {categoryParam && categoryParam !== "all" ? categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1) : "Semua Sub-Tema"}
                             </span>
                             <ChevronDown className="h-4 w-4 opacity-50" />
                         </Button>
@@ -62,7 +62,7 @@ export function LombaEssayFilter({ searchParam, categoryParam }: LombaEssayFilte
                     <DropdownMenuContent className="w-[200px]">
                         <DropdownMenuItem onSelect={() => updateFilter("all")}>
                             <LayoutGrid className="mr-2 h-4 w-4" />
-                            All Sub-Themes
+                            Semua Sub-Tema
                         </DropdownMenuItem>
                         <DropdownMenuItem onSelect={() => updateFilter("teknologi")}>
                             <MonitorSmartphone className="mr-2 h-4 w-4" />

@@ -35,13 +35,13 @@ export default async function LoginPage({
     }
 
     return (
-        <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center space-y-12 px-6 pb-16 pt-32 sm:px-8">
+        <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center space-y-12 px-4 pb-16 pt-32 sm:px-8">
             <section className="space-y-2">
                 <h1 className="max-w-md text-3xl sm:text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-balance">
-                    Create a Futura account
+                    Buat akun Futura
                 </h1>
                 <p className="max-w-sm text-sm font-medium leading-relaxed text-neutral-500">
-                    Set up your futura account 
+                    Siapkan akun Futura Anda
                 </p>
             </section>
 

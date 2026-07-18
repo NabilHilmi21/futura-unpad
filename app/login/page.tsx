@@ -47,13 +47,13 @@ export default async function LoginPage({
 
     if (params.error === "oauth_failed" || params.error === "missing_code") {
         return (
-            <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center px-6 pb-16 pt-32 sm:px-8">
+            <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center px-4 pb-16 pt-32 sm:px-8">
                 <ErrorState 
                     icon={ShieldAlert}
-                    title="Verification link invalid or already used"
-                    description="This link has expired or you have already verified your email using the OTP code. Please log in to continue."
+                    title="Tautan verifikasi tidak valid atau sudah digunakan"
+                    description="Tautan ini telah kedaluwarsa atau Anda sudah memverifikasi email Anda menggunakan kode OTP. Silakan masuk untuk melanjutkan."
                     actionHref="/login"
-                    actionLabel="Go to Login"
+                    actionLabel="Ke Halaman Masuk"
                 />
             </main>
         )
@@ -61,13 +61,13 @@ export default async function LoginPage({
 
     if (params.reset === "success") {
         return (
-            <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center px-6 pb-16 pt-32 sm:px-8">
+            <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center px-4 pb-16 pt-32 sm:px-8">
                 <ErrorState 
                     icon={CheckCircle2}
-                    title="Password Reset Successfully"
-                    description="Your password has been securely updated. You can now log in to your account."
+                    title="Kata Sandi Berhasil Direset"
+                    description="Kata sandi Anda telah diperbarui dengan aman. Anda sekarang dapat masuk ke akun Anda."
                     actionHref="/login"
-                    actionLabel="Go to Login"
+                    actionLabel="Ke Halaman Masuk"
                     className="[&_svg]:text-emerald-500 [&_div]:bg-emerald-50 dark:[&_div]:bg-emerald-500/10"
                 />
             </main>
@@ -78,13 +78,13 @@ export default async function LoginPage({
     const isVerified = cookieStore.get("email_verified_flash")?.value === "1";
 
     return (
-        <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center space-y-12 px-6 pb-16 pt-32 sm:px-8">
+        <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center space-y-12 px-4 pb-16 pt-32 sm:px-8">
             <section className="space-y-2">
                 <h1 className="max-w-md text-3xl sm:text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-balance">
-                    Sign in to your Futura account
+                    Masuk ke akun Futura Anda
                 </h1>
                 <p className="max-w-sm text-sm font-medium leading-relaxed text-neutral-500">
-                    Get notified on every seminar
+                    Masuk untuk mengelola pendaftaran Anda
                 </p>
             </section>
 
@@ -95,7 +95,7 @@ export default async function LoginPage({
                     aria-live="polite"
                 >
                     <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-500" />
-                    <p className="text-sm font-medium">Your email has been verified successfully. Please log in to continue.</p>
+                    <p className="text-sm font-medium">Email Anda berhasil diverifikasi. Silakan masuk untuk melanjutkan.</p>
                 </div>
             )}
 

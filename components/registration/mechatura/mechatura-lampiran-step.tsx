@@ -31,10 +31,10 @@ export default function MechaturaLampiranStep({
                         className="h-11 rounded-[8px]"
                         onClick={onBack}
                     >
-                        Back
+                        Kembali
                     </Button>
                     <Button type="submit" className="h-11 rounded-[8px]">
-                        Continue to verification
+                        Lanjutkan ke verifikasi
                     </Button>
                 </Field>
             </FieldGroup>

@@ -65,7 +65,7 @@ export default function KategoriLomba({ onContinue }: KategoriLombaProps){
                     />
                 </Field>
                 <Button type="submit" className="h-11 rounded-[8px] mt-4">
-                    Continue
+                    Lanjutkan
                 </Button>
             </FieldGroup>
         </form>

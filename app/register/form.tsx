@@ -77,7 +77,7 @@ export default function RegisterForm({ loginHref = "/login" }: { loginHref?: str
         const channel = new window.BroadcastChannel('auth-sync');
         channel.onmessage = (event) => {
             if (event.data === 'email_verified') {
-                toast.success("Email verified in another tab!");
+                toast.success("Email diverifikasi di tab lain!");
                 setVerifyEmail(null);
                 router.push("/login");
             }
@@ -99,9 +99,9 @@ export default function RegisterForm({ loginHref = "/login" }: { loginHref?: str
                 confirmPassword: values.confirmPassword,
                 termsAccepted: values.termsAccepted,
         }).catch((error) => {
-            setSubmitError(error instanceof Error ? error.message : "Registration failed.");
-            toast.error("Registration failed", {
-                description: error instanceof Error ? error.message : "An unexpected error occurred."
+            setSubmitError(error instanceof Error ? error.message : "Registrasi gagal.");
+            toast.error("Registrasi gagal", {
+                description: error instanceof Error ? error.message : "Terjadi kesalahan yang tidak terduga."
             });
             return null;
         });
@@ -111,7 +111,7 @@ export default function RegisterForm({ loginHref = "/login" }: { loginHref?: str
         }
 
         if (data?.authenticated) {
-            toast.success("Successfully registered and logged in");
+            toast.success("Berhasil mendaftar dan masuk");
             const currentUrl = new URL(window.location.href);
             const getSafeRedirectPath = (value: string | null) => {
                 return value &&
@@ -131,9 +131,9 @@ export default function RegisterForm({ loginHref = "/login" }: { loginHref?: str
         }
 
         setVerifyEmail(values.email);
-        setSuccessMessage("Registration successful. Please verify your email.");
-        toast.success("Registration successful", {
-            description: "Please enter the OTP sent to your email to verify your account."
+        setSuccessMessage("Pendaftaran berhasil. Silakan verifikasi email Anda.");
+        toast.success("Pendaftaran berhasil", {
+            description: "Silakan masukkan OTP yang dikirim ke email Anda untuk memverifikasi akun Anda."
         });
     };
 
@@ -144,7 +144,7 @@ export default function RegisterForm({ loginHref = "/login" }: { loginHref?: str
 
         setError("termsAccepted", {
             type: "manual",
-            message: "Please agree to the Terms and Privacy Policy.",
+            message: "Harap setujui Syarat dan Kebijakan Privasi.",
         });
         return false;
     };
@@ -157,7 +157,7 @@ export default function RegisterForm({ loginHref = "/login" }: { loginHref?: str
                     <FormTextField<RegisterFormValues>
                         name="username"
                         label="Username"
-                        placeholder="e.g. johndoe123"
+                        placeholder="contoh: johndoe123"
                         autoComplete="username"
                     />
 
@@ -165,16 +165,16 @@ export default function RegisterForm({ loginHref = "/login" }: { loginHref?: str
                         name="email"
                         label="Email"
                         type="email"
-                        placeholder="e.g. johndoe@gmail.com"
+                        placeholder="contoh: johndoe@gmail.com"
                         autoComplete="email"
                     />
 
                     <Field className="gap-2">
                         <FormTextField<RegisterFormValues>
                             name="password"
-                            label="Password"
+                            label="Kata Sandi"
                             type="password"
-                            placeholder="Enter your password"
+                            placeholder="Masukkan kata sandi Anda"
                             autoComplete="new-password"
                         />
 
@@ -206,16 +206,16 @@ export default function RegisterForm({ loginHref = "/login" }: { loginHref?: str
                                         passwordStrength === 3 ? "text-yellow-500" :
                                             "text-emerald-500"
                             )}>
-                                {passwordStrength === 1 ? "Very Weak" : passwordStrength === 2 ? "Weak" : passwordStrength === 3 ? "Strong" : "Very Strong"}
+                                {passwordStrength === 1 ? "Sangat Lemah" : passwordStrength === 2 ? "Lemah" : passwordStrength === 3 ? "Kuat" : "Sangat Kuat"}
                             </p>
                         )}
                     </Field>
 
                     <FormTextField<RegisterFormValues>
                         name="confirmPassword"
-                        label="Confirm Password"
+                        label="Konfirmasi Kata Sandi"
                         type="password"
-                        placeholder="Confirm your password"
+                        placeholder="Konfirmasi kata sandi Anda"
                         autoComplete="new-password"
                     />
 
@@ -239,21 +239,21 @@ export default function RegisterForm({ loginHref = "/login" }: { loginHref?: str
                     />
                     <div className="min-w-0 flex-1 space-y-1">
                         <p className="text-sm leading-5 text-muted-foreground">
-                            I agree with the{" "}
+                            Saya setuju dengan{" "}
                             <button
                                 type="button"
                                 className="cursor-pointer font-medium text-blue-600 underline-offset-4 hover:underline"
                                 onClick={() => setLegalDialog("terms")}
                             >
-                                Terms
+                                Syarat
                             </button>{" "}
-                            and{" "}
+                            dan{" "}
                             <button
                                 type="button"
                                 className="cursor-pointer font-medium text-blue-600 underline-offset-4 hover:underline"
                                 onClick={() => setLegalDialog("privacy")}
                             >
-                                Privacy Policy
+                                Kebijakan Privasi
                             </button>
                             .
                         </p>
@@ -272,7 +272,7 @@ export default function RegisterForm({ loginHref = "/login" }: { loginHref?: str
                         className="h-11 rounded-[8px]"
                         disabled={registerAccount.isPending}
                     >
-                        {registerAccount.isPending ? "Creating account..." : "Create Account"}
+                        {registerAccount.isPending ? "Membuat akun..." : "Buat Akun"}
                     </Button>
 
                     <div className="relative my-0.5">
@@ -281,7 +281,7 @@ export default function RegisterForm({ loginHref = "/login" }: { loginHref?: str
                         </div>
                         <div className="relative flex justify-center text-sm lowercase">
                             <span className="bg-background px-2 text-muted-foreground">
-                                Or
+                                Atau
                             </span>
                         </div>
                     </div>
@@ -289,13 +289,13 @@ export default function RegisterForm({ loginHref = "/login" }: { loginHref?: str
                     <GoogleLoginButton onBeforeLogin={requireLegalAgreement} />
                 </Field>
                 <p className="text-center text-sm text-muted-foreground">
-                    Already have an account?{" "}
+                    Sudah punya akun?{" "}
                     <Link
                         href={loginHref}
                         prefetch={false}
                         className="text-blue-600"
                     >
-                        Log in
+                        Masuk
                     </Link>
                 </p>
                 </FieldGroup>
@@ -323,10 +323,10 @@ export default function RegisterForm({ loginHref = "/login" }: { loginHref?: str
             >
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle className="text-2xl font-semibold tracking-tight">Check your email</DialogTitle>
+                        <DialogTitle className="text-2xl font-semibold tracking-tight">Periksa email Anda</DialogTitle>
                         <DialogDescription className="text-base text-muted-foreground pt-2">
-                            We&apos;ve sent a confirmation code to <span className="font-medium text-foreground">{verifyEmail}</span>.
-                            Please enter it below to activate your account. The code expires in 1 hour.
+                            Kami telah mengirimkan kode konfirmasi ke <span className="font-medium text-foreground">{verifyEmail}</span>.
+                            Silakan masukkan di bawah ini untuk mengaktifkan akun Anda. Kode kedaluwarsa dalam 1 jam.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex flex-col space-y-6 py-4">
@@ -353,9 +353,9 @@ export default function RegisterForm({ loginHref = "/login" }: { loginHref?: str
                                         body: JSON.stringify({ email: verifyEmail, token: otp }),
                                     });
                                     const data = await res.json();
-                                    if (!res.ok) throw new Error(data.error || "Verification failed");
+                                    if (!res.ok) throw new Error(data.error || "Verifikasi gagal");
                                     
-                                    toast.success("Email verified successfully!");
+                                    toast.success("Email berhasil diverifikasi!");
                                     router.push("/login");
                                 } catch (err: any) {
                                     toast.error(err.message);
@@ -364,7 +364,7 @@ export default function RegisterForm({ loginHref = "/login" }: { loginHref?: str
                                 }
                             }}
                         >
-                            {isVerifying ? "Verifying..." : "Verify Account"}
+                            {isVerifying ? "Memverifikasi..." : "Verifikasi Akun"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -388,11 +388,11 @@ function LegalDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle>{isTerms ? "Terms" : "Privacy Policy"}</DialogTitle>
+                    <DialogTitle>{isTerms ? "Syarat" : "Kebijakan Privasi"}</DialogTitle>
                     <DialogDescription>
                         {isTerms
-                            ? "These draft terms describe how participants use Futura registration and event services."
-                            : "This draft policy describes how Futura handles account, registration, and event-related information."}
+                            ? "Syarat dan Ketentuan ini mengatur akses dan penggunaan Anda terhadap layanan registrasi Futura Universitas Padjadjaran."
+                            : "Kebijakan Privasi ini menjelaskan bagaimana Futura Universitas Padjadjaran mengumpulkan, menggunakan, dan melindungi Informasi Pribadi Anda."}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -409,29 +409,58 @@ function LegalDialog({
 function TermsContent() {
     return (
         <>
-            <section className="space-y-2">
-                <h3 className="font-medium text-foreground">Account Use</h3>
+            <div className="space-y-3">
                 <p>
-                    You agree to provide accurate registration details, keep your account access secure, and use the Futura website only for lawful event registration, payment, and participation purposes.
+                    Selamat datang di website resmi Futura Universitas Padjadjaran (futuraunpad.com). Syarat dan Ketentuan ini mengatur akses dan penggunaan Anda terhadap website dan layanan registrasi kami untuk acara lomba Robot Sumo, lomba Robot Transporter, Seminar Nasional, dan Lomba Essay.
                 </p>
+                <p>
+                    Dengan mengakses atau menggunakan website ini, Anda setuju untuk terikat oleh Syarat dan Ketentuan ini. Jika Anda tidak setuju dengan bagian mana pun dari syarat ini, Anda tidak diperkenankan untuk menggunakan layanan kami.
+                </p>
+            </div>
+
+            <section className="space-y-2 pt-2">
+                <h3 className="font-medium text-foreground">Pendaftaran dan Akun Pengguna</h3>
+                <ul className="list-disc pl-6 space-y-1">
+                    <li>Untuk mendaftar acara atau kompetisi, Anda diwajibkan untuk membuat akun dan memberikan informasi yang akurat, lengkap, dan terbaru.</li>
+                    <li>Anda bertanggung jawab penuh untuk menjaga kerahasiaan kata sandi dan akun Anda.</li>
+                    <li>Panitia berhak menangguhkan atau menghapus akun jika ditemukan indikasi pemalsuan data, pendaftaran ganda yang melanggar aturan, atau tindakan curang lainnya.</li>
+                </ul>
             </section>
-            <section className="space-y-2">
-                <h3 className="font-medium text-foreground">Registration and Attendance</h3>
-                <p>
-                    Event seats, competition entries, certificates, attendance records, and payment status may depend on the information you submit. Futura may contact you to verify details or resolve registration issues.
-                </p>
+            
+            <section className="space-y-2 pt-2">
+                <h3 className="font-medium text-foreground">Ketentuan Pendaftaran Acara dan Kompetisi</h3>
+                <ul className="list-disc pl-6 space-y-1">
+                    <li>Seluruh peserta wajib mematuhi Guidebook (Buku Panduan) resmi dari masing-masing acara yang didaftarkan.</li>
+                    <li>Bagi peserta di bawah umur (di bawah 18 tahun), pendaftaran wajib menyertakan data dan dokumen identitas (KTP) dari Orang Tua, Wali yang sah, atau Guru Pembina sebagai penanggung jawab.</li>
+                    <li>Pendaftaran baru dianggap sah dan selesai setelah proses verifikasi dokumen atau pembayaran berhasil dikonfirmasi oleh sistem.</li>
+                </ul>
             </section>
-            <section className="space-y-2">
-                <h3 className="font-medium text-foreground">Payments and Event Changes</h3>
-                <p>
-                    Fees, payment deadlines, event schedules, and participation requirements may change while the final event information is being prepared. Any official updates should be followed as published by the organizer.
-                </p>
+
+            <section className="space-y-2 pt-2">
+                <h3 className="font-medium text-foreground">Pembayaran dan Kebijakan Pengembalian Dana</h3>
+                <ul className="list-disc pl-6 space-y-1">
+                    <li>Pembayaran pendaftaran diproses melalui sistem payment gateway pihak ketiga yang terintegrasi di website kami.</li>
+                    <li>Anda wajib membayar sesuai dengan nominal tagihan yang tertera pada sistem sebelum batas waktu yang ditentukan.</li>
+                    <li>Seluruh pembayaran yang telah berhasil dikonfirmasi bersifat final dan tidak dapat dikembalikan (non-refundable), kecuali acara dibatalkan secara sepihak oleh panitia Futura Universitas Padjadjaran.</li>
+                </ul>
             </section>
-            <section className="space-y-2">
-                <h3 className="font-medium text-foreground">Responsible Conduct</h3>
-                <p>
-                    You agree not to misuse the website, submit false data, disrupt other users, attempt unauthorized access, or interfere with Futura systems and event operations.
-                </p>
+
+            <section className="space-y-2 pt-2">
+                <h3 className="font-medium text-foreground">Kewajiban Pengguna</h3>
+                <ul className="list-disc pl-6 space-y-1">
+                    <li>Menggunakan website ini untuk tujuan legal dan tidak melanggar hukum.</li>
+                    <li>Tidak mengunggah dokumen yang mengandung virus, malware, atau kode berbahaya lainnya.</li>
+                    <li>Tidak mencoba meretas, melakukan spamming, menembus sistem keamanan (bypass), atau membebani infrastruktur kami secara tidak wajar.</li>
+                    <li>Tidak menggunakan identitas orang lain tanpa izin.</li>
+                </ul>
+            </section>
+
+            <section className="space-y-2 pt-2">
+                <h3 className="font-medium text-foreground">Tiket dan Akses Acara</h3>
+                <ul className="list-disc pl-6 space-y-1">
+                    <li>Peserta yang telah tervalidasi akan menerima tiket elektronik (QR Code) melalui sistem kami atau email terdaftar.</li>
+                    <li>Tiket elektronik wajib ditunjukkan pada saat proses daftar ulang (check-in) di lokasi acara dan tidak dapat dipindahtangankan tanpa persetujuan resmi.</li>
+                </ul>
             </section>
         </>
     );
@@ -440,28 +469,47 @@ function TermsContent() {
 function PrivacyContent() {
     return (
         <>
-            <section className="space-y-2">
-                <h3 className="font-medium text-foreground">Information We Collect</h3>
+            <div className="space-y-3">
                 <p>
-                    Futura may collect account details, contact information, registration data, institution details, payment references, attendance status, and messages you submit through the website.
+                    Futura Universitas Padjadjaran mengoperasikan website futuraunpad.com yang menyediakan layanan registrasi dan informasi terkait acara.
+                </p>
+                <p>
+                    Jika Anda memilih untuk menggunakan layanan kami, maka Anda menyetujui pengumpulan dan penggunaan informasi sehubungan dengan kebijakan ini. Kami tidak akan menggunakan atau membagikan informasi Anda dengan siapa pun kecuali seperti yang dijelaskan dalam Kebijakan Privasi ini.
+                </p>
+            </div>
+
+            <section className="space-y-2 pt-2">
+                <h3 className="font-medium text-foreground">Pengumpulan dan Penggunaan Informasi</h3>
+                <p>
+                    Untuk pengalaman yang lebih baik saat menggunakan layanan kami, kami mungkin meminta Anda untuk memberikan kami informasi pengenal pribadi tertentu, termasuk namun tidak terbatas pada nama, nomor telepon, dan alamat email Anda. Informasi yang kami kumpulkan akan digunakan untuk menghubungi atau mengidentifikasi Anda.
                 </p>
             </section>
-            <section className="space-y-2">
-                <h3 className="font-medium text-foreground">How We Use Information</h3>
+
+            <section className="space-y-2 pt-2">
+                <h3 className="font-medium text-foreground">Data Log & Cookies</h3>
                 <p>
-                    Information is used to create accounts, manage registrations, process payments, verify attendance, issue event records, communicate updates, and improve event operations.
+                    Kami mengumpulkan Data Log yang dikirimkan browser Anda (seperti alamat IP, versi browser, halaman yang dikunjungi, dan waktu kunjungan). Kami juga menggunakan "cookies" untuk mengumpulkan informasi guna meningkatkan layanan kami.
                 </p>
             </section>
-            <section className="space-y-2">
-                <h3 className="font-medium text-foreground">Service Providers</h3>
+
+            <section className="space-y-2 pt-2">
+                <h3 className="font-medium text-foreground">Penyedia Layanan Pihak Ketiga</h3>
                 <p>
-                    Some information may be processed by trusted services used for authentication, payments, email delivery, analytics, hosting, and operational support.
+                    Kami mempekerjakan pihak ketiga untuk memfasilitasi layanan kami (termasuk autentikasi dan payment gateway). Pihak ketiga ini memiliki akses ke Informasi Pribadi Anda hanya untuk melakukan tugas atas nama kami dan berkewajiban untuk tidak mengungkapkannya.
                 </p>
             </section>
-            <section className="space-y-2">
-                <h3 className="font-medium text-foreground">Data Requests</h3>
+
+            <section className="space-y-2 pt-2">
+                <h3 className="font-medium text-foreground">Privasi Peserta di Bawah Umur</h3>
                 <p>
-                    You may contact the organizer to request corrections or deletion where appropriate. Some records may need to be retained for payment, attendance, certificate, or administrative purposes.
+                    Pengumpulan informasi pribadi dari peserta di bawah umur (di bawah 18 tahun) hanya dapat dilakukan dengan sepengetahuan dan persetujuan dari orang tua, wali yang sah, atau guru pembina. Apabila kami menemukan data anak di bawah umur yang dikirimkan tanpa persetujuan, panitia berhak membatalkan pendaftaran.
+                </p>
+            </section>
+            
+            <section className="space-y-2 pt-2">
+                <h3 className="font-medium text-foreground">Keamanan Data</h3>
+                <p>
+                    Kami menggunakan cara yang dapat diterima secara komersial untuk melindungi Informasi Pribadi Anda, namun tidak ada metode transmisi melalui internet atau penyimpanan elektronik yang 100% aman.
                 </p>
             </section>
         </>

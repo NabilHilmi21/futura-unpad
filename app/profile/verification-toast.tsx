@@ -19,20 +19,20 @@ export function VerificationToast() {
             if (verified === "1") {
                 isToastShown.current = true;
                 shouldCleanUrl = true;
-                toast.success("Email verified successfully!", {
-                    description: "Your account is now fully verified.",
+                toast.success("Email berhasil diverifikasi!", {
+                    description: "Akun Anda sekarang telah diverifikasi sepenuhnya.",
                 });
             } else if (emailChange === "pending") {
                 isToastShown.current = true;
                 shouldCleanUrl = true;
-                toast.info("One more step!", {
-                    description: "Email partially verified. Please check the other email address to complete the change.",
+                toast.info("Satu langkah lagi!", {
+                    description: "Email diverifikasi sebagian. Silakan periksa alamat email lainnya untuk menyelesaikan perubahan.",
                 });
             } else if (emailChange === "success") {
                 isToastShown.current = true;
                 shouldCleanUrl = true;
-                toast.success("Email changed successfully!", {
-                    description: "Your account email has been updated.",
+                toast.success("Email berhasil diubah!", {
+                    description: "Email akun Anda telah diperbarui.",
                 });
             }
 

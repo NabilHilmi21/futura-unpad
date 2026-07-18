@@ -102,11 +102,11 @@ function AttendanceCheckbox({ team }: { team: MechaturaTeamData }) {
 
 const copyText = async (value: string | null | undefined, label: string) => {
     if (!value) {
-        toast.error(`No ${label.toLowerCase()} available to copy`);
+        toast.error(`Tidak ada ${label} untuk disalin`);
         return;
     }
     await navigator.clipboard.writeText(value);
-    toast.success(`Copied ${label.toLowerCase()} to clipboard`);
+    toast.success(`Berhasil menyalin ${label} ke papan klip`);
 };
 
 export function TeamActions({ team, hideViewDetails }: { team: MechaturaTeamData, hideViewDetails?: boolean }) {
@@ -119,27 +119,27 @@ export function TeamActions({ team, hideViewDetails }: { team: MechaturaTeamData
 
     const handleDownload = async (path: string | null, label: string) => {
         if (!path) {
-            toast.error(`No ${label.toLowerCase()} available`);
+            toast.error(`Tidak ada ${label} yang tersedia`);
             return;
         }
         
         try {
             const url = await getMechaturaDocumentUrl(path);
-            if (!url) throw new Error("URL generation failed");
+            if (!url) throw new Error("Pembuatan URL gagal");
             window.open(url, '_blank');
-            toast.success(`Opening ${label.toLowerCase()}`);
+            toast.success(`Membuka ${label}`);
         } catch (error) {
-            toast.error(`Failed to download ${label.toLowerCase()}`);
+            toast.error(`Gagal mengunduh ${label}`);
         }
     };
 
     const handleStatusUpdate = async (status: "approved" | "rejected") => {
         try {
             await updateMechaturaRegistrationStatus(team.id, status);
-            toast.success(`Application ${status} successfully`);
+            toast.success(status === "approved" ? "Pendaftaran berhasil disetujui" : "Pendaftaran berhasil ditolak");
             router.refresh();
         } catch (error) {
-            toast.error(`Failed to update application status`);
+            toast.error(`Gagal memperbarui status pendaftaran`);
             throw error;
         }
     };
@@ -147,10 +147,10 @@ export function TeamActions({ team, hideViewDetails }: { team: MechaturaTeamData
     const handleDelete = async () => {
         try {
             await deleteTeam.mutateAsync(team.id);
-            toast.success("Team deleted successfully");
+            toast.success("Tim berhasil dihapus");
             router.refresh();
         } catch (e) {
-            toast.error("Failed to delete team");
+            toast.error("Gagal menghapus tim");
             throw e; // Let ConfirmDialog catch it for internal error handling too
         }
     };
@@ -165,7 +165,7 @@ export function TeamActions({ team, hideViewDetails }: { team: MechaturaTeamData
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-52">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                     <DropdownMenuSeparator />
 
                     {!hideViewDetails && (
@@ -173,7 +173,7 @@ export function TeamActions({ team, hideViewDetails }: { team: MechaturaTeamData
                             <DropdownMenuItem asChild>
                                 <Link href={`/admin/mechatura/${team.id}`} prefetch={false}>
                                     <Eye className="h-4 w-4" />
-                                    View Details
+                                    Lihat Detail
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
@@ -181,51 +181,51 @@ export function TeamActions({ team, hideViewDetails }: { team: MechaturaTeamData
                     )}
 
                     <DropdownMenuGroup>
-                        <DropdownMenuLabel>Copy</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => copyText(team.team_id, "Team ID")}>
+                        <DropdownMenuLabel>Salin</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => copyText(team.team_id, "ID Tim")}>
                             <Tags className="h-4 w-4" />
-                            Team ID
+                            ID Tim
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => copyText(team.leader?.email, "Leader Email")}>
+                        <DropdownMenuItem onClick={() => copyText(team.leader?.email, "Email Ketua")}>
                             <Mail className="h-4 w-4" />
-                            Leader Email
+                            Email Ketua
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => copyText(team.leader?.phone, "Leader Phone")}>
+                        <DropdownMenuItem onClick={() => copyText(team.leader?.phone, "Telepon Ketua")}>
                             <Phone className="h-4 w-4" />
-                            Leader Phone
+                            Telepon Ketua
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     
                     <DropdownMenuGroup>
-                        <DropdownMenuLabel>Documents</DropdownMenuLabel>
+                        <DropdownMenuLabel>Dokumen</DropdownMenuLabel>
                         <DropdownMenuItem 
-                            onClick={() => handleDownload(team.member_document_path, "Member Document")}
+                            onClick={() => handleDownload(team.member_document_path, "Dokumen Anggota")}
                             disabled={!team.member_document_path}
                         >
                             <FileText className="h-4 w-4" />
-                            Member Doc
+                            Dok. Anggota
                         </DropdownMenuItem>
                         <DropdownMenuItem 
-                            onClick={() => handleDownload(team.robot_document_path, "Robot Document")}
+                            onClick={() => handleDownload(team.robot_document_path, "Dokumen Robot")}
                             disabled={!team.robot_document_path}
                         >
                             <FileText className="h-4 w-4" />
-                            Robot Doc
+                            Dok. Robot
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
                     
                     <DropdownMenuSeparator />
 
                     <DropdownMenuGroup>
-                        <DropdownMenuLabel>Application</DropdownMenuLabel>
+                        <DropdownMenuLabel>Pendaftaran</DropdownMenuLabel>
                         <DropdownMenuItem 
                             onClick={(e) => { e.preventDefault(); setApproveOpen(true); }}
                             disabled={isPending || team.registration_status === "approved"}
                             className="text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50 dark:focus:bg-emerald-950"
                         >
                             <CheckCircle className="h-4 w-4" />
-                            Approve
+                            Setujui
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                             onClick={(e) => { e.preventDefault(); setRejectOpen(true); }}
@@ -233,7 +233,7 @@ export function TeamActions({ team, hideViewDetails }: { team: MechaturaTeamData
                             className="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950"
                         >
                             <XCircle className="h-4 w-4" />
-                            Reject
+                            Tolak
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
                     
@@ -244,37 +244,37 @@ export function TeamActions({ team, hideViewDetails }: { team: MechaturaTeamData
                         onClick={() => setDeleteOpen(true)}
                     >
                         <Trash className="h-4 w-4" />
-                        Delete
+                        Hapus
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
             <ConfirmDialog
                 open={deleteOpen}
                 onOpenChange={setDeleteOpen}
-                title="Delete team?"
-                description="This will permanently remove this Mechatura team, its registered people, and uploaded documents. This action cannot be undone."
-                confirmText="Delete team"
-                cancelText="Cancel"
+                title="Hapus tim?"
+                description="Tindakan ini akan menghapus permanen tim Mechatura ini, anggota terdaftar, dan dokumen yang diunggah. Tindakan ini tidak dapat dibatalkan."
+                confirmText="Hapus tim"
+                cancelText="Batal"
                 variant="destructive"
                 onConfirm={handleDelete}
             />
             <ConfirmDialog
                 open={approveOpen}
                 onOpenChange={setApproveOpen}
-                title="Approve Team Application?"
-                description={`This will mark ${team.team_name}'s application as approved.`}
-                confirmText="Approve Application"
-                cancelText="Cancel"
+                title="Setujui Pendaftaran Tim?"
+                description={`Tindakan ini akan menandai pendaftaran tim ${team.team_name} sebagai disetujui.`}
+                confirmText="Setujui Pendaftaran"
+                cancelText="Batal"
                 variant="default"
                 onConfirm={() => handleStatusUpdate("approved")}
             />
             <ConfirmDialog
                 open={rejectOpen}
                 onOpenChange={setRejectOpen}
-                title="Reject Team Application?"
-                description={`This will mark ${team.team_name}'s application as rejected. Please make sure you have a valid reason.`}
-                confirmText="Reject Application"
-                cancelText="Cancel"
+                title="Tolak Pendaftaran Tim?"
+                description={`Tindakan ini akan menandai pendaftaran tim ${team.team_name} sebagai ditolak. Pastikan Anda memiliki alasan yang sah.`}
+                confirmText="Tolak Pendaftaran"
+                cancelText="Batal"
                 variant="destructive"
                 onConfirm={() => handleStatusUpdate("rejected")}
             />
@@ -292,7 +292,7 @@ export const columns: ColumnDef<MechaturaTeamData>[] = [
     },
     {
         accessorKey: "attended",
-        header: () => <div className="text-center">Checked In</div>,
+        header: () => <div className="text-center">Check In</div>,
         cell: ({ row }) => (
             <div className="flex items-center justify-center">
                 <AttendanceCheckbox team={row.original} />
@@ -301,7 +301,7 @@ export const columns: ColumnDef<MechaturaTeamData>[] = [
     },
     {
         accessorKey: "team_name",
-        header: "Team",
+        header: "Tim",
         cell: ({ row }) => (
             <div className="min-w-0">
                 <p className="font-medium">{row.original.team_name}</p>
@@ -310,7 +310,7 @@ export const columns: ColumnDef<MechaturaTeamData>[] = [
     },
     {
         accessorKey: "competition_type",
-        header: "Category",
+        header: "Kategori",
         cell: ({ row }) => {
             const team = row.original;
             const category = isMechaturaCompetitionType(team.competition_type)
@@ -329,7 +329,7 @@ export const columns: ColumnDef<MechaturaTeamData>[] = [
     },
     {
         accessorKey: "leader",
-        header: "Leader",
+        header: "Ketua",
         cell: ({ row }) => {
             const leader = row.original.leader;
             return (
@@ -349,7 +349,7 @@ export const columns: ColumnDef<MechaturaTeamData>[] = [
     },
     {
         accessorKey: "payment_status",
-        header: "Payment",
+        header: "Pembayaran",
         cell: ({ row }) => {
             const status = getStatus(row.original.payment_status);
             return (
@@ -366,11 +366,11 @@ export const columns: ColumnDef<MechaturaTeamData>[] = [
         header: "Status",
         cell: ({ row }) => {
             const status = row.original.registration_status;
-            if (status === 'approved') return <span className="inline-flex rounded-full px-2.5 py-1 text-xs font-medium bg-emerald-100 text-emerald-800">Approved</span>;
-            if (status === 'rejected') return <span className="inline-flex rounded-full px-2.5 py-1 text-xs font-medium bg-red-100 text-red-800">Rejected</span>;
-            if (status === 'waiting_payment') return <span className="inline-flex rounded-full px-2.5 py-1 text-xs font-medium bg-amber-100 text-amber-800">Waiting Payment</span>;
-            if (status === 'registered') return <span className="inline-flex rounded-full px-2.5 py-1 text-xs font-medium bg-blue-100 text-blue-800">Registered</span>;
-            return <span className="inline-flex rounded-full px-2.5 py-1 text-xs font-medium bg-zinc-100 text-zinc-700">Unknown</span>;
+            if (status === 'approved') return <span className="inline-flex rounded-full px-2.5 py-1 text-xs font-medium bg-emerald-100 text-emerald-800">Disetujui</span>;
+            if (status === 'rejected') return <span className="inline-flex rounded-full px-2.5 py-1 text-xs font-medium bg-red-100 text-red-800">Ditolak</span>;
+            if (status === 'waiting_payment') return <span className="inline-flex rounded-full px-2.5 py-1 text-xs font-medium bg-amber-100 text-amber-800">Menunggu Pembayaran</span>;
+            if (status === 'registered') return <span className="inline-flex rounded-full px-2.5 py-1 text-xs font-medium bg-blue-100 text-blue-800">Terdaftar</span>;
+            return <span className="inline-flex rounded-full px-2.5 py-1 text-xs font-medium bg-zinc-100 text-zinc-700">Tidak diketahui</span>;
         },
     },
     {

@@ -46,7 +46,7 @@ export const clientSeminarFormSchema = z.object({
     .enum(["mahasiswa", "siswa", "dosen", "umum"])
     .refine((v) => v.length > 0, { message: "Pilih status akademika." }),
   identity_confirmed: z.boolean().refine((val) => val === true, {
-    message: "Please confirm if your details are correct for certificate records.",
+    message: "Harap konfirmasi bahwa data Anda sudah benar untuk keperluan sertifikat.",
   }),
   is_same_institution: z.boolean(),
   group_name: z.string().trim().max(120, "Nama tim terlalu panjang.").optional(),

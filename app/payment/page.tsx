@@ -51,7 +51,7 @@ import { AlertCircle } from "lucide-react"
 
 function PaymentErrorState({ title, description, href, cta }: { title: string, description: string, href: string, cta: string }) {
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center px-6 pb-16 pt-32 sm:px-8">
+    <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center px-4 pb-16 pt-32 sm:px-8">
       <ErrorState 
         icon={AlertCircle}
         title={title}
@@ -112,7 +112,7 @@ export default async function PaymentPage({
     : params.order_id;
 
   if (!isRegistrationToken(orderId)) {
-    return <PaymentErrorState title="Payment link is invalid." description="Please return to fill and submit the form again." href="/" cta="Back to Home" />;
+    return <PaymentErrorState title="Tautan pembayaran tidak valid." description="Silakan kembali untuk mengisi dan mengirimkan formulir lagi." href="/" cta="Kembali ke Beranda" />;
   }
 
   const supabase = createAdminClient();
@@ -122,14 +122,14 @@ export default async function PaymentPage({
   });
 
   if (!order) {
-    return <PaymentErrorState title="Payment link is invalid." description="Please return to fill and submit the form again." href="/" cta="Back to Home" />;
+    return <PaymentErrorState title="Tautan pembayaran tidak valid." description="Silakan kembali untuk mengisi dan mengirimkan formulir lagi." href="/" cta="Kembali ke Beranda" />;
   }
 
   if (order.userId) {
     const { user } = await getCachedAuth();
 
     if (order.userId !== user?.id) {
-       return <PaymentErrorState title="Payment link is invalid." description="Please return to fill and submit the form again." href="/" cta="Back to Home" />;
+       return <PaymentErrorState title="Tautan pembayaran tidak valid." description="Silakan kembali untuk mengisi dan mengirimkan formulir lagi." href="/" cta="Kembali ke Beranda" />;
     }
   }
 
@@ -145,10 +145,10 @@ export default async function PaymentPage({
   if (isExpired && !isPaid) {
     return (
       <PaymentErrorState 
-        title="Payment window expired." 
-        description="This Mechatura payment window has expired. Please return to the Mechatura registration page to start a new registration." 
+        title="Batas waktu pembayaran kedaluwarsa." 
+        description="Batas waktu pembayaran Mechatura telah berakhir. Silakan kembali ke halaman pendaftaran Mechatura untuk memulai pendaftaran baru." 
         href="/mechatura/form" 
-        cta="Register again" 
+        cta="Daftar lagi" 
       />
     );
   }
@@ -156,14 +156,14 @@ export default async function PaymentPage({
   const expiresAt = getMechaturaPaymentExpiresAt(order.createdAt);
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center space-y-12 px-6 pb-16 pt-32 sm:px-8">
+    <main className="mx-auto flex min-h-screen w-full max-w-3xl flex-col justify-center space-y-12 px-4 pb-16 pt-32 sm:px-8">
       <section className="space-y-2">
         <h1 className="max-w-xl text-3xl sm:text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-          Complete Payment.
+          Selesaikan Pembayaran.
         </h1>
         <p className="max-w-lg text-sm font-medium leading-relaxed text-neutral-500">
-          Review your {registrationProgramLabels[order.program]} order before
-          continuing to payment.
+          Tinjau pesanan {registrationProgramLabels[order.program]} Anda sebelum
+          melanjutkan ke pembayaran.
         </p>
       </section>
 
@@ -180,7 +180,7 @@ export default async function PaymentPage({
               <CreditCard className="h-5 w-5 text-muted-foreground" />
             </span>
             <div>
-              <h2 className="font-semibold">Order Summary</h2>
+              <h2 className="font-semibold">Ringkasan Pesanan</h2>
               <p className="text-sm text-muted-foreground">{order.title}</p>
             </div>
           </div>
@@ -188,7 +188,7 @@ export default async function PaymentPage({
 
         <div className="divide-y divide-border">
           <div className="p-5">
-            <h3 className="text-sm font-semibold">Registration Details</h3>
+            <h3 className="text-sm font-semibold">Detail Pendaftaran</h3>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               {order.details.map(([label, value]) => (
                 <div key={label}>
@@ -213,11 +213,11 @@ export default async function PaymentPage({
               <span>{formatCurrency(order.amount)}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Admin fee</span>
+              <span className="text-muted-foreground">Biaya admin</span>
               <span>Rp. 0</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Payment status</span>
+              <span className="text-muted-foreground">Status pembayaran</span>
               <span>{paymentStatusLabels[paymentStatus]}</span>
             </div>
           </div>
@@ -234,7 +234,7 @@ export default async function PaymentPage({
       {isPaid ? (
         <Button asChild className="h-11 rounded-xl">
           <Link href={`/payment/success?order_id=${order.externalId}`} prefetch={false}>
-            View receipt
+            Lihat bukti pembayaran
           </Link>
         </Button>
       ) : (

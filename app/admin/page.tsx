@@ -49,11 +49,10 @@ async function AdminDashboardData() {
                 <div className="space-y-3 relative z-10">
                     <div className="space-y-2">
                         <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-balance bg-gradient-to-r from-white via-white/80 to-white/40 bg-clip-text text-transparent">
-                            Futura Overview
+                            Ringkasan Futura
                         </h1>
                         <p className="max-w-xl text-sm md:text-base font-medium leading-relaxed text-muted-foreground/80">
-                            Welcome back, <span className="text-foreground">{user.email}</span>. Monitor registration progress and
-                            payment health from one place.
+                            Selamat datang kembali, <span className="text-foreground">{user.email}</span>. Pantau kemajuan pendaftaran dan kesehatan pembayaran dari satu tempat.
                         </p>
                     </div>
                 </div>
@@ -73,7 +72,7 @@ async function AdminDashboardData() {
                             <Users className="w-24 h-24 text-primary" strokeWidth={1} />
                         </div>
                         <div className="flex items-center justify-between gap-3 relative z-10">
-                            <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">Registrations</p>
+                            <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">Pendaftar</p>
                         </div>
                         <p className="mt-4 text-4xl font-semibold tracking-tight text-foreground relative z-10">
                             {totalRegistrations}
@@ -118,13 +117,13 @@ async function AdminDashboardData() {
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                             <Cpu className="w-24 h-24 text-primary" strokeWidth={1} />
                         </div>
-                        <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors relative z-10">Total Teams</p>
+                        <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors relative z-10">Total Tim</p>
                         <p className="mt-4 text-4xl font-semibold tracking-tight text-foreground relative z-10">
                             {totalMechaturaCount}
                         </p>
                     </div>
                     <div className="group rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-emerald-500/5 hover:border-emerald-500/20 relative overflow-hidden">
-                        <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors relative z-10">Paid Teams</p>
+                        <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors relative z-10">Tim Lunas</p>
                         <p className="mt-4 text-4xl font-semibold tracking-tight text-emerald-400 relative z-10 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]">
                             {mechaturaPaidCount}
                         </p>
@@ -153,13 +152,13 @@ async function AdminDashboardData() {
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
                             <Trophy className="w-24 h-24 text-primary" strokeWidth={1} />
                         </div>
-                        <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors relative z-10">Total Teams</p>
+                        <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors relative z-10">Total Tim</p>
                         <p className="mt-4 text-4xl font-semibold tracking-tight text-muted-foreground relative z-10">
                             -
                         </p>
                     </div>
                     <div className="group rounded-2xl border border-white/5 bg-card/40 backdrop-blur-xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-emerald-500/5 hover:border-emerald-500/20 relative overflow-hidden">
-                        <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors relative z-10">Paid Teams</p>
+                        <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors relative z-10">Tim Lunas</p>
                         <p className="mt-4 text-4xl font-semibold tracking-tight text-muted-foreground relative z-10">
                             -
                         </p>

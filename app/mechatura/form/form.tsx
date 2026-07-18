@@ -191,17 +191,17 @@ export default function MechaturaRegistrationForm() {
       setSubmitError(
         error instanceof Error
           ? error.message
-          : "Registration failed. Please check your data and try again."
+          : "Pendaftaran gagal. Silakan periksa data Anda dan coba lagi."
       );
-      toast.error("Registration failed", {
-        description: error instanceof Error ? error.message : "An unexpected error occurred."
+      toast.error("Pendaftaran gagal", {
+        description: error instanceof Error ? error.message : "Terjadi kesalahan yang tidak terduga."
       });
       return null;
     });
 
     if (data?.payment_url) {
-      toast.success("Registration successful", {
-        description: "Redirecting to payment..."
+      toast.success("Pendaftaran berhasil", {
+        description: "Mengarahkan ke pembayaran..."
       });
       clearFormDraft(MECHATURA_DRAFT_STORAGE_KEY);
 

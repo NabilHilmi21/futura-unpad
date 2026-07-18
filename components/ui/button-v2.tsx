@@ -43,17 +43,17 @@ export function ButtonV2({ text, href, requireAuth }: ButtonV2Props) {
       <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Authentication Required</DialogTitle>
+            <DialogTitle>Otentikasi Diperlukan</DialogTitle>
             <DialogDescription>
-              You need to login or register first to continue.
+              Anda harus masuk atau mendaftar terlebih dahulu untuk melanjutkan.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 mt-4">
             <Button variant="outline" asChild>
-              <Link href={`/register?next=${encodeURIComponent(href)}`}>Create Account</Link>
+              <Link href={`/register?next=${encodeURIComponent(href)}`}>Buat Akun</Link>
             </Button>
             <Button asChild>
-              <Link href={`/login?next=${encodeURIComponent(href)}`}>Log In</Link>
+              <Link href={`/login?next=${encodeURIComponent(href)}`}>Masuk</Link>
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 const statusOptions = [
-    { value: "all", label: "All statuses", icon: UsersRound },
+    { value: "all", label: "Semua status", icon: UsersRound },
     { value: "mahasiswa", label: "Mahasiswa", icon: GraduationCap },
     { value: "siswa", label: "Siswa", icon: BookOpen },
     { value: "dosen", label: "Dosen", icon: Briefcase },
@@ -24,16 +24,16 @@ const statusOptions = [
 ]
 
 const typeOptions = [
-    { value: "all", label: "All types", icon: Map },
-    { value: "individual", label: "Individual", icon: User },
-    { value: "group", label: "Group", icon: Users },
+    { value: "all", label: "Semua tipe", icon: Map },
+    { value: "individual", label: "Individu", icon: User },
+    { value: "group", label: "Grup", icon: Users },
 ]
 
 const attendanceOptions = [
-    { value: "all", label: "All check-ins", icon: UserCheck },
-    { value: "checked-in", label: "Checked in", icon: CheckCircle2 },
-    { value: "pending", label: "Not checked in", icon: XCircle },
-    { value: "partial", label: "Partially checked in", icon: Clock },
+    { value: "all", label: "Semua check-in", icon: UserCheck },
+    { value: "checked-in", label: "Sudah check-in", icon: CheckCircle2 },
+    { value: "pending", label: "Belum check-in", icon: XCircle },
+    { value: "partial", label: "Check-in sebagian", icon: Clock },
 ]
 
 const pageSizeOptions = [10, 20, 30, 40]
@@ -79,15 +79,15 @@ export default function SeminarListClient({
             value: stats.totalRegistrations,
         },
         {
-            label: "Checked in",
+            label: "Check-in",
             value: stats.checkedInAttendees,
         },
         {
-            label: "Group",
+            label: "Grup",
             value: stats.groupRegistrations,
         },
         {
-            label: "Individual",
+            label: "Individu",
             value: stats.individualRegistrations,
         },
     ]
@@ -128,7 +128,7 @@ export default function SeminarListClient({
     if (searchParam?.trim()) {
         activeFilterPills.push({
             key: "search",
-            label: `Search: "${searchParam}"`,
+            label: `Cari: "${searchParam}"`,
             onRemove: () => updateFilter("search", undefined)
         })
     }
@@ -144,7 +144,7 @@ export default function SeminarListClient({
         const label = typeOptions.find(o => o.value === typeFilter)?.label ?? typeFilter
         activeFilterPills.push({
             key: "type",
-            label: `Type: ${label}`,
+            label: `Tipe: ${label}`,
             onRemove: () => updateFilter("type", "all")
         })
     }
@@ -168,13 +168,13 @@ export default function SeminarListClient({
         <div className="mx-auto w-full max-w-7xl space-y-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                    <h2 className="font-semibold text-2xl tracking-tight">Seminar Registrations</h2>
+                    <h2 className="font-semibold text-2xl tracking-tight">Pendaftaran Seminar</h2>
                 </div>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                     <Button variant="outline" className="h-11 rounded-[8px] px-5" asChild>
                         <a href="/api/admin/seminar-registrations/export" download>
                             <Download className="h-4 w-4" />
-                            Export CSV
+                            Ekspor CSV
                         </a>
                     </Button>
                 </div>
@@ -207,10 +207,10 @@ export default function SeminarListClient({
                             key={searchParam ?? "empty"}
                             name="search"
                             defaultValue={searchParam ?? ""}
-                            placeholder="Search registrations..."
+                            placeholder="Cari pendaftaran..."
                             className="h-10 w-full rounded-lg border border-input bg-background px-4 pl-9 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         />
-                        <button type="submit" className="sr-only">Search</button>
+                        <button type="submit" className="sr-only">Cari</button>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
@@ -247,7 +247,7 @@ export default function SeminarListClient({
                                         {(() => {
                                             const opt = typeOptions.find(o => o.value === (typeFilter ?? "all"))
                                             const Icon = opt?.icon || Map
-                                            return <><Icon className="h-4 w-4" />{opt?.label || "Type"}</>
+                                            return <><Icon className="h-4 w-4" />{opt?.label || "Tipe"}</>
                                         })()}
                                     </span>
                                     <ChevronDown className="h-4 w-4 opacity-50" />
@@ -298,7 +298,7 @@ export default function SeminarListClient({
 
                 {activeFilterPills.length > 0 && (
                     <div className="flex items-center gap-2 flex-wrap px-1">
-                        <span className="text-sm text-muted-foreground font-medium mr-1">Active filters:</span>
+                        <span className="text-sm text-muted-foreground font-medium mr-1">Filter aktif:</span>
                         {activeFilterPills.map(pill => (
                             <div key={pill.key} className="flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-foreground shadow-sm">
                                 {pill.label}
@@ -317,7 +317,7 @@ export default function SeminarListClient({
                             onClick={() => router.push(pageSize !== defaultPageSize ? `/admin/seminar?pageSize=${pageSize}` : "/admin/seminar")}
                             className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 ml-2 transition-colors"
                         >
-                            Clear all
+                            Hapus semua
                         </button>
                     </div>
                 )}
@@ -327,8 +327,8 @@ export default function SeminarListClient({
 
             <div className="flex flex-col gap-4 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <p className="font-medium text-foreground hidden sm:block">Rows per page</p>
-                    <p className="font-medium text-foreground sm:hidden">Rows</p>
+                    <p className="font-medium text-foreground hidden sm:block">Baris per halaman</p>
+                    <p className="font-medium text-foreground sm:hidden">Baris</p>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm" className="h-8 w-[70px] justify-between px-2">
@@ -348,12 +348,12 @@ export default function SeminarListClient({
                 
                 <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 lg:gap-8">
                     <div className="text-sm text-muted-foreground font-medium">
-                        Showing {pagination.startItem}-{pagination.endItem} of {pagination.totalItems}
+                        Menampilkan {pagination.startItem}-{pagination.endItem} dari {pagination.totalItems}
                     </div>
                     
                     <div className="flex items-center gap-2">
                         <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-                            Page {pagination.page} of {pagination.totalPages}
+                            Halaman {pagination.page} dari {pagination.totalPages}
                         </div>
                         <div className="flex items-center gap-2">
                             <Button

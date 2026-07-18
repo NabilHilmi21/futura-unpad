@@ -165,9 +165,9 @@ export default async function ProfilePage() {
                 <Ticket className="h-4 w-4 text-foreground" />
               </div>
               <div>
-                <h2 className="font-semibold text-foreground">National Seminar</h2>
+                <h2 className="font-semibold text-foreground">Seminar Nasional</h2>
                 <p className="text-xs text-muted-foreground">
-                  {latestRegistration ? `Registered on ${formatDate(latestRegistration.created_at)}` : "No active registration"}
+                  {latestRegistration ? `Terdaftar pada ${formatDate(latestRegistration.created_at)}` : "Tidak ada pendaftaran aktif"}
                 </p>
               </div>
             </div>
@@ -181,7 +181,7 @@ export default async function ProfilePage() {
                 <div className="hidden lg:flex gap-2">
                   <span className={`inline-flex items-center rounded-md border border-border py-2 px-3 text-xs font-semibold ${checkedInCount > 0 ? 'bg-background text-foreground' : 'bg-muted/30 text-muted-foreground'}`}>
                     {checkedInCount > 0 ? <CheckCircle2 className="w-4 h-4 mr-1.5 text-green-500" /> : <Clock className="w-4 h-4 mr-1.5 text-muted-foreground" />}
-                    {latestRegistration.registration_type === "group" ? `${checkedInCount}/${totalParticipants} Checked In` : (latestRegistration.attended ? "Checked In" : "Waiting to Check In")}
+                    {latestRegistration.registration_type === "group" ? `${checkedInCount}/${totalParticipants} Hadir` : (latestRegistration.attended ? "Hadir" : "Menunggu Kehadiran")}
                   </span>
                 </div>
               </>
@@ -194,21 +194,21 @@ export default async function ProfilePage() {
                 <div className="flex flex-col sm:flex-row gap-6">
                   <div className="grid gap-5 text-sm sm:grid-cols-2 flex-grow">
                     <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Participant Name</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Nama Peserta</p>
                       <p className="font-medium text-foreground">{latestRegistration.nama_lengkap}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Institution</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Asal Institusi</p>
                       <p className="font-medium text-foreground">{latestRegistration.asal_institusi}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Phone Number</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Nomor Telepon</p>
                       <p className="font-medium text-foreground">{latestRegistration.no_telepon}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Status / Fee</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Status / Biaya</p>
                       <p className="font-medium text-foreground">
-                        {academicStatus ? statusLabels[academicStatus] : "-"} <span className="text-muted-foreground font-normal ml-1">(Free)</span>
+                        {academicStatus ? statusLabels[academicStatus] : "-"} <span className="text-muted-foreground font-normal ml-1">(Gratis)</span>
                       </p>
                     </div>
                   </div>
@@ -216,8 +216,8 @@ export default async function ProfilePage() {
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <p className="text-sm font-semibold text-foreground mb-1">Registration Coming Soon</p>
-                <p className="text-sm text-muted-foreground">National Seminar registration is not open yet.</p>
+                <p className="text-sm font-semibold text-foreground mb-1">Pendaftaran Segera Dibuka</p>
+                <p className="text-sm text-muted-foreground">Pendaftaran Seminar Nasional belum dibuka.</p>
               </div>
             )}
           </div>
@@ -231,9 +231,9 @@ export default async function ProfilePage() {
                 <Bot className="h-4 w-4 text-foreground" />
               </div>
               <div>
-                <h2 className="font-semibold text-foreground">Mechatura Competition</h2>
+                <h2 className="font-semibold text-foreground">Kompetisi Mechatura</h2>
                 <p className="text-xs text-muted-foreground">
-                  {latestMechaturaRegistration ? `Registered on ${formatDate(latestMechaturaRegistration.created_at)}` : "No active registration"}
+                  {latestMechaturaRegistration ? `Terdaftar pada ${formatDate(latestMechaturaRegistration.created_at)}` : "Tidak ada pendaftaran aktif"}
                 </p>
               </div>
             </div>
@@ -260,21 +260,21 @@ export default async function ProfilePage() {
                 <div className="flex flex-col sm:flex-row gap-6">
                   <div className="grid gap-5 text-sm sm:grid-cols-2 flex-grow">
                     <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Team Name</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Nama Tim</p>
                       <p className="font-medium text-foreground">{latestMechaturaRegistration.team_name}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Category</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Kategori</p>
                       <p className="font-medium text-foreground">
                         {mechaturaCompetition ? mechaturaCompetitionLabels[mechaturaCompetition] : "-"}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Robot Name</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Nama Robot</p>
                       <p className="font-medium text-foreground">{latestMechaturaRegistration.robot_name}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Team Leader</p>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-1">Ketua Tim</p>
                       <p className="font-medium text-foreground">{mechaturaLeader?.full_name ?? "-"}</p>
                     </div>
                   </div>
@@ -285,7 +285,7 @@ export default async function ProfilePage() {
                   <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                     <Button asChild variant="outline" className="w-full sm:w-auto shrink-0 bg-background hover:bg-muted/50">
                       <Link href={`/payment/success?order_id=${encodeURIComponent(latestMechaturaRegistration.midtrans_order_id)}`}>
-                        View Payment Receipt <ChevronRight className="w-4 h-4 ml-1" />
+                        Lihat Bukti Pembayaran <ChevronRight className="w-4 h-4 ml-1" />
                       </Link>
                     </Button>
                   </div>
@@ -293,7 +293,7 @@ export default async function ProfilePage() {
                   <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                     <Button asChild variant="outline" className="w-full sm:w-auto shrink-0 bg-background hover:bg-muted/50">
                       <Link href={`/payment?order_id=${encodeURIComponent(latestMechaturaRegistration.midtrans_order_id)}`}>
-                        Open Payment Details <ChevronRight className="w-4 h-4 ml-1" />
+                        Buka Detail Pembayaran <ChevronRight className="w-4 h-4 ml-1" />
                       </Link>
                     </Button>
                   </div>
@@ -301,9 +301,9 @@ export default async function ProfilePage() {
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <p className="text-sm text-muted-foreground mb-4">You have not formed a team for the Mechatura Robotics Competition yet.</p>
+                <p className="text-sm text-muted-foreground mb-4">Anda belum membentuk tim untuk Kompetisi Robotika Mechatura.</p>
                 <Button asChild className="h-10 rounded-xl">
-                  <Link href="/mechatura/form" prefetch={true}>Register Team</Link>
+                  <Link href="/mechatura/form" prefetch={true}>Daftar Tim</Link>
                 </Button>
               </div>
             )}
@@ -320,7 +320,7 @@ export default async function ProfilePage() {
               <div>
                 <h2 className="font-semibold text-foreground">Lomba KTI</h2>
                 <p className="text-xs text-muted-foreground">
-                  Scientific Paper Competition
+                  Kompetisi Karya Tulis Ilmiah
                 </p>
               </div>
             </div>
@@ -328,8 +328,8 @@ export default async function ProfilePage() {
 
           <div className="p-6">
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <p className="text-sm font-semibold text-foreground mb-1">Registration Coming Soon</p>
-              <p className="text-sm text-muted-foreground">Lomba KTI registration is not open yet.</p>
+              <p className="text-sm font-semibold text-foreground mb-1">Pendaftaran Segera Dibuka</p>
+              <p className="text-sm text-muted-foreground">Pendaftaran Lomba KTI belum dibuka.</p>
             </div>
           </div>
         </div>

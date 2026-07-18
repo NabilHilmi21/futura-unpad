@@ -33,7 +33,7 @@ import { getCachedAuth } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Futura 2026",
-  description: "by HMTE Universitas Padjadjaran",
+  description: "oleh HMTE Universitas Padjadjaran",
 };
 
 export default async function RootLayout({
@@ -56,7 +56,7 @@ export default async function RootLayout({
 
   return (
     <html
-      lang="en"
+      lang="id"
       className={cn(
         "h-full",
         "antialiased",
