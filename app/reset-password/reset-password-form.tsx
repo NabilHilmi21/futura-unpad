@@ -1,27 +1,33 @@
 "use client"
 
-import Link from "next/link"
 import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "nextjs-toploader/app";
+import { useRouter } from "nextjs-toploader/app"
+import { FormProvider, useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
 import { Button } from "@/components/ui/button"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { useAuth } from "@/components/auth-provider"
+import { Field, FieldError, FieldGroup } from "@/components/ui/field"
 import { useResetPasswordMutation } from "@/hooks/mutations/use-auth-mutations"
-import { createClient } from "@/utils/supabase/client"
-import { ErrorState } from "@/components/ui/error-state"
-import { CheckCircle2 } from "lucide-react"
+import { resetPasswordSchema } from "@/lib/validation"
+import { cn } from "@/lib/utils"
+import { FormTextField } from "@/components/form/form-text-field"
+
+type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>
+
+const getPasswordStrength = (pwd: string) => {
+    if (!pwd) return 0;
+    let score = 0;
+    if (pwd.length > 0) score = 1;
+    if (pwd.length >= 6) score = 2;
+    if (pwd.length >= 8 && /[A-Za-z]/.test(pwd) && /[0-9]/.test(pwd)) score = 3;
+    if (pwd.length >= 8 && /[A-Z]/.test(pwd) && /[a-z]/.test(pwd) && /[0-9]/.test(pwd) && /[^A-Za-z0-9]/.test(pwd)) score = 4;
+    return score;
+};
 
 export default function ResetPasswordForm() {
     const router = useRouter()
-    const searchParams = useSearchParams()
     const resetPassword = useResetPasswordMutation()
-    const [password, setPassword] = useState("")
-    const [confirmPassword, setConfirmPassword] = useState("")
-    const [errorMessage, setErrorMessage] = useState("")
-    const [successMessage, setSuccessMessage] = useState("")
-    const [isComplete, setIsComplete] = useState(false)
+    const [submitError, setSubmitError] = useState("")
 
     useEffect(() => {
         const channel = new window.BroadcastChannel('auth-sync');
@@ -29,29 +35,25 @@ export default function ResetPasswordForm() {
         channel.close();
     }, []);
 
-    const handleUpdatePassword = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setErrorMessage("")
-        setSuccessMessage("")
+    const form = useForm<ResetPasswordFormValues>({
+        resolver: zodResolver(resetPasswordSchema),
+        defaultValues: {
+            password: "",
+            confirmPassword: "",
+        },
+    })
 
-        if (password.length < 8) {
-            setErrorMessage("Password must be at least 8 characters.")
-            return
-        }
+    const { handleSubmit, watch } = form
+    const passwordValue = watch("password")
+    const passwordStrength = getPasswordStrength(passwordValue)
 
-        if (password !== confirmPassword) {
-            setErrorMessage("Passwords do not match.")
-            return
-        }
-
+    const onSubmit = async (values: ResetPasswordFormValues) => {
+        setSubmitError("")
         try {
-            await resetPassword.mutateAsync({
-                password,
-                confirmPassword,
-            })
+            await resetPassword.mutateAsync(values)
             window.location.href = "/login?reset=success";
         } catch (error) {
-            setErrorMessage(error instanceof Error ? error.message : "Password update failed. Please request a new reset link.")
+            setSubmitError(error instanceof Error ? error.message : "Password update failed. Please request a new reset link.")
         }
     }
 
@@ -66,59 +68,77 @@ export default function ResetPasswordForm() {
                 </p>
             </section>
 
-            <form onSubmit={handleUpdatePassword}>
-                <FieldGroup className="gap-5">
-                    <Field className="gap-2">
-                        <FieldLabel htmlFor="password">New password</FieldLabel>
-                        <Input
-                            id="password"
-                            type="password"
-                            className="h-11 rounded-xl"
-                            autoComplete="new-password"
-                            placeholder="Enter a new password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            minLength={8}
-                            disabled={isComplete}
-                            aria-invalid={!!errorMessage}
-                        />
-                    </Field>
+            <FormProvider {...form}>
+                <form onSubmit={handleSubmit(onSubmit)} noValidate>
+                    <FieldGroup className="gap-5">
+                        <Field className="gap-2">
+                            <FormTextField<ResetPasswordFormValues>
+                                name="password"
+                                label="New password"
+                                type="password"
+                                placeholder="Enter a new password"
+                                autoComplete="new-password"
+                            />
 
-                    <Field className="gap-2">
-                        <FieldLabel htmlFor="confirm-password">Confirm password</FieldLabel>
-                        <Input
-                            id="confirm-password"
+                            {/* Password Strength Indicator */}
+                            <div className="mt-1 flex gap-1">
+                                {[1, 2, 3, 4].map((bar) => (
+                                    <div
+                                        key={bar}
+                                        className={cn(
+                                            "h-1 flex-1 rounded-full transition-all duration-300",
+                                            passwordStrength >= bar
+                                                ? passwordStrength === 1
+                                                    ? "bg-destructive"
+                                                    : passwordStrength === 2
+                                                        ? "bg-orange-500"
+                                                        : passwordStrength === 3
+                                                            ? "bg-yellow-500"
+                                                            : "bg-emerald-500"
+                                                : "bg-muted-foreground/20"
+                                        )}
+                                    />
+                                ))}
+                            </div>
+                            {passwordStrength > 0 && (
+                                <p className={cn(
+                                    "text-xs font-medium text-right transition-colors duration-300",
+                                    passwordStrength === 1 ? "text-destructive" :
+                                        passwordStrength === 2 ? "text-orange-500" :
+                                            passwordStrength === 3 ? "text-yellow-500" :
+                                                "text-emerald-500"
+                                )}>
+                                    {passwordStrength === 1 ? "Very Weak" : passwordStrength === 2 ? "Weak" : passwordStrength === 3 ? "Strong" : "Very Strong"}
+                                </p>
+                            )}
+                        </Field>
+
+                        <FormTextField<ResetPasswordFormValues>
+                            name="confirmPassword"
+                            label="Confirm password"
                             type="password"
-                            className="h-11 rounded-xl"
-                            autoComplete="new-password"
                             placeholder="Confirm your new password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            required
-                            minLength={8}
-                            disabled={isComplete}
-                            aria-invalid={!!errorMessage}
+                            autoComplete="new-password"
                         />
-                    </Field>
 
-                    {errorMessage ? (
-                        <p className="rounded-xl border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
-                            {errorMessage}
-                        </p>
-                    ) : null}
+                        {submitError ? (
+                            <p className="rounded-[8px] border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+                                {submitError}
+                            </p>
+                        ) : null}
 
-                    <Field className="gap-3">
-                        <Button
-                            type="submit"
-                            className="h-11 rounded-xl"
-                            disabled={resetPassword.isPending}
-                        >
-                            {resetPassword.isPending ? "Updating password..." : "Update password"}
-                        </Button>
-                    </Field>
-                </FieldGroup>
-            </form>
+                        <Field className="gap-3">
+                            <Button
+                                type="submit"
+                                className="h-11 rounded-[8px]"
+                                disabled={resetPassword.isPending}
+                            >
+                                {resetPassword.isPending ? "Updating password..." : "Update password"}
+                            </Button>
+                        </Field>
+                    </FieldGroup>
+                </form>
+            </FormProvider>
         </main>
     )
 }
