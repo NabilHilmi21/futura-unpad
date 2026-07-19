@@ -87,7 +87,7 @@ export function HeroSection() {
             Futura
           </h1> */}
           <p className="mx-auto max-w-3xl text-lg leading-relaxed text-neutral-600 dark:text-neutral-400 text-balance">
-            Implementasi Energi Cerdas di Era Industri 5.0: Optimalisasi Smart Grid dan Energi Baru Terbarukan
+            Transformasi Teknologi di Era Making Indonesia 4.0: Konvergensi Energi, Konektivitas, dan Industri Nasional Menuju 2030
           </p>
 
           <ButtonV2
