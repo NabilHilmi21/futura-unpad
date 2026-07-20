@@ -99,22 +99,22 @@ const timelineTabs = [
     items: [
       {
         category: "Mechatura",
-        event: "Mulai Registrasi",
-        date: "20 Juli",
+        event: "Registrasi Batch 1",
+        date: "20 Juli - 31 Agustus 2026",
         description:
           "Mulai pendaftaran tim Mechatura dan pengumpulan data peserta.",
       },
       {
         category: "Mechatura",
-        event: "Akhir Registrasi",
-        date: "1 November 2026",
+        event: "Registrasi Batch 2",
+        date: "1 September - 1 Oktober 2026",
         description:
-          "AKhir pendaftaran tim Mechatura dan pengumpulan data peserta.",
+          "Mulai pendaftaran tim Mechatura dan pengumpulan data peserta.",
       },
       {
         category: "Mechatura",
         event: "Technical Meeting",
-        date: "Akan diumumkan",
+        date: "Akan Diumumkan",
         description:
           "Sesi pengarahan teknis untuk peserta sebelum pelaksanaan lomba.",
         status: "Akan Diumumkan",
