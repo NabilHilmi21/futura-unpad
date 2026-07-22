@@ -128,7 +128,7 @@ export async function GET(request: Request) {
     }
 
     const response = NextResponse.redirect(new URL(finalNextUrl, requestUrl.origin))
-
+    
     if (keepSignedIn) {
         response.cookies.set(AUTH_PERSISTENCE_COOKIE, "", {
             ...authPersistenceCookieOptions,
