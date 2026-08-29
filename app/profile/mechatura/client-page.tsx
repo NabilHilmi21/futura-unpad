@@ -233,20 +233,20 @@ function PaymentSection({ team, isLeader, isSubmitted, revisionFields = [] }: an
         </h3>
       </div>
 
-      <div className="flex flex-col items-center justify-center w-full max-w-[240px] mx-auto mb-2">
+      <div className="flex flex-col items-center justify-center w-full max-w-[240px] mx-auto mb-6">
         <Image
-          src="/images/mechatura-qris.png"
+          src="/qris-mechatura.jpeg"
           alt="QRIS Pembayaran Mechatura"
           width={240}
           height={240}
           className="w-full h-auto object-contain mix-blend-multiply dark:mix-blend-normal"
           priority
         />
-        <p className="text-lg text-center font-medium mt-3">
+        {/* <p className="text-lg text-center font-medium mt-3">
           Batch 1: Rp175.000
         </p><p className="text-xs text-muted-foreground text-center font-medium mb-6">
           Bank Digital BCA <br /> a.n. Kenzie Asadel Dhabantha
-        </p>
+        </p> */}
       </div>
 
       {isLeader ? (
