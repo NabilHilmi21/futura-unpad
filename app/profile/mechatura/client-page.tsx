@@ -776,7 +776,7 @@ function TeamMembersSection({ allMembers, isLeader, isSubmitted, revisionFields 
             <div key={m.id} tabIndex={0} className={`group py-3 flex items-start justify-between gap-3 focus:outline-none ${index !== allMembers.length - 1 ? 'border-b border-border/50' : ''}`}>
               <div className="min-w-0 flex-1">
                 <p className="text-foreground font-medium text-sm leading-snug flex items-center gap-1.5 min-w-0">
-                  <span className="truncate" title={m.full_name || m.fallback_name || "Anggota Belum Bernama"}>{m.full_name || m.fallback_name || "Anggota Belum Bernama"}</span>
+                  <span className="truncate" title={m.full_name || m.fallback_name || "Tanpa Nama"}>{m.full_name || m.fallback_name || "Tanpa Nama"}</span>
                   {m.is_leader ? (
                     <span className="inline-flex items-center justify-center text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full font-semibold shrink-0">
                       Ketua
@@ -1034,7 +1034,7 @@ function TeamManagementSection({ team, currentUserMembership, allMembers, isSubm
                   <SelectContent className="mechatura-wrapper bg-card border-border">
                     {otherMembers.map((m: any) => (
                       <SelectItem key={m.id} value={m.user_id} className="text-foreground focus:bg-muted focus:text-foreground">
-                        {m.full_name || m.fallback_name || 'Anggota Belum Bernama'}
+                        {m.full_name || m.fallback_name || 'Tanpa Nama'}
                       </SelectItem>
                     ))}
                   </SelectContent>
