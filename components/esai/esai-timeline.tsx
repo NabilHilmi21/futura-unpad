@@ -17,7 +17,7 @@ const esaiTimelineItems: GrandTimelineItem[] = [
   {
     category: "Lomba Esai",
     event: "Registrasi & Pengumpulan",
-    date: "21 September - 22 Oktober 2026",
+    date: "20 September - 22 Oktober 2026",
     description: "Peserta melakukan registrasi sekaligus mengumpulkan naskah Esai.",
     location: "Online/Daring",
   },

@@ -57,7 +57,7 @@ const timelineTabs = [
       {
         category: "Mechatura",
         event: "Registrasi Batch 1",
-        date: "20 Juli - 31 Agustus 2026",
+        date: "20 Juli - 20 September 2026",
         description:
           "Mulai pendaftaran tim Mechatura dan pengumpulan data peserta.",
         location: "Online/Daring",
@@ -65,7 +65,7 @@ const timelineTabs = [
       {
         category: "Mechatura",
         event: "Registrasi Batch 2",
-        date: "1 September - 1 Oktober 2026",
+        date: "21 September - 1 Oktober 2026",
         description:
           "Mulai pendaftaran tim Mechatura dan pengumpulan data peserta.",
         location: "Online/Daring",
@@ -94,7 +94,7 @@ const timelineTabs = [
       {
         category: "Lomba Esai",
         event: "Registrasi & Pengumpulan",
-        date: "21 September - 22 Oktober 2026",
+        date: "20 September - 22 Oktober 2026",
         description:
           "Peserta melakukan registrasi sekaligus mengumpulkan naskah Esai.",
         location: "Online/Daring",
