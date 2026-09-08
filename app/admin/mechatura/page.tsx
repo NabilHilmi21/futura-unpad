@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
 import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/lib/supabase-admin";
 import { isCompletedPaymentStatus } from "@/lib/payment";
 import { requireAdminOrRedirect } from "@/lib/auth";
 import MechaturaListClient from "./mechatura-list-client";
@@ -129,31 +130,43 @@ async function MechaturaAdminData({
         registrations = clampedPageData ?? [];
     }
 
-    const enrichedRegistrations = await Promise.all(
-        registrations.map(async (team) => {
-            if (!team.mechatura_members) return team;
-            
-            const enrichedMembers = await Promise.all(
-                team.mechatura_members.map(async (m) => {
-                    let fallback_name = null;
-                    if (m.user_id) {
-                        try {
-                            const { data: userData } = await supabase.auth.admin.getUserById(m.user_id);
-                            if (userData?.user) {
-                                const meta = userData.user.user_metadata || {};
-                                fallback_name = meta.display_name || meta.username || userData.user.email || null;
-                            }
-                        } catch (e) {
-                            // ignore error
-                        }
-                    }
-                    return { ...m, fallback_name };
-                })
-            );
-            
-            return { ...team, mechatura_members: enrichedMembers };
-        })
-    );
+    const adminSupabase = createAdminClient();
+    
+    // Batch fetch user data to prevent N+1 auth requests
+    const uniqueUserIds = Array.from(new Set(
+        registrations.flatMap(team => (team.mechatura_members || []).map(m => m.user_id).filter(Boolean))
+    ));
+    
+    const fallbackNamesByUserId = new Map<string, string>();
+    const fetchBatchSize = 10;
+    
+    for (let i = 0; i < uniqueUserIds.length; i += fetchBatchSize) {
+        const batch = uniqueUserIds.slice(i, i + fetchBatchSize);
+        await Promise.all(batch.map(async (userId) => {
+            try {
+                const { data: userData } = await adminSupabase.auth.admin.getUserById(userId as string);
+                if (userData?.user) {
+                    const meta = userData.user.user_metadata || {};
+                    const name = meta.display_name || meta.username || userData.user.email || null;
+                    if (name) fallbackNamesByUserId.set(userId as string, name);
+                }
+            } catch (e) {
+                // ignore
+            }
+        }));
+    }
+
+    const enrichedRegistrations = registrations.map((team) => {
+        if (!team.mechatura_members) return team;
+        const enrichedMembers = team.mechatura_members.map((m) => {
+            let fallback_name = null;
+            if (m.user_id && fallbackNamesByUserId.has(m.user_id)) {
+                fallback_name = fallbackNamesByUserId.get(m.user_id);
+            }
+            return { ...m, fallback_name };
+        });
+        return { ...team, mechatura_members: enrichedMembers };
+    });
 
     const from = (page - 1) * pageSize;
 

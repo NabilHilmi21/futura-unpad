@@ -27,6 +27,7 @@ import {
 } from "@/lib/payment";
 import { formatMechaturaDateTime } from "@/lib/mechatura/format";
 import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/lib/supabase-admin";
 import { TeamDetailActions } from "./team-detail-actions";
 
 export const dynamic = "force-dynamic";
@@ -283,12 +284,13 @@ export default async function MechaturaRegistrationDetails({
         throw new Error(membersError.message);
     }
 
+    const adminSupabase = createAdminClient();
     const enrichedMembers = await Promise.all(
         (members || []).map(async (m) => {
             let fallback_name = null;
             if (m.user_id) {
                 try {
-                    const { data: userData } = await supabase.auth.admin.getUserById(m.user_id);
+                    const { data: userData } = await adminSupabase.auth.admin.getUserById(m.user_id);
                     if (userData?.user) {
                         const meta = userData.user.user_metadata || {};
                         fallback_name = meta.display_name || meta.username || userData.user.email || null;
@@ -500,7 +502,7 @@ export default async function MechaturaRegistrationDetails({
                                             </TableCell>
                                             <TableCell className="px-4 py-3">
                                                 <div className="flex flex-col gap-1.5">
-                                                    <span className="font-medium whitespace-nowrap text-foreground">{member.full_name || member.fallback_name || "Anggota Belum Bernama"}</span>
+                                                    <span className="font-medium whitespace-nowrap text-foreground">{member.full_name || member.fallback_name || "Tanpa Nama"}</span>
                                                     <div>
                                                         <span
                                                             className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-medium ${member.is_leader

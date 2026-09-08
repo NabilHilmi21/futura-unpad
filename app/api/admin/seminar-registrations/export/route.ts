@@ -44,11 +44,11 @@ const escapeCSV = (field: string | null | undefined) => {
     let stringField = String(field)
 
     // Prevent CSV Formula Injection
-    if (/^[=+\-@]/.test(stringField)) {
+    if (/^[=+\-@]/.test(stringField.trimStart())) {
         stringField = "'" + stringField
     }
 
-    if (stringField.includes(",") || stringField.includes('"') || stringField.includes("\n")){
+    if (stringField.includes(",") || stringField.includes('"') || stringField.includes("\n") || stringField.includes("\r")){
         return `"${stringField.replace(/"/g, '""')}"`
     }
     return stringField
@@ -143,7 +143,16 @@ export async function GET() {
     // Convert data to CSV rows
     const rows = allGrouped.map(({ main, members }) => {
         const type = main.registration_type === "grup" || main.registration_type === "group" ? "Group" : "Individual"
-        const date = main.created_at ? new Date(main.created_at).toISOString() : ""
+        let date = "";
+        if (main.created_at) {
+            const d = new Date(main.created_at);
+            date = new Intl.DateTimeFormat("id-ID", {
+                timeZone: "Asia/Jakarta",
+                year: "numeric", month: "2-digit", day: "2-digit",
+                hour: "2-digit", minute: "2-digit", second: "2-digit",
+                hour12: false
+            }).format(d).replace(/\./g, ":").replace(",", "");
+        }
 
         const baseRow = [
             escapeCSV(main.id),
