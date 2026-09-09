@@ -883,7 +883,7 @@ function RobotDocumentsSection({ team, isLeader, isSubmitted, revisionFields = [
                 Baca Juklak Robot Sumo
               </a>
             ) : (
-              <a href="https://drive.google.com/file/d/1krsXNkqPjHsvQmkj9DoSleJ1S-MQD2is/view?usp=sharing" target="_blank" rel="noreferrer" className="text-xs font-semibold text-primary hover:underline underline-offset-4">
+              <a href="https://drive.google.com/file/d/1uPokIED16frMM7HlFlWoTrzti-tcnUh3/view?usp=sharing" target="_blank" rel="noreferrer" className="text-xs font-semibold text-primary hover:underline underline-offset-4">
                 Baca Juklak Robot Transporter
               </a>
             )}

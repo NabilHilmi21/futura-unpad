@@ -16,7 +16,7 @@ export const MECHATURA_DOCUMENTS = {
   juklakTransporter: {
     title: "Juklak Robot Transporter",
     shortTitle: "Juklak Robot Transporter",
-    url: "https://drive.google.com/file/d/1krsXNkqPjHsvQmkj9DoSleJ1S-MQD2is/view?usp=sharing",
+    url: "https://drive.google.com/file/d/1uPokIED16frMM7HlFlWoTrzti-tcnUh3/view?usp=sharing",
     description: "Regulasi lintasan, spesifikasi teknis, mekanisme poin & waktu Transporter.",
   },
 } as const;

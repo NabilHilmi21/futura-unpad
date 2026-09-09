@@ -25,7 +25,7 @@ const categories = [
     description: "Lomba robot manual yang menguji kecepatan dan ketepatan saat memindahkan objek melewati rintangan tanpa fitur otomatis. Penilaian berfokus utama pada efisiensi gerak dan ketepatan waktu pemindahan objek.",
     highlights_title: "Fokus Kompetisi",
     highlights: "Kecepatan, Efisiensi Gerak, dan Ketepatan Pemindahan",
-    juklak_url: "https://drive.google.com/file/d/1krsXNkqPjHsvQmkj9DoSleJ1S-MQD2is/view?usp=sharing",
+    juklak_url: "https://drive.google.com/file/d/1uPokIED16frMM7HlFlWoTrzti-tcnUh3/view?usp=sharing",
     icon: Boxes,
   },
 ];
