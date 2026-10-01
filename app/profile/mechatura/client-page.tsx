@@ -147,7 +147,7 @@ export function MechaturaProfileClient({ currentUserMembership, team, allMembers
           </div>
         )}
         <TeamHeaderSection team={team} currentUserMembership={currentUserMembership} allMembers={allMembers} copyCode={copyCode} copied={copied} isSubmitted={isSubmitted} />
-        <IdentitySection currentUserMembership={currentUserMembership} isSubmitted={isSubmitted} revisionFields={revisionFields} />
+        <IdentitySection currentUserMembership={currentUserMembership} team={team} isSubmitted={isSubmitted} revisionFields={revisionFields} />
         {isLeader && <PembinaSection team={team} isSubmitted={isSubmitted} revisionFields={revisionFields} />}
         <RobotDocumentsSection team={team} isLeader={isLeader} isSubmitted={isSubmitted} revisionFields={revisionFields} />
         <FinalizeSection team={team} isLeader={isLeader} isSubmitted={isSubmitted} allMembers={allMembers} />
@@ -287,8 +287,10 @@ function PaymentSection({ team, isLeader, isSubmitted, revisionFields = [] }: an
   );
 }
 
-function IdentitySection({ currentUserMembership, isSubmitted, revisionFields = [] }: any) {
+function IdentitySection({ currentUserMembership, team, isSubmitted, revisionFields = [] }: any) {
   const [isSaving, setIsSaving] = useState(false);
+  const [isCaptionOpen, setIsCaptionOpen] = useState(false);
+  const [isCaptionCopied, setIsCaptionCopied] = useState(false);
   const [institutionType, setInstitutionType] = useState<InstitutionType>(
     (currentUserMembership.institution_category as InstitutionType) || "SD"
   );
@@ -328,6 +330,44 @@ function IdentitySection({ currentUserMembership, isSubmitted, revisionFields = 
   const institutionValue = identityForm.watch("institution");
   const institutionError = identityForm.formState.errors.institution;
   const isSearchable = SEARCHABLE_TYPES.includes(institutionType);
+
+  const defaultTeamName = team?.name || "[Nama Tim]";
+  const defaultInstitution = institutionValue || currentUserMembership?.institution || "[Universitas/Instansi]";
+
+  const [captionTeamName, setCaptionTeamName] = useState(defaultTeamName);
+  const [captionInstitution, setCaptionInstitution] = useState(defaultInstitution);
+
+  useEffect(() => {
+    if (isCaptionOpen) {
+      setCaptionTeamName(team?.name || "[Nama Tim]");
+      setCaptionInstitution(institutionValue || currentUserMembership?.institution || "[Universitas/Instansi]");
+    }
+  }, [isCaptionOpen, team?.name, institutionValue, currentUserMembership?.institution]);
+
+  const captionText = `🤖⚡ Ready to compete and power on the future at MECHATURA FUTURA 2026!
+
+Halo semuanya! 👋
+Kami ${captionTeamName} dari ${captionInstitution}, dan dengan bangga siap menjadi bagian dari MECHATURA FUTURA 2026! 🚀
+
+Saatnya buktikan kemampuan, adu strategi, dan tuangkan kreativitas dalam dunia robotika! ⚙️🔥
+Bersama tim, kami siap bertanding, berinovasi, dan memberikan yang terbaik di setiap tantangan.
+
+🔥 Let’s compete. Let’s innovate. Let’s power on the future!
+
+See you at MECHATURA FUTURA 2026! 🤖🏆
+
+Stay tuned for more updates!
+Instagram: @futuraunpad.hmte
+
+#FUTURA2026
+#PowerOnTheFuture
+#UniversitasPadjadjaran`;
+
+  const copyCaption = () => {
+    navigator.clipboard.writeText(captionText);
+    setIsCaptionCopied(true);
+    setTimeout(() => setIsCaptionCopied(false), 2000);
+  };
 
   const getLabelWithRevision = (fieldName: string, defaultLabel: string) => {
     const isRevision = revisionFields.includes(`member_${currentUserMembership.id}_${fieldName}`);
@@ -466,12 +506,22 @@ function IdentitySection({ currentUserMembership, isSubmitted, revisionFields = 
 
             {/* ── Row 4: Instagram | Student ID ── */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormTextField<IdentityValues>
-                name="instagram_username"
-                label={getLabelWithRevision("instagram_username", "Link Post Instagram (Twibbon)") as any}
-                type="url"
-                disabled={isSubmitted}
-              />
+              <div className="flex flex-col gap-3">
+                <FormTextField<IdentityValues>
+                  name="instagram_username"
+                  label={getLabelWithRevision("instagram_username", "Link Post Instagram (Twibbon)") as any}
+                  type="url"
+                  disabled={isSubmitted}
+                />
+                <div className="flex flex-wrap items-center gap-2 mt-[-4px]">
+                  <Button type="button" variant="outline" size="sm" asChild>
+                    <a href="/mechatura/twibbon-mechatura.png" download>Download Twibbon</a>
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setIsCaptionOpen(true)}>
+                    Lihat Caption
+                  </Button>
+                </div>
+              </div>
               <FormTextField<IdentityValues>
                 name="student_id_link"
                 label={getLabelWithRevision("student_id_link", "Identitas/KTM (Link Google Drive)") as any}
@@ -489,6 +539,47 @@ function IdentitySection({ currentUserMembership, isSubmitted, revisionFields = 
           </form>
         </FormProvider>
       </div>
+
+      <Dialog open={isCaptionOpen} onOpenChange={setIsCaptionOpen}>
+        <DialogContent className="sm:max-w-[500px] mechatura-wrapper bg-card border-border z-[60]">
+          <DialogHeader>
+            <DialogTitle>Caption Twibbon</DialogTitle>
+            <DialogDescription>
+              Jika nama tim atau instansi kurang tepat, Anda bisa mengubahnya di bawah.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2 mt-1">
+             <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium leading-snug">Nama Tim</label>
+                <Input className="h-11 rounded-[8px] bg-slate-100/50 dark:bg-input/30" value={captionTeamName} onChange={e => setCaptionTeamName(e.target.value)} />
+             </div>
+             <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium leading-snug">Asal Institusi</label>
+                <Input className="h-11 rounded-[8px] bg-slate-100/50 dark:bg-input/30" value={captionInstitution} onChange={e => setCaptionInstitution(e.target.value)} />
+             </div>
+          </div>
+
+          <div className="bg-muted/60 p-4 rounded-md text-sm whitespace-pre-wrap font-mono max-h-[40vh] overflow-y-auto border border-border/50">
+            {captionText}
+          </div>
+          <DialogFooter>
+            <Button type="button" onClick={copyCaption} className="w-full sm:w-auto">
+              {isCaptionCopied ? (
+                <>
+                  <Check className="w-4 h-4 mr-2" />
+                  Tersalin
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4 mr-2" />
+                  Salin Caption
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
