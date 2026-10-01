@@ -872,7 +872,7 @@ function TeamMembersSection({ allMembers, isLeader, isSubmitted, revisionFields 
             "full_name", "institution_category", "institution", "city", "phone_number", "instagram_username", "student_id_link"
           ].some(f => revisionFields.includes(`member_${m.id}_${f}`));
 
-          const isDataComplete = m.full_name && m.institution && m.city && m.phone_number && m.student_id_link;
+          const isDataComplete = m.full_name && m.institution && m.city && m.phone_number && m.instagram_username && m.student_id_link;
           const isActuallyComplete = isDataComplete && !hasRevision;
 
           return (
@@ -1206,7 +1206,7 @@ function FinalizeSection({ team, isLeader, isSubmitted, allMembers }: any) {
   }
 
   const isComplete = team.payment_proof_link && team.robot_document_link && allMembers?.every((m: any) => 
-    m.full_name && m.institution && m.city && m.phone_number && m.student_id_link
+    m.full_name && m.institution && m.city && m.phone_number && m.instagram_username && m.student_id_link
   );
 
   const handleFinalize = async () => {

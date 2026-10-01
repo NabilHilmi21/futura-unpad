@@ -541,7 +541,7 @@ export default async function MechaturaRegistrationDetails({
                                                     )}
                                                     {member.instagram_username && (
                                                         <a
-                                                            href={`https://instagram.com/${member.instagram_username.replace("@", "")}`}
+                                                            href={member.instagram_username}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="inline-flex items-center text-blue-600 hover:underline text-sm font-medium"
