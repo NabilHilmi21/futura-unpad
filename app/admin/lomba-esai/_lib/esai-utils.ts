@@ -44,6 +44,8 @@ export type AdminEsaiRegistration = {
     id: string;
     user_id: string;
     full_name: string | null;
+    fallback_name?: string | null;
+    fallback_email?: string | null;
     institution: string | null;
     institution_category: string | null;
     city: string | null;

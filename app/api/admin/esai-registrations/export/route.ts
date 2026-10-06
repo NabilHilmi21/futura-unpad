@@ -40,10 +40,37 @@ export async function GET(request: Request) {
         
         let csvContent = selectedCols.join(",") + "\n";
 
+        // Fetch user metadata for missing names/emails
+        const uniqueUserIds = Array.from(new Set(data.map((r: any) => r.user_id).filter(Boolean)));
+        const fallbackInfoByUserId = new Map<string, { name: string; email: string }>();
+        for (let i = 0; i < uniqueUserIds.length; i += 10) {
+            const batch = uniqueUserIds.slice(i, i + 10);
+            await Promise.all(batch.map(async (userId) => {
+                try {
+                    const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId as string);
+                    if (userData?.user) {
+                        const meta = userData.user.user_metadata || {};
+                        const name = meta.display_name?.trim() || meta.username?.trim() || userData.user.email?.trim() || meta.full_name?.trim() || meta.name?.trim() || "";
+                        fallbackInfoByUserId.set(userId as string, { name, email: userData.user.email || "" });
+                    }
+                } catch (e) {
+                    // ignore
+                }
+            }));
+        }
+
         // CSV Rows
         data.forEach(row => {
+            const fallback = fallbackInfoByUserId.get(row.user_id);
             const rowData = selectedCols.map(col => {
-                let val = row[col] ?? "";
+                let val = row[col];
+                if (col === "full_name" && (!val || !String(val).trim())) {
+                    val = fallback?.name || "";
+                }
+                if (col === "email" && (!val || !String(val).trim())) {
+                    val = fallback?.email || "";
+                }
+                val = val ?? "";
                 if (typeof val === "string") {
                     val = val.replace(/"/g, '""');
                     if (val.includes(",") || val.includes('"') || val.includes("\n")) {
