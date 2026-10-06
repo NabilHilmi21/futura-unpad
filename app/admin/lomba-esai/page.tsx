@@ -93,9 +93,12 @@ async function EsaiAdminData({
         registrations = clampedPageData ?? [];
     }
 
-    // Batch fetch user data to prevent N+1 auth requests
+    // Batch fetch user data only for registrations missing full_name or email
     const uniqueUserIds = Array.from(new Set(
-        registrations.map(r => r.user_id).filter(Boolean)
+        registrations
+            .filter(r => !r.full_name?.trim() || !r.email?.trim())
+            .map(r => r.user_id)
+            .filter(Boolean)
     ));
 
     const fallbackInfoByUserId = new Map<string, { name: string | null; email: string | null }>();

@@ -60,7 +60,9 @@ export type AdminEsaiRegistration = {
 
 export const toSearchPattern = (search: string) => {
     if (!search) return null;
-    const pattern = search.replace(/[%_]/g, "\\$&"); // Escape LIKE wildcards
+    const pattern = search
+        .replace(/\\/g, "\\\\") // Escape backslashes first
+        .replace(/[%_]/g, "\\$&"); // Escape LIKE wildcards
     const safePattern = pattern.replace(/"/g, '\\"'); // Escape double quotes for PostgREST
     return `"%${safePattern}%"`; // Wrap in double quotes
 };
