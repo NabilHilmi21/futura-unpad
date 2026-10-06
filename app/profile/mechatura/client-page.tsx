@@ -973,7 +973,7 @@ function RobotDocumentsSection({ team, isLeader, isSubmitted, revisionFields = [
               <span className="font-medium text-foreground">Sumo:</span> Dimensi maks 20x20 cm. Berat maks 3 kg.
             </li>
             <li>
-              <span className="font-medium text-foreground">Transporter:</span> Dimensi maks 20x20 cm (P x L). Tinggi & berat bebas. Dilarang menggunakan magnet.
+              <span className="font-medium text-foreground">Transporter:</span> Dimensi maks 25x25 cm (P x L). Tinggi & berat bebas. Dilarang menggunakan magnet.
             </li>
           </ul>
 
