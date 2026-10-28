@@ -18,19 +18,51 @@ import { mechaturaCompetitionLabels, paymentStatusLabels } from "@/lib/payment";
 
 export const dynamic = "force-dynamic";
 
+type MechaturaTeamExport = {
+    id: string;
+    join_code: string;
+    name: string;
+    category: unknown;
+    pembina_name?: string | null;
+    pembina_phone?: string | null;
+    payment_status?: string | null;
+    submission_status?: string | null;
+    admin_approval_status?: string | null;
+    created_at?: string | null;
+};
+
+type MechaturaMemberExport = {
+    id: string;
+    team_id: string;
+    user_id?: string | null;
+    full_name?: string | null;
+    phone_number?: string | null;
+    email?: string;
+    institution?: string | null;
+    city?: string | null;
+    instagram_username?: string | null;
+    is_leader?: boolean;
+};
+
 const escapeCSV = (field: string | number | null | undefined) => {
     if (field === null || field === undefined) return "";
-    let stringField = String(field);
-    if (/^[=+\-@\t\r|]/.test(stringField.trimStart())) {
+    // Remove null bytes to prevent parser truncation attacks
+    let stringField = String(field).replace(/\0/g, "");
+    
+    // Prevent CSV Formula Injection (OWASP mitigation)
+    const isFormula = /^[=+\-@\t\r|]/.test(stringField.trimStart());
+    if (isFormula) {
         stringField = "'" + stringField;
     }
-    if (stringField.includes(",") || stringField.includes('"') || stringField.includes("\n") || stringField.includes("\r")) {
+
+    // Always quote fields that contain special characters or formula characters
+    if (isFormula || stringField.includes(",") || stringField.includes(";") || stringField.includes('"') || stringField.includes("\n") || stringField.includes("\r")) {
         return `"${stringField.replace(/"/g, '""')}"`;
     }
     return stringField;
 };
 
-const formatPaymentStatus = (status: string | null) =>
+const formatPaymentStatus = (status: string | null | undefined) =>
     status && status in paymentStatusLabels
         ? paymentStatusLabels[status as keyof typeof paymentStatusLabels]
         : paymentStatusLabels.unpaid;
@@ -50,18 +82,19 @@ const chunk = <T,>(items: T[], size: number) => {
 };
 
 export async function GET(request: NextRequest) {
-    const limit = await rateLimit(request, {
+    try {
+        const { user, adminAccess } = await requireAdmin();
+        if (!user || !adminAccess) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+    const limit = await rateLimit(user.id, {
         key: "admin-export-mechatura",
         limit: 15,
         windowSeconds: 60,
     });
     if (!limit.success) {
         return rateLimited(limit.retryAfter);
-    }
-
-    const { user, adminAccess } = await requireAdmin();
-    if (!user || !adminAccess) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -81,17 +114,17 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient();
 
-    // First fetch members that match search pattern
+    // First fetch members that match search pattern (no artificial limit for exports)
     const { data: memberSearchMatches } = searchPattern
         ? await supabase
             .from("mechatura_members")
             .select("team_id")
             .or(`full_name.ilike.${searchPattern},phone_number.ilike.${searchPattern}`)
-            .limit(100)
             .returns<Array<{ team_id: string }>>()
         : { data: [] };
 
-    const memberTeamIds = Array.from(new Set((memberSearchMatches ?? []).map((m) => m.team_id)));
+    // Limit matched member team IDs to prevent PostgREST 414 URI Too Long errors
+    const memberTeamIds = Array.from(new Set((memberSearchMatches ?? []).map((m) => m.team_id))).slice(0, 100);
     const filterOptions = {
         categoryFilter,
         paymentFilter,
@@ -107,7 +140,7 @@ export async function GET(request: NextRequest) {
         filterOptions
     );
 
-    const registrations: any[] = [];
+    const registrations: MechaturaTeamExport[] = [];
     const batchSize = 1000;
     let offset = 0;
 
@@ -125,7 +158,11 @@ export async function GET(request: NextRequest) {
         offset += batchSize;
     }
 
-    const members: any[] = [];
+    if (registrations.length === 0) {
+        return new NextResponse("Tidak ada data untuk diekspor", { status: 404 });
+    }
+
+    const members: MechaturaMemberExport[] = [];
     const teamIds = registrations.map((r) => r.id);
     const memberChunkSize = 150;
 
@@ -143,44 +180,87 @@ export async function GET(request: NextRequest) {
         members.push(...(data ?? []));
     }
 
-    // Attempt to fetch emails and fallback names for members
-    const uniqueUserIds = Array.from(new Set(members.map(m => m.user_id).filter(Boolean)));
+    const validMechaturaCols = new Set([
+        "id", "join_code", "name", "category", "pembina_name", "pembina_phone",
+        "leader_name", "leader_phone", "leader_email", "leader_institution", "leader_city", "leader_instagram",
+        "payment_status", "submission_status", "approval_status", "created_at",
+        "member_name", "member_phone", "member_email", "member_institution", "member_city", "member_instagram"
+    ]);
+    const colsParam = searchParams.get("cols");
+    const rawRequestedCols = colsParam ? colsParam.split(",").map(c => c.trim()).filter(Boolean) : [];
+    const validRequestedCols = rawRequestedCols.filter(col => validMechaturaCols.has(col));
+    const requestedCols = validRequestedCols.length > 0 ? validRequestedCols : [];
+    const shouldExport = (col: string) => requestedCols.length === 0 || requestedCols.includes(col);
+
+    // Attempt to fetch emails and fallback names for members only when requested
+    const needsEmailOrName = shouldExport("leader_email") || shouldExport("member_email") || 
+                             shouldExport("leader_name") || shouldExport("member_name");
+
+    const uniqueUserIds = needsEmailOrName
+        ? Array.from(new Set(members.map(m => m.user_id).filter((id): id is string => Boolean(id))))
+        : [];
     const emailsByUserId = new Map<string, string>();
     const namesByUserId = new Map<string, string>();
-    const adminSupabase = createAdminClient();
-    let page = 1;
-    let hasNextPage = true;
-    while (hasNextPage) {
-        const { data, error } = await adminSupabase.auth.admin.listUsers({ page, perPage: 1000 });
-        if (error || !data.users.length) break;
-        for (const u of data.users) {
-            if (uniqueUserIds.includes(u.id)) {
-                if (u.email) emailsByUserId.set(u.id, u.email);
-                const meta = u.user_metadata || {};
-                const name = meta.display_name?.trim() || 
-                             meta.username?.trim() || 
-                             u.email?.trim() || 
-                             meta.full_name?.trim() || 
-                             meta.name?.trim() || 
-                             "";
-                if (name) namesByUserId.set(u.id, name);
+
+    if (needsEmailOrName && uniqueUserIds.length > 0) {
+        const adminSupabase = createAdminClient();
+        const neededSet = new Set(uniqueUserIds);
+
+        if (uniqueUserIds.length <= 5) {
+            // For small batches, query directly in parallel
+            await Promise.all(
+                uniqueUserIds.map(async (userId) => {
+                    try {
+                        const { data } = await adminSupabase.auth.admin.getUserById(userId);
+                        if (data?.user) {
+                            if (data.user.email) emailsByUserId.set(userId, data.user.email);
+                            const meta = data.user.user_metadata || {};
+                            const name = meta.display_name?.trim() || 
+                                         meta.username?.trim() || 
+                                         data.user.email?.trim() || 
+                                         meta.full_name?.trim() || 
+                                         meta.name?.trim() || 
+                                         "";
+                            if (name) namesByUserId.set(userId, name);
+                        }
+                    } catch {
+                        // ignore
+                    }
+                })
+            );
+        } else {
+            // Paginated scan with early exit when all needed IDs are found
+            let page = 1;
+            let hasNextPage = true;
+            while (hasNextPage && emailsByUserId.size < neededSet.size && page <= 10) {
+                const { data, error } = await adminSupabase.auth.admin.listUsers({ page, perPage: 1000 });
+                if (error || !data?.users?.length) break;
+                for (const u of data.users) {
+                    if (neededSet.has(u.id)) {
+                        if (u.email) emailsByUserId.set(u.id, u.email);
+                        const meta = u.user_metadata || {};
+                        const name = meta.display_name?.trim() || 
+                                     meta.username?.trim() || 
+                                     u.email?.trim() || 
+                                     meta.full_name?.trim() || 
+                                     meta.name?.trim() || 
+                                     "";
+                        if (name) namesByUserId.set(u.id, name);
+                    }
+                }
+                hasNextPage = data.users.length === 1000;
+                page++;
             }
         }
-        hasNextPage = data.users.length === 1000;
-        page++;
     }
 
-    const membersByTeamId = new Map<string, any[]>();
+    const membersByTeamId = new Map<string, MechaturaMemberExport[]>();
     for (const member of members) {
         member.email = member.user_id ? (emailsByUserId.get(member.user_id) || "") : "";
         const teamMembers = membersByTeamId.get(member.team_id) ?? [];
         teamMembers.push(member);
         membersByTeamId.set(member.team_id, teamMembers);
     }
-
-    const colsParam = searchParams.get("cols");
-    const requestedCols = colsParam ? colsParam.split(",") : [];
-    const shouldExport = (col: string) => requestedCols.length === 0 || requestedCols.includes(col);
 
     const headers: string[] = [];
     if (shouldExport("id")) headers.push("ID");
@@ -262,12 +342,19 @@ export async function GET(request: NextRequest) {
         return [...baseRow, ...memberCols].join(",");
     });
 
-    const csvContent = [headers.join(","), ...rows].join("\n");
+    const csvContent = [headers.join(","), ...rows].join("\r\n");
 
-    return new NextResponse("\uFEFF" + csvContent, {
-        headers: {
-            "Content-Type": "text/csv; charset=utf-8",
-            "Content-Disposition": `attachment; filename="mechatura-teams-${new Date().toISOString().split("T")[0]}.csv"`,
-        },
-    });
+        return new NextResponse("\uFEFF" + csvContent, {
+            headers: {
+                "Content-Type": "text/csv; charset=utf-8",
+                "Content-Disposition": `attachment; filename="mechatura-teams-${new Date().toISOString().split("T")[0]}.csv"`,
+            },
+        });
+    } catch (error) {
+        console.error("Export Mechatura error:", error);
+        return NextResponse.json(
+            { error: "Terjadi kesalahan saat mengekspor data" },
+            { status: 500 }
+        );
+    }
 }

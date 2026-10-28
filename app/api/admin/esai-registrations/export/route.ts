@@ -3,17 +3,30 @@ import { createAdminClient } from "@/lib/supabase-admin";
 import { requireAdmin } from "@/lib/auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { rateLimited } from "@/lib/http";
-import { toSearchPattern, subthemeMap, type EsaiSubthemeFilter } from "@/app/admin/lomba-esai/_lib/esai-utils";
+import {
+    toSearchPattern,
+    subthemeMap,
+    submissionFilters,
+    categoryFilters,
+    subthemeFilters,
+    normalizeFilter
+} from "@/app/admin/lomba-esai/_lib/esai-utils";
 
 export const dynamic = "force-dynamic";
 
 const escapeCSV = (field: string | number | null | undefined) => {
     if (field === null || field === undefined) return "";
-    let stringField = String(field);
-    if (/^[=+\-@\t\r|]/.test(stringField.trimStart())) {
+    // Remove null bytes to prevent parser truncation attacks
+    let stringField = String(field).replace(/\0/g, "");
+    
+    // Prevent CSV Formula Injection (OWASP mitigation)
+    const isFormula = /^[=+\-@\t\r|]/.test(stringField.trimStart());
+    if (isFormula) {
         stringField = "'" + stringField;
     }
-    if (stringField.includes(",") || stringField.includes('"') || stringField.includes("\n") || stringField.includes("\r")) {
+
+    // Always quote fields that contain special characters or formula characters
+    if (isFormula || stringField.includes(",") || stringField.includes(";") || stringField.includes('"') || stringField.includes("\n") || stringField.includes("\r")) {
         return `"${stringField.replace(/"/g, '""')}"`;
     }
     return stringField;
@@ -59,7 +72,10 @@ const COLUMN_HEADERS: Record<string, string> = {
 
 export async function GET(request: Request) {
     try {
-        const limit = await rateLimit(request, {
+        const { user, adminAccess } = await requireAdmin(); 
+        if (!user || !adminAccess) return new NextResponse("Unauthorized", { status: 401 });
+
+        const limit = await rateLimit(user.id, {
             key: "admin-export-esai",
             limit: 15,
             windowSeconds: 60,
@@ -69,9 +85,6 @@ export async function GET(request: Request) {
             return rateLimited(limit.retryAfter);
         }
 
-        const { adminAccess } = await requireAdmin(); 
-        if (!adminAccess) return new NextResponse("Unauthorized", { status: 401 });
-
         const { searchParams } = new URL(request.url);
         
         const search = searchParams.get("search");
@@ -80,22 +93,26 @@ export async function GET(request: Request) {
         const subtheme = searchParams.get("subtheme");
         const cols = searchParams.get("cols");
 
+        const submissionFilter = normalizeFilter(submission ?? undefined, submissionFilters, "all");
+        const categoryFilter = normalizeFilter(category ?? undefined, categoryFilters, "all");
+        const subthemeFilter = normalizeFilter(subtheme ?? undefined, subthemeFilters, "all");
+
         const supabaseAdmin = createAdminClient();
         const searchPattern = search ? toSearchPattern(search.trim()) : null;
 
         const buildQuery = () => {
             let query = supabaseAdmin.from("esai_registrations").select("*");
 
-            if (submission && submission !== "all") {
-                query = query.eq("submission_status", submission);
+            if (submissionFilter !== "all") {
+                query = query.eq("submission_status", submissionFilter);
             }
 
-            if (category && category !== "all") {
-                query = query.eq("institution_category", category);
+            if (categoryFilter !== "all") {
+                query = query.eq("institution_category", categoryFilter);
             }
 
-            if (subtheme && subtheme !== "all") {
-                const mapped = subthemeMap[subtheme as Exclude<EsaiSubthemeFilter, "all">];
+            if (subthemeFilter !== "all") {
+                const mapped = subthemeMap[subthemeFilter];
                 if (mapped) {
                     query = query.ilike("sub_theme", mapped.pattern);
                 }
@@ -108,7 +125,7 @@ export async function GET(request: Request) {
             return query;
         };
 
-        const registrations: any[] = [];
+        const registrations: Record<string, unknown>[] = [];
         const batchSize = 1000;
         let offset = 0;
 
@@ -134,14 +151,14 @@ export async function GET(request: Request) {
         const selectedCols = cols ? cols.split(",").filter(c => allAvailableCols.includes(c)) : allAvailableCols;
         const validSelectedCols = selectedCols.length > 0 ? selectedCols : allAvailableCols;
 
-        let csvContent = validSelectedCols.map(col => escapeCSV(COLUMN_HEADERS[col] || col)).join(",") + "\n";
+        let csvContent = validSelectedCols.map(col => escapeCSV(COLUMN_HEADERS[col] || col)).join(",") + "\r\n";
 
         // Fetch user metadata only for participants missing names or emails
         const usersNeedingFallback = Array.from(
             new Set(
                 registrations
-                    .filter((r) => !r.full_name?.trim() || !r.email?.trim())
-                    .map((r) => r.user_id)
+                    .filter((r) => !String(r.full_name ?? "").trim() || !String(r.email ?? "").trim())
+                    .map((r) => String(r.user_id || ""))
                     .filter(Boolean)
             )
         );
@@ -175,7 +192,7 @@ export async function GET(request: Request) {
                 const neededSet = new Set(usersNeedingFallback);
                 let authPage = 1;
                 let hasNextAuthPage = true;
-                while (hasNextAuthPage && fallbackInfoByUserId.size < neededSet.size) {
+                while (hasNextAuthPage && fallbackInfoByUserId.size < neededSet.size && authPage <= 10) {
                     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.listUsers({
                         page: authPage,
                         perPage: 1000,
@@ -201,9 +218,9 @@ export async function GET(request: Request) {
 
         // CSV Rows
         registrations.forEach(row => {
-            const fallback = fallbackInfoByUserId.get(row.user_id);
+            const fallback = fallbackInfoByUserId.get(String(row.user_id || ""));
             const rowData = validSelectedCols.map(col => {
-                let val = row[col];
+                let val: string | number | null | undefined = row[col] as string | number | null | undefined;
                 if (col === "full_name") {
                     const trimmed = val ? String(val).trim() : "";
                     val = trimmed || fallback?.name || "Tanpa Nama";
@@ -211,7 +228,7 @@ export async function GET(request: Request) {
                     const trimmed = val ? String(val).trim() : "";
                     val = trimmed || fallback?.email || "";
                 } else if (col === "created_at" && val) {
-                    const d = new Date(val);
+                    const d = new Date(String(val));
                     val = new Intl.DateTimeFormat("id-ID", {
                         timeZone: "Asia/Jakarta",
                         year: "numeric", month: "2-digit", day: "2-digit",
@@ -228,7 +245,7 @@ export async function GET(request: Request) {
 
                 return escapeCSV(val);
             });
-            csvContent += rowData.join(",") + "\n";
+            csvContent += rowData.join(",") + "\r\n";
         });
 
         return new NextResponse("\uFEFF" + csvContent, {

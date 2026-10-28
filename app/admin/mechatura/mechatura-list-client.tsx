@@ -1,28 +1,24 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ExportCsvDialog, type ActiveFilterBadge } from "@/components/admin/export-csv-dialog";
 import { mechaturaCompetitionLabels } from "@/lib/payment";
-import { ChevronDown, ChevronLeft, ChevronRight, Download, Search, X, LayoutGrid, Swords, Truck, Send, FileText } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Download, Search, X, LayoutGrid, Swords, Truck } from "lucide-react";
 import { useRouter } from "nextjs-toploader/app";
 import Link from "next/link";
 import { DataTable } from "./data-table";
@@ -77,7 +73,6 @@ const COLUMN_LABELS: Record<string, string> = {
     name: "Nama Tim",
     category: "Kategori",
     created_at: "Waktu Daftar",
-    payment_status: "Status Pembayaran",
     submission_status: "Status Pengumpulan",
     approval_status: "Verifikasi Admin",
     pembina_name: "Nama Pembina",
@@ -103,7 +98,7 @@ const COLUMN_GROUPS = [
     },
     {
         title: "Status",
-        keys: ["payment_status", "submission_status", "approval_status"]
+        keys: ["submission_status", "approval_status"]
     },
     {
         title: "Pembina",
@@ -119,6 +114,19 @@ const COLUMN_GROUPS = [
     }
 ];
 
+const ESSENTIAL_MECHATURA_COLS = [
+    "id",
+    "join_code",
+    "name",
+    "category",
+    "submission_status",
+    "approval_status",
+    "leader_name",
+    "leader_phone",
+    "leader_email",
+    "leader_institution",
+];
+
 export default function MechaturaListClient({
     registrations,
     searchParam,
@@ -132,45 +140,140 @@ export default function MechaturaListClient({
     stats,
 }: MechaturaListClientProps) {
     const router = useRouter();
-    const hasActiveFilters =
+    const hasActiveExportFilters =
         !!searchParam?.trim() || categoryFilter !== "all" || submissionFilter !== "all" || approvalFilter !== "all" || batchFilter !== "all";
 
     const [exportOpen, setExportOpen] = useState(false);
-    const [exportFilterMode, setExportFilterMode] = useState<"all" | "filtered">(hasActiveFilters ? "filtered" : "all");
-
     const [localFilters, setLocalFilters] = useState({
         category: categoryFilter,
-        payment: paymentFilter,
         submission: submissionFilter,
         approval: approvalFilter,
         batch: batchFilter,
     });
 
-    const defaultCols = {
-        id: true,
-        join_code: true,
-        name: true,
-        category: true,
-        created_at: true,
-        payment_status: true,
-        submission_status: true,
-        approval_status: true,
-        pembina_name: true,
-        pembina_phone: true,
-        leader_name: true,
-        leader_phone: true,
-        leader_email: true,
-        leader_institution: true,
-        leader_city: true,
-        leader_instagram: true,
-        member_name: true,
-        member_phone: true,
-        member_email: true,
-        member_institution: true,
-        member_city: true,
-        member_instagram: true,
-    };
-    const [cols, setCols] = useState(defaultCols);
+    const exportFilterBadges = useMemo<ActiveFilterBadge[]>(() => {
+        const badges: ActiveFilterBadge[] = [];
+        if (searchParam?.trim()) {
+            badges.push({ key: "search", label: "Pencarian", value: `"${searchParam.trim()}"` });
+        }
+        if (localFilters.category !== "all") {
+            const cat = categoryOptions.find(o => o.value === localFilters.category)?.label || localFilters.category;
+            badges.push({ key: "category", label: "Kategori", value: cat });
+        }
+        if (localFilters.submission !== "all") {
+            const sub = localFilters.submission === "draft" ? "Draft" : "Submitted";
+            badges.push({ key: "submission", label: "Pengumpulan", value: sub });
+        }
+        if (localFilters.approval !== "all") {
+            const app = localFilters.approval === "pending" ? "Menunggu" : localFilters.approval === "approved" ? "Disetujui" : "Revisi";
+            badges.push({ key: "approval", label: "Verifikasi", value: app });
+        }
+        if (localFilters.batch !== "all") {
+            badges.push({ key: "batch", label: "Batch", value: localFilters.batch === "batch1" ? "Batch 1" : "Batch 2" });
+        }
+        return badges;
+    }, [searchParam, localFilters]);
+
+    const buildExportParams = useCallback((mode: "all" | "filtered") => {
+        if (mode === "all") {
+            return {};
+        }
+        return {
+            search: searchParam?.trim(),
+            category: localFilters.category,
+            submission: localFilters.submission,
+            approval: localFilters.approval,
+            batch: localFilters.batch,
+        };
+    }, [searchParam, localFilters]);
+
+    const mechaturaFilterControls = useMemo(() => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+            <div className="space-y-1.5">
+                <Label htmlFor="filter-mechatura-category" className="text-xs sm:text-sm font-medium text-foreground">
+                    Kategori
+                </Label>
+                <Select
+                    value={localFilters.category}
+                    onValueChange={(val) => setLocalFilters((f) => ({ ...f, category: val as MechaturaCategoryFilter }))}
+                >
+                    <SelectTrigger id="filter-mechatura-category" size="sm" className="w-full bg-background border-border text-sm text-foreground h-9">
+                        <SelectValue placeholder="Pilih kategori" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" className="bg-popover border-border text-popover-foreground z-[70]">
+                        {categoryOptions.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value} className="text-sm">
+                                {opt.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div className="space-y-1.5">
+                <Label htmlFor="filter-mechatura-submission" className="text-xs sm:text-sm font-medium text-foreground">
+                    Pengumpulan
+                </Label>
+                <Select
+                    value={localFilters.submission}
+                    onValueChange={(val) => setLocalFilters((f) => ({ ...f, submission: val as MechaturaSubmissionFilter }))}
+                >
+                    <SelectTrigger id="filter-mechatura-submission" size="sm" className="w-full bg-background border-border text-sm text-foreground h-9">
+                        <SelectValue placeholder="Pilih status" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" className="bg-popover border-border text-popover-foreground z-[70]">
+                        {submissionFilters.map((s) => (
+                            <SelectItem key={s} value={s} className="text-sm">
+                                {s === "all" ? "Semua Submit" : s === "draft" ? "Draft" : "Submitted"}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div className="space-y-1.5">
+                <Label htmlFor="filter-mechatura-approval" className="text-xs sm:text-sm font-medium text-foreground">
+                    Verifikasi
+                </Label>
+                <Select
+                    value={localFilters.approval}
+                    onValueChange={(val) => setLocalFilters((f) => ({ ...f, approval: val as MechaturaApprovalFilter }))}
+                >
+                    <SelectTrigger id="filter-mechatura-approval" size="sm" className="w-full bg-background border-border text-sm text-foreground h-9">
+                        <SelectValue placeholder="Pilih verifikasi" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" className="bg-popover border-border text-popover-foreground z-[70]">
+                        {approvalFilters.map((a) => (
+                            <SelectItem key={a} value={a} className="text-sm">
+                                {a === "all" ? "Semua Approval" : a === "pending" ? "Menunggu" : a === "approved" ? "Disetujui" : "Revisi"}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div className="space-y-1.5">
+                <Label htmlFor="filter-mechatura-batch" className="text-xs sm:text-sm font-medium text-foreground">
+                    Batch
+                </Label>
+                <Select
+                    value={localFilters.batch}
+                    onValueChange={(val) => setLocalFilters((f) => ({ ...f, batch: val as MechaturaBatchFilter }))}
+                >
+                    <SelectTrigger id="filter-mechatura-batch" size="sm" className="w-full bg-background border-border text-sm text-foreground h-9">
+                        <SelectValue placeholder="Pilih batch" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" className="bg-popover border-border text-popover-foreground z-[70]">
+                        {batchFilters.map((b) => (
+                            <SelectItem key={b} value={b} className="text-sm">
+                                {b === "all" ? "Semua Batch" : b === "batch1" ? "Batch 1" : "Batch 2"}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+        </div>
+    ), [localFilters]);
 
     const metrics = [
         { label: "Total tim", value: stats.totalTeams },
@@ -270,248 +373,41 @@ export default function MechaturaListClient({
                         </h1>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Dialog open={exportOpen} onOpenChange={(open) => {
-                            setExportOpen(open);
-                            if (open) {
-                                setExportFilterMode(hasActiveFilters ? "filtered" : "all");
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
                                 setLocalFilters({
                                     category: categoryFilter,
-                                    payment: paymentFilter,
                                     submission: submissionFilter,
                                     approval: approvalFilter,
                                     batch: batchFilter,
                                 });
-                                setCols(defaultCols);
-                            }
-                        }}>
-                            <DialogTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-8 sm:h-9 px-3 sm:px-3.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800 text-xs sm:text-sm font-medium transition-colors shrink-0"
-                                >
-                                    <Download className="h-3.5 w-3.5 mr-1.5" />
-                                    Ekspor CSV
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                                <DialogHeader>
-                                    <DialogTitle>Ekspor Data Tim Mechatura</DialogTitle>
-                                    <DialogDescription>
-                                        Pilih apakah Anda ingin mengekspor seluruh data tim atau menggunakan filter. Anda juga dapat memilih kolom yang ingin diekspor.
-                                    </DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-6 py-4">
-                                <div className="flex flex-col gap-2">
-                                    <Label className="text-base font-semibold">Opsi Data</Label>
-                                    <RadioGroup 
-                                        className="flex flex-col gap-3 mt-2" 
-                                        value={exportFilterMode} 
-                                        onValueChange={(val) => setExportFilterMode(val as "all" | "filtered")}
-                                    >
-                                        <div className="flex items-start gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
-                                            <RadioGroupItem value="all" id="mode-all" className="mt-1" />
-                                            <label htmlFor="mode-all" className="flex flex-col cursor-pointer flex-1">
-                                                <span className="font-medium">Semua Data</span>
-                                                <span className="text-sm text-muted-foreground">Ekspor seluruh tim terdaftar tanpa filter.</span>
-                                            </label>
-                                        </div>
-                                        <div className="flex items-start gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
-                                            <RadioGroupItem value="filtered" id="mode-filtered" className="mt-1" />
-                                            <label htmlFor="mode-filtered" className="flex flex-col cursor-pointer flex-1">
-                                                <span className="font-medium">Gunakan Filter</span>
-                                                <span className="text-sm text-muted-foreground">Ekspor hanya tim yang sesuai dengan pencarian dan filter.</span>
-                                            </label>
-                                        </div>
-                                    </RadioGroup>
-                                </div>
+                                setExportOpen(true);
+                            }}
+                            className="h-8 sm:h-9 px-3 sm:px-3.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800 text-xs sm:text-sm font-medium transition-colors shrink-0"
+                        >
+                            <Download className="h-3.5 w-3.5 mr-1.5" />
+                            Ekspor CSV
+                        </Button>
 
-                                {exportFilterMode === "filtered" && (
-                                    <div className="flex flex-col gap-3 p-4 border rounded-lg bg-muted/20">
-                                        <Label className="font-semibold mb-1">Filter Ekspor</Label>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div className="flex flex-col gap-1.5">
-                                                <Label className="text-xs">Kategori</Label>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button type="button" variant="outline" className="h-10 w-full justify-between rounded-lg bg-background">
-                                                            <span className="truncate flex items-center gap-2">
-                                                                {(() => {
-                                                                    const ActiveIcon = categoryOptions.find(o => o.value === localFilters.category)?.icon || LayoutGrid;
-                                                                    return <ActiveIcon className="h-4 w-4" />;
-                                                                })()}
-                                                                {categoryOptions.find(o => o.value === localFilters.category)?.label || "Semua Kategori"}
-                                                            </span>
-                                                            <ChevronDown className="h-4 w-4 opacity-50" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent className="w-[200px]">
-                                                        {categoryOptions.map((option) => (
-                                                            <DropdownMenuItem key={option.value} onSelect={() => setLocalFilters(f => ({ ...f, category: option.value as MechaturaCategoryFilter }))}>
-                                                                <option.icon className="mr-2 h-4 w-4" />
-                                                                {option.label}
-                                                            </DropdownMenuItem>
-                                                        ))}
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </div>
-                                            
-                                            <div className="flex flex-col gap-1.5">
-                                                <Label className="text-xs">Pengumpulan</Label>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button type="button" variant="outline" className="h-10 w-full justify-between rounded-lg bg-background">
-                                                            <span className="truncate flex items-center gap-2">
-                                                                <Send className="h-4 w-4" />
-                                                                {localFilters.submission === "all" ? "Semua Submit" : 
-                                                                 localFilters.submission === "draft" ? "Draft" : 
-                                                                 localFilters.submission === "submitted" ? "Submitted" :
-                                                                 (localFilters.submission as string).charAt(0).toUpperCase() + (localFilters.submission as string).slice(1)}
-                                                            </span>
-                                                            <ChevronDown className="h-4 w-4 opacity-50" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent className="w-[200px]">
-                                                        {submissionFilters.map((status) => (
-                                                            <DropdownMenuItem key={status} onSelect={() => setLocalFilters(f => ({ ...f, submission: status as MechaturaSubmissionFilter }))}>
-                                                                <Send className="mr-2 h-4 w-4" />
-                                                                {status === "all" ? "Semua Submit" : 
-                                                                 status === "draft" ? "Draft" : 
-                                                                 status === "submitted" ? "Submitted" :
-                                                                 (status as string).charAt(0).toUpperCase() + (status as string).slice(1)}
-                                                            </DropdownMenuItem>
-                                                        ))}
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </div>
-
-                                            <div className="flex flex-col gap-1.5">
-                                                <Label className="text-xs">Verifikasi Admin</Label>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button type="button" variant="outline" className="h-10 w-full justify-between rounded-lg bg-background">
-                                                            <span className="truncate flex items-center gap-2">
-                                                                <FileText className="h-4 w-4" />
-                                                                {localFilters.approval === "all" ? "Semua Approval" : 
-                                                                 localFilters.approval === "pending" ? "Menunggu" : 
-                                                                 localFilters.approval === "approved" ? "Disetujui" :
-                                                                 localFilters.approval === "revision" ? "Revisi" :
-                                                                 (localFilters.approval as string).charAt(0).toUpperCase() + (localFilters.approval as string).slice(1)}
-                                                            </span>
-                                                            <ChevronDown className="h-4 w-4 opacity-50" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent className="w-[200px]">
-                                                        {approvalFilters.map((status) => (
-                                                            <DropdownMenuItem key={status} onSelect={() => setLocalFilters(f => ({ ...f, approval: status as MechaturaApprovalFilter }))}>
-                                                                <FileText className="mr-2 h-4 w-4" />
-                                                                {status === "all" ? "Semua Approval" : 
-                                                                 status === "pending" ? "Menunggu" : 
-                                                                 status === "approved" ? "Disetujui" :
-                                                                 status === "revision" ? "Revisi" :
-                                                                 (status as string).charAt(0).toUpperCase() + (status as string).slice(1)}
-                                                            </DropdownMenuItem>
-                                                        ))}
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </div>
-                                            <div className="flex flex-col gap-1.5">
-                                                <Label className="text-xs">Batch</Label>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button type="button" variant="outline" className="h-10 w-full justify-between rounded-lg bg-background">
-                                                            <span className="truncate flex items-center gap-2">
-                                                                <FileText className="h-4 w-4" />
-                                                                {localFilters.batch === "all" ? "Semua Batch" : 
-                                                                 localFilters.batch === "batch1" ? "Batch 1" : "Batch 2"}
-                                                            </span>
-                                                            <ChevronDown className="h-4 w-4 opacity-50" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent className="w-[200px]">
-                                                        {batchFilters.map((status) => (
-                                                            <DropdownMenuItem key={status} onSelect={() => setLocalFilters(f => ({ ...f, batch: status as MechaturaBatchFilter }))}>
-                                                                <FileText className="mr-2 h-4 w-4" />
-                                                                {status === "all" ? "Semua Batch" : 
-                                                                 status === "batch1" ? "Batch 1" : "Batch 2"}
-                                                            </DropdownMenuItem>
-                                                        ))}
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="flex flex-col gap-3">
-                                    <div className="flex items-center justify-between">
-                                        <Label className="text-base font-semibold">Pilih Kolom Ekspor</Label>
-                                        <Button variant="ghost" size="sm" onClick={() => {
-                                            const allSelected = Object.values(cols).every(Boolean);
-                                            const newVal = Object.fromEntries(Object.keys(cols).map(k => [k, !allSelected])) as typeof cols;
-                                            setCols(newVal);
-                                        }}>
-                                            {Object.values(cols).every(Boolean) ? "Batalkan Semua" : "Pilih Semua"}
-                                        </Button>
-                                    </div>
-                                    <div className="flex flex-col gap-6 p-4 border rounded-lg bg-muted/10">
-                                        {COLUMN_GROUPS.map(group => (
-                                            <div key={group.title} className="flex flex-col gap-2">
-                                                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{group.title}</Label>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-4">
-                                                    {group.keys.map((key) => {
-                                                        const k = key as keyof typeof cols;
-                                                        return (
-                                                            <div key={k} className="flex items-center space-x-2">
-                                                                <Checkbox 
-                                                                    id={`col-${k}`} 
-                                                                    checked={cols[k]} 
-                                                                    onCheckedChange={(checked) => setCols(c => ({ ...c, [k]: !!checked }))}
-                                                                />
-                                                                <label
-                                                                    htmlFor={`col-${k}`}
-                                                                    className="text-sm font-medium leading-none cursor-pointer text-foreground/90 hover:text-foreground transition-colors"
-                                                                >
-                                                                    {COLUMN_LABELS[k] || k.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                                                </label>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button variant="outline" onClick={() => setExportOpen(false)}>Batal</Button>
-                                <Button onClick={() => {
-                                    const query = new URLSearchParams();
-                                    if (exportFilterMode === "filtered") {
-                                        if (searchParam?.trim()) query.set("search", searchParam.trim());
-                                        if (localFilters.category !== "all") query.set("category", localFilters.category);
-                                        if (localFilters.submission !== "all") query.set("submission", localFilters.submission);
-                                        if (localFilters.approval !== "all") query.set("approval", localFilters.approval);
-                                        if (localFilters.batch !== "all") query.set("batch", localFilters.batch);
-                                    }
-                                    
-                                    const selectedCols = Object.entries(cols).filter(([_, v]) => v).map(([k]) => k);
-                                    if (selectedCols.length > 0 && selectedCols.length < Object.keys(cols).length) {
-                                        query.set("cols", selectedCols.join(","));
-                                    } else if (selectedCols.length === 0) {
-                                        query.set("cols", "id");
-                                    }
-
-                                    const queryString = query.toString();
-                                    const url = `/api/admin/mechatura-registrations/export${queryString ? `?${queryString}` : ""}`;
-                                    window.open(url, "_blank");
-                                    setExportOpen(false);
-                                }}>
-                                    Unduh CSV
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
+                        <ExportCsvDialog
+                            open={exportOpen}
+                            onOpenChange={setExportOpen}
+                            title="Ekspor Data Tim Mechatura"
+                            description="Pilih data tim dan kolom yang ingin diekspor."
+                            entityName="Tim"
+                            totalCount={stats.totalTeams}
+                            hasActiveFilters={hasActiveExportFilters}
+                            activeFilterBadges={exportFilterBadges}
+                            columnLabels={COLUMN_LABELS}
+                            columnGroups={COLUMN_GROUPS}
+                            essentialColumns={ESSENTIAL_MECHATURA_COLS}
+                            exportEndpoint="/api/admin/mechatura-registrations/export"
+                            filenamePrefix="mechatura-teams"
+                            buildExportParams={buildExportParams}
+                            filterControlContent={mechaturaFilterControls}
+                        />
                 </div>
             </div>
 

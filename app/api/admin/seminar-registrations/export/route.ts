@@ -41,35 +41,38 @@ const exportColumns = [
     "is_main_contact",
 ].join(",")
 
-const escapeCSV = (field: string | null | undefined) => {
-    if (!field) return ""
-    let stringField = String(field)
+const escapeCSV = (field: string | number | null | undefined) => {
+    if (field === null || field === undefined) return ""
+    // Remove null bytes to prevent parser truncation attacks
+    let stringField = String(field).replace(/\0/g, "")
 
-    // Prevent CSV Formula Injection
-    if (/^[=+\-@\t\r|]/.test(stringField.trimStart())) {
+    // Prevent CSV Formula Injection (OWASP mitigation)
+    const isFormula = /^[=+\-@\t\r|]/.test(stringField.trimStart())
+    if (isFormula) {
         stringField = "'" + stringField
     }
 
-    if (stringField.includes(",") || stringField.includes('"') || stringField.includes("\n") || stringField.includes("\r")){
+    // Always quote fields that contain special characters or formula characters
+    if (isFormula || stringField.includes(",") || stringField.includes('"') || stringField.includes("\n") || stringField.includes("\r")){
         return `"${stringField.replace(/"/g, '""')}"`
     }
     return stringField
 }
 
-export async function GET(request: Request) {
-    const limit = await rateLimit(request, {
+export async function GET() {
+    const { user, adminAccess } = await requireAdmin()
+
+    if (!user || !adminAccess) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const limit = await rateLimit(user.id, {
         key: "admin-export-seminar",
         limit: 15,
         windowSeconds: 60,
     });
     if (!limit.success) {
         return rateLimited(limit.retryAfter);
-    }
-
-    const { user, adminAccess } = await requireAdmin()
-
-    if (!user || !adminAccess) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const supabase = createAdminClient()
@@ -121,13 +124,19 @@ export async function GET(request: Request) {
         }
     }
 
-    // Combine them into a single array, filtering out any anomalous groups without a maincontact
+    // Combine them into a single array with fallback for groups missing explicit main contact
     const allGrouped: CompleteGroupedRegistration[] = [
         ...individualRegistrations,
         ...Array.from(groupedRegistrations.values()),
-    ].flatMap((group) =>
-        group.main ? [{ main: group.main, members: group.members }] : []
-    )
+    ].flatMap((group) => {
+        if (group.main) {
+            return [{ main: group.main, members: group.members }];
+        }
+        if (group.members.length > 0) {
+            return [{ main: group.members[0], members: group.members.slice(1) }];
+        }
+        return [];
+    });
 
     let maxMembers = 0;
     allGrouped.forEach(group => {
@@ -186,7 +195,7 @@ export async function GET(request: Request) {
         return [...baseRow, ...memberCols].join(",")
     })
 
-    const csvContent = [headers.join(","), ...rows].join("\n")
+    const csvContent = [headers.join(","), ...rows].join("\r\n")
 
     return new NextResponse("\uFEFF" + csvContent, {
         headers: {

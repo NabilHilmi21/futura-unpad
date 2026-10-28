@@ -1,30 +1,27 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronDown, ChevronLeft, ChevronRight, Download, Search, X, Send, School, BookOpen, GraduationCap, Layers, Cpu, Leaf, Lightbulb } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Download, Search, X, School, BookOpen, GraduationCap, Layers, Cpu, Leaf, Lightbulb } from "lucide-react";
 import { useRouter } from "nextjs-toploader/app";
 import Link from "next/link";
 import { DataTable } from "./data-table";
 import { getColumns } from "./participants";
+import { ExportCsvDialog, type ActiveFilterBadge } from "@/components/admin/export-csv-dialog";
 import {
     buildEsaiPageHref,
     pageSizeOptions,
@@ -69,7 +66,6 @@ const COLUMN_LABELS: Record<string, string> = {
     essay_paper_url: "File Naskah Esai",
     identity_card_url: "File KTM / Identitas",
     instagram_twibbon_url: "File Bukti Twibbon",
-    payment_proof_url: "File Bukti Pembayaran",
 };
 
 const COLUMN_GROUPS = [
@@ -91,7 +87,7 @@ const COLUMN_GROUPS = [
     },
     {
         title: "Dokumen Lampiran",
-        keys: ["essay_paper_url", "identity_card_url", "instagram_twibbon_url", "payment_proof_url"]
+        keys: ["essay_paper_url", "identity_card_url", "instagram_twibbon_url"]
     }
 ];
 
@@ -109,6 +105,19 @@ const subthemeOptions = [
     { value: "talenta", label: "Talenta & Ekosistem", icon: Lightbulb },
 ] as const;
 
+const ESSENTIAL_ESAI_COLS = [
+    "id",
+    "full_name",
+    "institution",
+    "institution_category",
+    "city",
+    "email",
+    "phone_number",
+    "paper_title",
+    "sub_theme",
+    "submission_status",
+];
+
 export default function EsaiListClient({
     registrations,
     searchParam,
@@ -124,33 +133,114 @@ export default function EsaiListClient({
         !!searchParam?.trim() || submissionFilter !== "all" || categoryFilter !== "all" || subthemeFilter !== "all";
 
     const [exportOpen, setExportOpen] = useState(false);
-    const [exportFilterMode, setExportFilterMode] = useState<"all" | "filtered">(hasActiveFilters ? "filtered" : "all");
-
     const [localFilters, setLocalFilters] = useState({
         submission: submissionFilter,
         category: categoryFilter,
         subtheme: subthemeFilter,
     });
 
-    const defaultCols: Record<string, boolean> = {
-        id: true,
-        user_id: true,
-        created_at: true,
-        full_name: true,
-        institution: true,
-        institution_category: true,
-        city: true,
-        email: true,
-        phone_number: true,
-        paper_title: true,
-        sub_theme: true,
-        submission_status: true,
-        essay_paper_url: true,
-        identity_card_url: true,
-        instagram_twibbon_url: true,
-        payment_proof_url: true,
-    };
-    const [cols, setCols] = useState(defaultCols);
+    const exportFilterBadges = useMemo<ActiveFilterBadge[]>(() => {
+        const badges: ActiveFilterBadge[] = [];
+        if (searchParam?.trim()) {
+            badges.push({ key: "search", label: "Pencarian", value: `"${searchParam.trim()}"` });
+        }
+        if (localFilters.submission !== "all") {
+            const label = localFilters.submission === "draft" ? "Draft" : 
+                          localFilters.submission === "submitted" ? "Submitted" : 
+                          localFilters.submission === "approved" ? "Disetujui" : localFilters.submission;
+            badges.push({ key: "submission", label: "Status Dokumen", value: label });
+        }
+        if (localFilters.category !== "all") {
+            const cat = categoryOptions.find(c => c.value === localFilters.category);
+            badges.push({ key: "category", label: "Jenjang", value: cat?.label ?? localFilters.category });
+        }
+        if (localFilters.subtheme !== "all") {
+            const st = subthemeOptions.find(s => s.value === localFilters.subtheme);
+            badges.push({ key: "subtheme", label: "Subtema", value: st?.label ?? localFilters.subtheme });
+        }
+        return badges;
+    }, [searchParam, localFilters]);
+
+    const buildExportParams = useCallback((mode: "all" | "filtered") => {
+        if (mode === "all") {
+            return {};
+        }
+        return {
+            search: searchParam?.trim(),
+            submission: localFilters.submission,
+            category: localFilters.category,
+            subtheme: localFilters.subtheme,
+        };
+    }, [searchParam, localFilters]);
+
+    const esaiFilterControls = useMemo(() => (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+            <div className="space-y-1.5">
+                <Label htmlFor="filter-esai-submission" className="text-xs sm:text-sm font-medium text-foreground">
+                    Status Dokumen
+                </Label>
+                <Select
+                    value={localFilters.submission}
+                    onValueChange={(val) => setLocalFilters((f) => ({ ...f, submission: val as EsaiSubmissionFilter }))}
+                >
+                    <SelectTrigger id="filter-esai-submission" size="sm" className="w-full bg-background border-border text-sm text-foreground h-9">
+                        <SelectValue placeholder="Pilih status" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" className="bg-popover border-border text-popover-foreground z-[70]">
+                        {submissionFilters.map((status) => (
+                            <SelectItem key={status} value={status} className="text-sm">
+                                {status === "all" ? "Semua Status" : 
+                                 status === "draft" ? "Draft" : 
+                                 status === "submitted" ? "Submitted" : "Disetujui"}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div className="space-y-1.5">
+                <Label htmlFor="filter-esai-category" className="text-xs sm:text-sm font-medium text-foreground">
+                    Jenjang
+                </Label>
+                <Select
+                    value={localFilters.category}
+                    onValueChange={(val) => setLocalFilters((f) => ({ ...f, category: val as EsaiCategoryFilter }))}
+                >
+                    <SelectTrigger id="filter-esai-category" size="sm" className="w-full bg-background border-border text-sm text-foreground h-9">
+                        <SelectValue placeholder="Pilih jenjang" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" className="bg-popover border-border text-popover-foreground z-[70]">
+                        {categoryOptions.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value} className="text-sm">
+                                {opt.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div className="space-y-1.5">
+                <Label htmlFor="filter-esai-subtheme" className="text-xs sm:text-sm font-medium text-foreground">
+                    Subtema
+                </Label>
+                <Select
+                    value={localFilters.subtheme}
+                    onValueChange={(val) => setLocalFilters((f) => ({ ...f, subtheme: val as EsaiSubthemeFilter }))}
+                >
+                    <SelectTrigger id="filter-esai-subtheme" size="sm" className="w-full bg-background border-border text-sm text-foreground h-9">
+                        <SelectValue placeholder="Pilih subtema" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" className="bg-popover border-border text-popover-foreground z-[70]">
+                        {subthemeOptions.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value} className="text-sm">
+                                {opt.label}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+        </div>
+    ), [localFilters]);
 
     const metrics = [
         { label: "Total Peserta", value: stats.totalParticipants },
@@ -236,217 +326,40 @@ export default function EsaiListClient({
                         </h1>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Dialog open={exportOpen} onOpenChange={(open) => {
-                            setExportOpen(open);
-                            if (open) {
-                                setExportFilterMode(hasActiveFilters ? "filtered" : "all");
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
                                 setLocalFilters({
                                     submission: submissionFilter,
                                     category: categoryFilter,
                                     subtheme: subthemeFilter,
                                 });
-                            }
-                        }}>
-                            <DialogTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-8 sm:h-9 px-3 sm:px-3.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800 text-xs sm:text-sm font-medium transition-colors shrink-0"
-                                >
-                                    <Download className="h-3.5 w-3.5 mr-1.5" />
-                                    Ekspor CSV
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-                                <DialogHeader>
-                                    <DialogTitle>Ekspor Data Lomba Esai</DialogTitle>
-                                    <DialogDescription>
-                                        Pilih apakah Anda ingin mengekspor seluruh data peserta atau menggunakan filter. Anda juga dapat memilih kolom yang ingin diekspor.
-                                    </DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-6 py-4">
-                                <div className="flex flex-col gap-2">
-                                    <Label className="text-base font-semibold">Opsi Data</Label>
-                                    <RadioGroup 
-                                        className="flex flex-col gap-3 mt-2" 
-                                        value={exportFilterMode} 
-                                        onValueChange={(val) => setExportFilterMode(val as "all" | "filtered")}
-                                    >
-                                        <div className="flex items-start gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
-                                            <RadioGroupItem value="all" id="mode-all" className="mt-1" />
-                                            <label htmlFor="mode-all" className="flex flex-col cursor-pointer flex-1">
-                                                <span className="font-medium">Semua Data</span>
-                                                <span className="text-sm text-muted-foreground">Ekspor seluruh peserta terdaftar tanpa filter.</span>
-                                            </label>
-                                        </div>
-                                        <div className="flex items-start gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
-                                            <RadioGroupItem value="filtered" id="mode-filtered" className="mt-1" />
-                                            <label htmlFor="mode-filtered" className="flex flex-col cursor-pointer flex-1">
-                                                <span className="font-medium">Gunakan Filter</span>
-                                                <span className="text-sm text-muted-foreground">Ekspor hanya peserta yang sesuai dengan pencarian dan filter.</span>
-                                            </label>
-                                        </div>
-                                    </RadioGroup>
-                                </div>
+                                setExportOpen(true);
+                            }}
+                            className="h-8 sm:h-9 px-3 sm:px-3.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800 text-xs sm:text-sm font-medium transition-colors shrink-0"
+                        >
+                            <Download className="h-3.5 w-3.5 mr-1.5" />
+                            Ekspor CSV
+                        </Button>
 
-                                {exportFilterMode === "filtered" && (
-                                    <div className="flex flex-col gap-3 p-4 border rounded-lg bg-muted/20">
-                                        <Label className="font-semibold mb-1">Filter Ekspor</Label>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div className="flex flex-col gap-1.5">
-                                                <Label className="text-xs">Status Dokumen</Label>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button type="button" variant="outline" className="h-10 w-full justify-between rounded-lg bg-background">
-                                                            <span className="truncate flex items-center gap-2">
-                                                                <Send className="h-4 w-4" />
-                                                                {localFilters.submission === "all" ? "Semua Status" : 
-                                                                 localFilters.submission === "draft" ? "Draft" : 
-                                                                 localFilters.submission === "submitted" ? "Submitted" :
-                                                                 localFilters.submission === "approved" ? "Disetujui" :
-                                                                 (localFilters.submission as string).charAt(0).toUpperCase() + (localFilters.submission as string).slice(1)}
-                                                            </span>
-                                                            <ChevronDown className="h-4 w-4 opacity-50" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent className="w-[200px]">
-                                                        {submissionFilters.map((status) => (
-                                                            <DropdownMenuItem key={status} onSelect={() => setLocalFilters(f => ({ ...f, submission: status as EsaiSubmissionFilter }))}>
-                                                                <Send className="mr-2 h-4 w-4" />
-                                                                {status === "all" ? "Semua Status" : 
-                                                                 status === "draft" ? "Draft" : 
-                                                                 status === "submitted" ? "Submitted" :
-                                                                 status === "approved" ? "Disetujui" :
-                                                                 (status as string).charAt(0).toUpperCase() + (status as string).slice(1)}
-                                                            </DropdownMenuItem>
-                                                        ))}
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </div>
-
-                                            <div className="flex flex-col gap-1.5">
-                                                <Label className="text-xs">Kategori Instansi / Jenjang</Label>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button type="button" variant="outline" className="h-10 w-full justify-between rounded-lg bg-background">
-                                                            <span className="truncate flex items-center gap-2">
-                                                                {(() => {
-                                                                    const opt = categoryOptions.find(o => o.value === localFilters.category);
-                                                                    const Icon = opt?.icon || School;
-                                                                    return <><Icon className="h-4 w-4" />{opt?.label || "Semua Jenjang"}</>;
-                                                                })()}
-                                                            </span>
-                                                            <ChevronDown className="h-4 w-4 opacity-50" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent className="w-[200px]">
-                                                        {categoryOptions.map((option) => (
-                                                            <DropdownMenuItem key={option.value} onSelect={() => setLocalFilters(f => ({ ...f, category: option.value as EsaiCategoryFilter }))}>
-                                                                <option.icon className="mr-2 h-4 w-4" />
-                                                                {option.label}
-                                                            </DropdownMenuItem>
-                                                        ))}
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </div>
-
-                                            <div className="flex flex-col gap-1.5 sm:col-span-2">
-                                                <Label className="text-xs">Subtema Esai</Label>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button type="button" variant="outline" className="h-10 w-full justify-between rounded-lg bg-background">
-                                                            <span className="truncate flex items-center gap-2">
-                                                                {(() => {
-                                                                    const opt = subthemeOptions.find(o => o.value === localFilters.subtheme);
-                                                                    const Icon = opt?.icon || Layers;
-                                                                    return <><Icon className="h-4 w-4" />{opt?.label || "Semua Subtema"}</>;
-                                                                })()}
-                                                            </span>
-                                                            <ChevronDown className="h-4 w-4 opacity-50" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent className="w-[280px]">
-                                                        {subthemeOptions.map((option) => (
-                                                            <DropdownMenuItem key={option.value} onSelect={() => setLocalFilters(f => ({ ...f, subtheme: option.value as EsaiSubthemeFilter }))}>
-                                                                <option.icon className="mr-2 h-4 w-4" />
-                                                                {option.label}
-                                                            </DropdownMenuItem>
-                                                        ))}
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="flex flex-col gap-3">
-                                    <div className="flex items-center justify-between">
-                                        <Label className="text-base font-semibold">Pilih Kolom Ekspor</Label>
-                                        <Button variant="ghost" size="sm" onClick={() => {
-                                            const allSelected = Object.values(cols).every(Boolean);
-                                            const newVal = Object.fromEntries(Object.keys(cols).map(k => [k, !allSelected])) as typeof cols;
-                                            setCols(newVal);
-                                        }}>
-                                            {Object.values(cols).every(Boolean) ? "Batalkan Semua" : "Pilih Semua"}
-                                        </Button>
-                                    </div>
-                                    <div className="flex flex-col gap-6 p-4 border rounded-lg bg-muted/10">
-                                        {COLUMN_GROUPS.map(group => (
-                                            <div key={group.title} className="flex flex-col gap-2">
-                                                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{group.title}</Label>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-3 gap-x-4">
-                                                    {group.keys.map((key) => {
-                                                        const k = key as keyof typeof cols;
-                                                        return (
-                                                            <div key={k} className="flex items-center space-x-2">
-                                                                <Checkbox 
-                                                                    id={`col-${k}`} 
-                                                                    checked={cols[k]} 
-                                                                    onCheckedChange={(checked) => setCols(c => ({ ...c, [k]: !!checked }))}
-                                                                />
-                                                                <label
-                                                                    htmlFor={`col-${k}`}
-                                                                    className="text-sm font-medium leading-none cursor-pointer text-foreground/90 hover:text-foreground transition-colors"
-                                                                >
-                                                                    {COLUMN_LABELS[k] || k.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                                                </label>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button variant="outline" onClick={() => setExportOpen(false)}>Batal</Button>
-                                <Button onClick={() => {
-                                    const query = new URLSearchParams();
-                                    if (exportFilterMode === "filtered") {
-                                        if (searchParam?.trim()) query.set("search", searchParam.trim());
-                                        if (localFilters.submission !== "all") query.set("submission", localFilters.submission);
-                                        if (localFilters.category !== "all") query.set("category", localFilters.category);
-                                        if (localFilters.subtheme !== "all") query.set("subtheme", localFilters.subtheme);
-                                    }
-                                    
-                                    const selectedCols = Object.entries(cols).filter(([_, v]) => v).map(([k]) => k);
-                                    if (selectedCols.length > 0 && selectedCols.length < Object.keys(cols).length) {
-                                        query.set("cols", selectedCols.join(","));
-                                    } else if (selectedCols.length === 0) {
-                                        query.set("cols", "id");
-                                    }
-
-                                    const queryString = query.toString();
-                                    const url = `/api/admin/esai-registrations/export${queryString ? `?${queryString}` : ""}`;
-                                    window.open(url, "_blank");
-                                    setExportOpen(false);
-                                }}>
-                                    Unduh CSV
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
+                        <ExportCsvDialog
+                            open={exportOpen}
+                            onOpenChange={setExportOpen}
+                            title="Ekspor Data Lomba Esai"
+                            description="Pilih data peserta dan kolom yang ingin diekspor."
+                            entityName="Peserta"
+                            totalCount={stats.totalParticipants}
+                            hasActiveFilters={hasActiveFilters}
+                            activeFilterBadges={exportFilterBadges}
+                            columnLabels={COLUMN_LABELS}
+                            columnGroups={COLUMN_GROUPS}
+                            essentialColumns={ESSENTIAL_ESAI_COLS}
+                            exportEndpoint="/api/admin/esai-registrations/export"
+                            filenamePrefix="data-peserta-esai"
+                            buildExportParams={buildExportParams}
+                            filterControlContent={esaiFilterControls}
+                        />
                 </div>
             </div>
 
