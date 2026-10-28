@@ -39,12 +39,24 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       if (!target) return;
       
       const href = target.getAttribute('href');
-      // Only intercept hash-only links (e.g., "#about")
-      if (href && href.startsWith('#') && href.length > 1) {
+      if (!href) return;
+
+      let hashTarget: string | null = null;
+      if (href.startsWith('#') && href.length > 1) {
+        hashTarget = href;
+      } else if (href.startsWith('/#') && (pathname === '/' || !pathname)) {
+        hashTarget = href.substring(1);
+      } else if (href.includes('#')) {
+        const [path, hash] = href.split('#');
+        if (path === pathname && hash) {
+          hashTarget = `#${hash}`;
+        }
+      }
+
+      if (hashTarget) {
         e.preventDefault();
-        lenis.scrollTo(href);
-        // Optionally update the URL without triggering native scroll jump
-        window.history.pushState(null, '', href);
+        lenis.scrollTo(hashTarget);
+        window.history.pushState(null, '', hashTarget);
       }
     };
 
@@ -54,7 +66,7 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     if (window.location.hash) {
       setTimeout(() => {
         lenis.scrollTo(window.location.hash);
-      }, 100);
+      }, 150);
     }
 
     return () => {
@@ -62,15 +74,20 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       cancelAnimationFrame(rafId)
       lenis.destroy()
     }
-  }, [])
+  }, [pathname])
 
   useEffect(() => {
     if (lenisRef.current) {
       // Force lenis to recalculate height and scroll to top on page change
       lenisRef.current.resize();
       
-      // If we didn't just navigate to a hash, scroll to top
-      if (!window.location.hash) {
+      // If we navigated to a hash, scroll to it smoothly once rendered
+      if (window.location.hash) {
+        const hash = window.location.hash;
+        setTimeout(() => {
+          lenisRef.current?.scrollTo(hash);
+        }, 150);
+      } else {
         lenisRef.current.scrollTo(0, { immediate: true });
       }
     }

@@ -224,7 +224,14 @@ export default function Footer({ forceShow = false }: { forceShow?: boolean } = 
                   <li key={idx} className="flex items-start gap-3 text-sm font-light group">
                     <span className="mt-0.5 text-white/40 group-hover:text-amber-300 transition-colors duration-300">{info.icon}</span>
                     {info.href ? (
-                      <a href={info.href} className="hover:text-amber-300 transition-colors duration-300">{info.text}</a>
+                      <a
+                        href={info.href}
+                        target={info.href.startsWith("http") ? "_blank" : undefined}
+                        rel={info.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                        className="hover:text-amber-300 transition-colors duration-300"
+                      >
+                        {info.text}
+                      </a>
                     ) : (
                       <span>{info.text}</span>
                     )}

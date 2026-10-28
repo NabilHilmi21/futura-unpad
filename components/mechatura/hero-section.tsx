@@ -97,8 +97,8 @@ export function HeroSection() {
               <div className="mx-auto flex flex-col md:flex-row items-center gap-4">
                 <MechaturaRegistrationButton />
 
-                <Button className="rounded-full w-full md:w-fit py-6 md:py-7 px-5 text-md md:text-lg bg-transparent border border-white text-white hover:text-amber-300 hover:border-amber-300 hover:bg-transparent">
-                    <Link href="https://drive.google.com/file/d/1ZrAl8yhVDBqf2Yo4GCoYwWAz-kv7-Zyo/view?usp=sharing">Lihat Booklet</Link>
+                <Button asChild className="rounded-full w-full md:w-fit py-6 md:py-7 px-5 text-md md:text-lg bg-transparent border border-white text-white hover:text-amber-300 hover:border-amber-300 hover:bg-transparent">
+                    <Link href="https://drive.google.com/file/d/1ZrAl8yhVDBqf2Yo4GCoYwWAz-kv7-Zyo/view?usp=sharing" target="_blank" rel="noopener noreferrer">Lihat Booklet</Link>
                 </Button>
               </div>
             </div>
