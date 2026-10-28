@@ -17,6 +17,7 @@ interface ButtonV2Props {
 
 export function ButtonV2({ text, href, requireAuth, className }: ButtonV2Props) {
   const isAnchor = href.startsWith("#");
+  const isExternal = href.startsWith("http://") || href.startsWith("https://");
   const { user, isLoading } = useAuth();
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const router = useRouter();
@@ -74,38 +75,62 @@ export function ButtonV2({ text, href, requireAuth, className }: ButtonV2Props) 
     setIsHovered(true);
   };
 
+  const buttonInner = (
+    <>
+      {/* Tracking circle */}
+      <motion.div
+        initial={false}
+        animate={{
+          x: mousePos.x - 20,
+          y: mousePos.y - 20,
+          scale: isCentered ? 20 : (isHovered ? 1 : 0),
+        }}
+        transition={{
+          scale: { duration: 0.45, ease: "easeInOut" },
+          x: { type: "spring", stiffness: 400, damping: 25 },
+          y: { type: "spring", stiffness: 400, damping: 25 }
+        }}
+        className="pointer-events-none absolute left-0 top-0 z-0 h-10 w-10 rounded-full bg-amber-300"
+      />
+      <span className="relative z-10 font-medium transition-colors duration-500 group-hover:text-black">
+        {text}
+      </span>
+    </>
+  );
+
+  const sharedClass = "group relative inline-flex overflow-hidden rounded-full cursor-pointer text-lg px-6 py-2 w-fit bg-white text-black transition-colors duration-200";
+
   return (
     <>
-      <motion.div whileTap={{ scale: 0.95 }} className="w-fit">
-        <Link 
-          href={href} 
-          prefetch={true} 
-          onClick={handleClick}
-          ref={buttonRef}
-          onMouseMove={handleMouseMove}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={() => { setIsHovered(false); setIsCentered(false); }}
-          className="group relative inline-flex overflow-hidden rounded-full cursor-pointer text-lg px-6 py-2 w-fit bg-white text-black transition-colors duration-200"
-        >
-          {/* Tracking circle */}
-          <motion.div
-            initial={false}
-            animate={{
-              x: mousePos.x - 20,
-              y: mousePos.y - 20,
-              scale: isCentered ? 20 : (isHovered ? 1 : 0),
-            }}
-            transition={{
-              scale: { duration: 0.45, ease: "easeInOut" },
-              x: { type: "spring", stiffness: 400, damping: 25 },
-              y: { type: "spring", stiffness: 400, damping: 25 }
-            }}
-            className="pointer-events-none absolute left-0 top-0 z-0 h-10 w-10 rounded-full bg-amber-300"
-          />
-          <span className="relative z-10 font-medium transition-colors duration-500 group-hover:text-black">
-            {text}
-          </span>
-        </Link>
+      <motion.div whileTap={{ scale: 0.95 }} className={cn("w-fit", className)}>
+        {isExternal ? (
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={handleClick}
+            ref={buttonRef}
+            onMouseMove={handleMouseMove}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={() => { setIsHovered(false); setIsCentered(false); }}
+            className={sharedClass}
+          >
+            {buttonInner}
+          </a>
+        ) : (
+          <Link 
+            href={href} 
+            prefetch={true} 
+            onClick={handleClick}
+            ref={buttonRef}
+            onMouseMove={handleMouseMove}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={() => { setIsHovered(false); setIsCentered(false); }}
+            className={sharedClass}
+          >
+            {buttonInner}
+          </Link>
+        )}
       </motion.div>
 
       <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>

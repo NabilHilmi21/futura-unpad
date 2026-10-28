@@ -4,10 +4,11 @@ const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://va.vercel-scripts.com https://app.sandbox.midtrans.com https://app.midtrans.com;
   style-src 'self' 'unsafe-inline' https://accounts.google.com;
-  img-src 'self' data: blob: https://avatars.githubusercontent.com https://images.unsplash.com https://*.supabase.co https://lh3.googleusercontent.com;
+  img-src 'self' data: blob: https://avatars.githubusercontent.com https://images.unsplash.com https://*.supabase.co https://lh3.googleusercontent.com https://res.cloudinary.com;
   font-src 'self' data:;
-  connect-src 'self' https://*.supabase.co https://va.vercel-scripts.com https://vitals.vercel-insights.com https://accounts.google.com https://api.sandbox.midtrans.com https://api.midtrans.com;
-  frame-src 'self' https://accounts.google.com https://app.sandbox.midtrans.com https://app.midtrans.com;
+  connect-src 'self' https://*.supabase.co https://va.vercel-scripts.com https://vitals.vercel-insights.com https://accounts.google.com https://api.sandbox.midtrans.com https://api.midtrans.com https://res.cloudinary.com;
+  media-src 'self' https://res.cloudinary.com blob: data:;
+  frame-src 'self' https://accounts.google.com https://app.sandbox.midtrans.com https://app.midtrans.com https://www.google.com https://maps.google.com https://*.google.com;
   object-src 'none';
   base-uri 'self';
   form-action 'self' https://app.sandbox.midtrans.com https://app.midtrans.com;
@@ -41,7 +42,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
+            value: "camera=(), microphone=(), geolocation=(self \"https://www.google.com\" \"https://maps.google.com\"), browsing-topics=()",
           },
           {
             key: "X-Frame-Options",

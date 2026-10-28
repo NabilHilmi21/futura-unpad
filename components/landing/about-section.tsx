@@ -255,13 +255,23 @@ const VideoHoverWrapper = ({
   const showPill = isHovered && !isOverControls && !isPlaying;
   const pillText = hasPlayed ? "Continue" : "Watch Trailer";
 
+  const handleTogglePlay = () => {
+    if (isOverControls || !videoRef.current) return;
+    if (videoRef.current.paused) {
+      videoRef.current.play();
+    } else {
+      videoRef.current.pause();
+    }
+  };
+
   return (
     <div
       ref={wrapperRef}
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setIsHovered(false)}
-      className={`relative rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] transform transition-transform hover:scale-[1.02] duration-500 overflow-hidden ${showPill ? "cursor-none" : ""
+      onClick={handleTogglePlay}
+      className={`relative rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] transform transition-transform hover:scale-[1.02] duration-500 overflow-hidden cursor-pointer ${showPill ? "cursor-none" : ""
         } ${className || ""}`}
     >
       <video

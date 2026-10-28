@@ -86,7 +86,6 @@ export default function Location({
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
                         title={`Lokasi ${location}`}
-                        sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-same-origin"
                     />
                 </div>
             </div>
